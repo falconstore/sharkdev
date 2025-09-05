@@ -561,6 +561,21 @@ export class ArbiPro {
   updateResultsTable() {
     const active = this.activeHouses();
     
+    // Verifica se há alguma aposta LAY para mostrar coluna responsabilidade
+    const hasLayBets = active.some(h => h.lay);
+    
+    // Cabeçalho da tabela dinâmico
+    const headerHTML = `
+      <tr>
+        <th>Casa</th>
+        <th>Odd Final</th>
+        <th>Comissão</th>
+        <th>Stake</th>
+        ${hasLayBets ? '<th>Responsabilidade</th>' : ''}
+        <th>Lucro</th>
+      </tr>
+    `;
+    
     const rowsHTML = active.map((h, idx) => {
       const oddOriginal = Utils.parseFlex(h.odd) || 0;
       const oddText = oddOriginal.toFixed(2).replace('.', ',');
@@ -574,18 +589,27 @@ export class ArbiPro {
       const profitClass = profit >= 0 ? 'profit-positive' : 'profit-negative';
       const profitValue = Utils.formatBRL(profit);
       
+      // Responsabilidade para apostas LAY
+      const responsibilityCell = hasLayBets ? 
+        `<td>${h.lay ? '<strong>R$ ' + (h.responsibility || '0,00') + '</strong>' : '—'}</td>` : '';
+      
       return `
         <tr>
           <td><strong>Casa ${idx + 1}</strong></td>
           <td>${oddText}</td>
           <td>${commissionText}</td>
-          <td><strong>R$ ${stakeText}</strong>${h.freebet ? '<br><span class="text-small">(Freebet)</span>' : ''}</td>
+          <td><strong>R$ ${stakeText}</strong>${h.freebet ? '<br><span class="text-small">(Freebet)</span>' : ''}${h.lay ? '<br><span class="text-small">(LAY)</span>' : ''}</td>
+          ${responsibilityCell}
           <td class="${profitClass}"><strong>${profitValue}</strong></td>
         </tr>
       `;
     }).join("");
 
+    // Atualiza cabeçalho e corpo da tabela
+    const thead = document.querySelector('#panel-1 .results-table thead');
     const tbody = document.getElementById("resultsRows");
+    
+    if (thead) thead.innerHTML = headerHTML;
     if (tbody) tbody.innerHTML = rowsHTML;
   }
 }
