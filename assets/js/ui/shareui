@@ -1,0 +1,19 @@
+// assets/js/ui/shareui.js
+// Sistema de Interface para Compartilhamento
+
+export class ShareUI {
+  constructor() {
+    this.initialized = false;
+  }
+
+  init() {
+    this.initialized = true;
+    console.log('ShareUI inicializado');
+  }
+
+  // Método placeholder para compatibilidade
+  addShareButtons() {
+    // Implementação futura do sistema de compartilhamento
+    console.log('ShareUI: addShareButtons called');
+  }
+}
