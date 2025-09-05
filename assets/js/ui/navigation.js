@@ -5,6 +5,97 @@ export class Navigation {
   constructor() {
     this.currentPage = 'calculadoras';
     this.pages = ['calculadoras', 'sobre', 'contato'];
+  // Método para gerar FAQ items
+  generateFAQItems() {
+    const faqs = [
+      {
+        id: 1,
+        question: "Como funcionam as calculadoras?",
+        answer: "Nossas calculadoras (ArbiPro e FreePro) fazem cálculos matemáticos precisos para otimizar apostas e freebets, garantindo o melhor aproveitamento das promoções. Utilizamos algoritmos avançados para distribuição de stakes e análise de cenários."
+      },
+      {
+        id: 2, 
+        question: "Preciso pagar para usar as calculadoras?",
+        answer: "As calculadoras básicas são <strong>gratuitas</strong>. Para funcionalidades avançadas, suporte premium e recursos exclusivos, oferecemos planos de assinatura com valores acessíveis."
+      },
+      {
+        id: 3,
+        question: "Como recebo suporte técnico?",
+        answer: "Oferecemos suporte especializado via Telegram: <strong>Suporte Técnico</strong> para dúvidas sobre estratégias e <strong>Suporte Financeiro</strong> para questões de pagamento. Resposta média em 2-4 horas."
+      },
+      {
+        id: 4,
+        question: "É seguro usar as estratégias?",
+        answer: "Sim! Nossas estratégias são baseadas em <strong>matemática pura</strong> e aproveitamento de promoções legais das casas de apostas. Sempre recomendamos apostar com responsabilidade e dentro de suas possibilidades."
+      },
+      {
+        id: 5,
+        question: "Posso usar em qualquer casa de apostas?",
+        answer: "Sim! Nossas calculadoras funcionam com <strong>qualquer casa de apostas</strong>. Você apenas insere as odds e nossa ferramenta calcula a distribuição ideal de stakes para garantir lucro."
+      },
+      {
+        id: 6,
+        question: "Qual a diferença entre ArbiPro e FreePro?",
+        answer: "<strong>ArbiPro:</strong> Focada em arbitragem tradicional entre diferentes casas.<br><strong>FreePro:</strong> Especializada em otimização de freebets e promoções específicas."
+      }
+    ];
+
+    return faqs.map(faq => `
+      <div class="faq-item-modern" data-faq="${faq.id}">
+        <div class="faq-question-modern">
+          <div class="question-content">
+            <span class="question-icon">❓</span>
+            <span class="question-text">${faq.question}</span>
+          </div>
+          <span class="faq-toggle-modern">+</span>
+        </div>
+        <div class="faq-answer-modern">
+          <div class="answer-content">
+            <p>${faq.answer}</p>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // FAQ moderno simplificado
+  initModernFAQ() {
+    // Usa event delegation para melhor performance
+    const faqContainer = document.querySelector('.faq-container-modern');
+    
+    if (!faqContainer) {
+      console.warn('FAQ container não encontrado');
+      return;
+    }
+
+    faqContainer.addEventListener('click', (e) => {
+      const question = e.target.closest('.faq-question-modern');
+      if (!question) return;
+
+      const faqItem = question.closest('.faq-item-modern');
+      const toggle = faqItem.querySelector('.faq-toggle-modern');
+      const isActive = faqItem.classList.contains('active');
+
+      // Fecha todos os outros
+      document.querySelectorAll('.faq-item-modern').forEach(item => {
+        if (item !== faqItem) {
+          item.classList.remove('active');
+          const otherToggle = item.querySelector('.faq-toggle-modern');
+          if (otherToggle) otherToggle.textContent = '+';
+        }
+      });
+
+      // Toggle atual
+      if (!isActive) {
+        faqItem.classList.add('active');
+        if (toggle) toggle.textContent = '−';
+      } else {
+        faqItem.classList.remove('active');
+        if (toggle) toggle.textContent = '+';
+      }
+    });
+
+    console.log('✅ FAQ moderno inicializado com event delegation');
   }
 
   init() {
