@@ -54,16 +54,6 @@ export function getFreeProfHTML() {
       margin-bottom: 1.5rem;
     }
 
-    .calc-logo {
-    height: 64px !important;
-    width: auto !important;
-    margin-bottom: 0.75rem !important;
-    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1)) !important;
-    display: block !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    }
-
     .calc-title {
       font-size: 1.75rem;
       font-weight: 800;
@@ -356,9 +346,9 @@ export function getFreeProfHTML() {
 </head>
 <body>
   <div class="calc-header">
-  <h1 class="calc-title">Calculadora Shark FreePro</h1>
-  <p class="calc-subtitle">Otimize seus lucros com freebets de apostas seguras - estratégias para perder a qualificação e ganhar a freebet</p>
-</div>
+    <h1 class="calc-title">Calculadora Shark FreePro</h1>
+    <p class="calc-subtitle">Otimize seus lucros com freebets de apostas seguras - estratégias para perder a qualificação e ganhar a freebet</p>
+  </div>
 
   <div class="card">
     <div class="form-group">
@@ -642,6 +632,10 @@ export function getFreeProfHTML() {
     var step=parseFloat($("round_step").value)||1; 
     function roundStep(v){return Math.round(v/step)*step;} 
     stakes=stakes.map(roundStep);
+    
+    // APLICA VALOR MÍNIMO DE R$ 0,50
+    const MIN_STAKE = 0.50;
+    stakes = stakes.map(stake => Math.max(stake, MIN_STAKE));
     
     var liabilities=stakes.map((s,i)=>cov.isLay[i]?(cov.odds[i]-1)*s:0);
     var S=s1+stakes.reduce((a,s,idx)=>a+(cov.isLay[idx]?(cov.odds[idx]-1)*s:s),0);
