@@ -1,528 +1,263 @@
-// assets/js/ui/share-ui.js
-// Interface do usuário para compartilhamento
+// assets/js/utils/share.js
+// Sistema de compartilhamento de configurações
 
-import { ShareSystem } from '../utils/share.js';
-
-export class ShareUI {
+export class ShareSystem {
   constructor() {
-    this.shareSystem = new ShareSystem();
-    this.modalElement = null;
-    this.currentShareData = null;
+    this.baseUrl = window.location.origin + window.location.pathname;
+    this.shortenerApi = 'https://tinyurl.com/api-create.php'; // API gratuita
   }
 
-  // Cria modal de compartilhamento
-  createShareModal() {
-    if (this.modalElement) return this.modalElement;
+  // Gera link compartilhável para ArbiPro
+  generateArbiProLink(data) {
+    const config = {
+      t: 'arbipro', // tipo
+      n: data.numHouses || 2, // número de casas
+      r: data.rounding || 0.01, // arredondamento
+      h: data.houses.slice(0, data.numHouses).map(house => ({
+        o: house.odd || '', // odd
+        s: house.stake || '', // stake
+        c: house.commission, // comissão (null se não tem)
+        f: house.freebet || false, // freebet
+        i: house.increase, // aumento de odd (null se não tem)
+        l: house.lay || false, // lay
+        x: house.fixedStake || false // stake fixada
+      }))
+    };
 
-    const modal = document.createElement('div');
-    modal.id = 'shareModal';
-    modal.className = 'share-modal hidden';
-    modal.innerHTML = `
-      <div class="share-modal-backdrop" aria-hidden="true"></div>
-      <div class="share-modal-content" role="dialog" aria-labelledby="shareModalTitle" aria-modal="true">
-        <div class="share-modal-header">
-          <h3 id="shareModalTitle" class="share-modal-title">
-            🔗 Compartilhar Configuração
-          </h3>
-          <button class="share-modal-close" aria-label="Fechar modal">&times;</button>
-        </div>
-        
-        <div class="share-modal-body">
-          <div class="share-option">
-            <div class="share-option-header">
-              <span class="share-option-icon">🌐</span>
-              <div>
-                <div class="share-option-title">Link Completo</div>
-                <div class="share-option-desc">URL com todas as configurações (pode ser longo)</div>
-              </div>
-            </div>
-            <div class="share-url-container">
-              <input type="text" id="fullShareUrl" class="share-url-input" readonly>
-              <button class="btn btn-copy" data-action="copy-full">
-                📋 Copiar
-              </button>
-            </div>
-          </div>
-
-          <div class="share-option">
-            <div class="share-option-header">
-              <span class="share-option-icon">⚡</span>
-              <div>
-                <div class="share-option-title">Link Encurtado</div>
-                <div class="share-option-desc">URL curta e fácil de compartilhar</div>
-              </div>
-            </div>
-            <div class="share-url-container">
-              <input type="text" id="shortShareUrl" class="share-url-input" readonly>
-              <button class="btn btn-copy" data-action="copy-short">
-                📋 Copiar
-              </button>
-            </div>
-          </div>
-
-          <div class="share-option">
-            <div class="share-option-header">
-              <span class="share-option-icon">📱</span>
-              <div>
-                <div class="share-option-title">QR Code</div>
-                <div class="share-option-desc">Para compartilhar via celular</div>
-              </div>
-            </div>
-            <div class="share-qr-container">
-              <img id="shareQRCode" alt="QR Code" class="share-qr-image">
-              <button class="btn btn-secondary" data-action="download-qr">
-                💾 Baixar QR
-              </button>
-            </div>
-          </div>
-
-          <div class="share-actions">
-            <button class="btn btn-primary" data-action="share-whatsapp">
-              📱 WhatsApp
-            </button>
-            <button class="btn btn-primary" data-action="share-telegram">
-              ✈️ Telegram
-            </button>
-            <button class="btn btn-secondary" data-action="share-email">
-              📧 E-mail
-            </button>
-          </div>
-        </div>
-
-        <div class="share-modal-footer">
-          <div class="share-info">
-            💡 Links ficam válidos por 30 dias
-          </div>
-        </div>
-      </div>
-    `;
-
-    document.body.appendChild(modal);
-    this.modalElement = modal;
-    this.bindModalEvents();
-    
-    return modal;
+    return this.createShareableLink(config);
   }
 
-  // Vincula eventos do modal
-  bindModalEvents() {
-    if (!this.modalElement) return;
+  // Gera link compartilhável para FreePro
+  generateFreeProLink(data) {
+    const config = {
+      t: 'freepro', // tipo
+      n: data.numEntradas || 3, // número de entradas
+      r: data.roundStep || 1.00, // arredondamento
+      // Casa promoção
+      p: {
+        o: data.promoOdd || '', // odd da casa
+        c: data.promoComm || '', // comissão
+        s: data.promoStake || '', // stake qualificação
+        f: data.freebetValue || '', // valor da freebet
+        e: data.extractionRate || 70 // taxa de extração
+      },
+      // Coberturas
+      cov: data.coverages || []
+    };
 
-    // Fechar modal
-    this.modalElement.querySelector('.share-modal-close').addEventListener('click', () => {
-      this.hideModal();
-    });
-
-    this.modalElement.querySelector('.share-modal-backdrop').addEventListener('click', () => {
-      this.hideModal();
-    });
-
-    // Copiar URLs
-    this.modalElement.querySelector('[data-action="copy-full"]').addEventListener('click', () => {
-      this.copyUrl('full');
-    });
-
-    this.modalElement.querySelector('[data-action="copy-short"]').addEventListener('click', () => {
-      this.copyUrl('short');
-    });
-
-    // Download QR
-    this.modalElement.querySelector('[data-action="download-qr"]').addEventListener('click', () => {
-      this.downloadQR();
-    });
-
-    // Compartilhamento social
-    this.modalElement.querySelector('[data-action="share-whatsapp"]').addEventListener('click', () => {
-      this.shareToSocial('whatsapp');
-    });
-
-    this.modalElement.querySelector('[data-action="share-telegram"]').addEventListener('click', () => {
-      this.shareToSocial('telegram');
-    });
-
-    this.modalElement.querySelector('[data-action="share-email"]').addEventListener('click', () => {
-      this.shareToSocial('email');
-    });
-
-    // ESC para fechar
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && !this.modalElement.classList.contains('hidden')) {
-        this.hideModal();
-      }
-    });
+    return this.createShareableLink(config);
   }
 
-  // Mostra modal com dados de compartilhamento
-  showShareModal(shareData) {
-    const modal = this.createShareModal();
-    
-    if (!shareData) {
-      this.showError('Erro ao gerar link de compartilhamento');
-      return;
-    }
-
-    // Preenche URLs
-    modal.querySelector('#fullShareUrl').value = shareData.fullUrl;
-    modal.querySelector('#shortShareUrl').value = shareData.shortUrl;
-    
-    // Gera QR Code
-    const qrUrl = this.shareSystem.generateQRCodeUrl(shareData.shortUrl);
-    modal.querySelector('#shareQRCode').src = qrUrl;
-    
-    // Armazena dados para uso posterior
-    this.currentShareData = shareData;
-    
-    // Mostra modal
-    modal.classList.remove('hidden');
-    
-    // Foca no primeiro input
-    setTimeout(() => {
-      modal.querySelector('#shortShareUrl').select();
-    }, 100);
-  }
-
-  // Esconde modal
-  hideModal() {
-    if (this.modalElement) {
-      this.modalElement.classList.add('hidden');
-    }
-  }
-
-  // Copia URL para área de transferência
-  async copyUrl(type) {
-    const url = type === 'full' ? this.currentShareData?.fullUrl : this.currentShareData?.shortUrl;
-    
-    if (!url) {
-      this.showError('URL não disponível');
-      return;
-    }
-
-    const success = await this.shareSystem.copyToClipboard(url);
-    
-    if (success) {
-      this.showSuccess(`Link ${type === 'full' ? 'completo' : 'encurtado'} copiado!`);
-      
-      // Feedback visual no botão
-      const button = this.modalElement.querySelector(`[data-action="copy-${type}"]`);
-      const originalText = button.textContent;
-      button.textContent = '✅ Copiado!';
-      button.style.background = 'var(--success)';
-      
-      setTimeout(() => {
-        button.textContent = originalText;
-        button.style.background = '';
-      }, 2000);
-    } else {
-      this.showError('Não foi possível copiar. Use Ctrl+C manualmente.');
-    }
-  }
-
-  // Download do QR Code
-  async downloadQR() {
+  // Cria links compartilháveis
+  async createShareableLink(config) {
     try {
-      const qrImage = this.modalElement.querySelector('#shareQRCode');
-      const qrUrl = qrImage.src;
+      // Comprime configuração
+      const compressed = this.compressConfig(config);
       
-      const response = await fetch(qrUrl);
-      const blob = await response.blob();
+      // URL completa
+      const fullUrl = `${this.baseUrl}?config=${compressed}`;
       
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'shark-green-qr-code.png';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      // URL encurtada
+      const shortUrl = await this.shortenUrl(fullUrl);
       
-      this.showSuccess('QR Code baixado!');
+      return {
+        fullUrl,
+        shortUrl: shortUrl || fullUrl, // fallback para URL completa
+        config: compressed,
+        timestamp: Date.now()
+      };
     } catch (error) {
-      console.error('Erro ao baixar QR:', error);
-      this.showError('Erro ao baixar QR Code');
-    }
-  }
-
-  // Compartilhamento social
-  shareToSocial(platform) {
-    const url = this.currentShareData?.shortUrl;
-    const text = 'Confira esta configuração da Calculadora Shark Green! 🦈💚';
-    
-    if (!url) {
-      this.showError('URL não disponível');
-      return;
-    }
-
-    let shareUrl;
-    
-    switch (platform) {
-      case 'whatsapp':
-        shareUrl = `https://wa.me/?text=${encodeURIComponent(text + '\n' + url)}`;
-        break;
-      case 'telegram':
-        shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
-        break;
-      case 'email':
-        shareUrl = `mailto:?subject=${encodeURIComponent('Configuração Shark Green')}&body=${encodeURIComponent(text + '\n\n' + url)}`;
-        break;
-      default:
-        return;
-    }
-    
-    window.open(shareUrl, '_blank', 'width=600,height=400');
-  }
-
-  // Cria botão de compartilhamento
-  createShareButton(calculator) {
-    const button = document.createElement('button');
-    button.className = 'btn btn-share';
-    button.innerHTML = '🔗 Compartilhar';
-    button.setAttribute('data-calculator', calculator);
-    
-    button.addEventListener('click', () => {
-      this.handleShareClick(calculator);
-    });
-    
-    return button;
-  }
-
-  // Manipula clique no botão de compartilhar
-  async handleShareClick(calculator) {
-    try {
-      let shareData;
+      console.error('Erro ao criar link:', error);
+      // Retorna apenas URL completa em caso de erro
+      const compressed = this.compressConfig(config);
+      const fullUrl = `${this.baseUrl}?config=${compressed}`;
       
-      if (calculator === 'arbipro') {
-        const arbiPro = window.SharkGreen?.getModules()?.arbiPro;
-        if (!arbiPro) {
-          this.showError('ArbiPro não disponível');
-          return;
+      return {
+        fullUrl,
+        shortUrl: fullUrl,
+        config: compressed,
+        timestamp: Date.now()
+      };
+    }
+  }
+
+  // Comprime configuração para URL
+  compressConfig(config) {
+    try {
+      const jsonString = JSON.stringify(config);
+      // Usa btoa para base64 (compatível com todos navegadores)
+      return btoa(encodeURIComponent(jsonString));
+    } catch (error) {
+      console.error('Erro ao comprimir config:', error);
+      return '';
+    }
+  }
+
+  // Descomprime configuração da URL
+  decompressConfig(compressed) {
+    try {
+      const jsonString = decodeURIComponent(atob(compressed));
+      return JSON.parse(jsonString);
+    } catch (error) {
+      console.error('Erro ao descomprimir config:', error);
+      return null;
+    }
+  }
+
+  // Encurta URL usando serviço gratuito
+  async shortenUrl(longUrl) {
+    try {
+      // Tentativa 1: TinyURL (gratuito, sem API key)
+      const tinyResponse = await fetch(`${this.shortenerApi}?url=${encodeURIComponent(longUrl)}`);
+      
+      if (tinyResponse.ok) {
+        const shortUrl = await tinyResponse.text();
+        if (shortUrl.startsWith('http')) {
+          return shortUrl;
         }
-        
-        const config = this.extractArbiProConfig(arbiPro);
-        shareData = this.shareSystem.generateArbiProLink(config);
-      } else if (calculator === 'freepro') {
-        const config = this.extractFreeProConfig();
-        shareData = this.shareSystem.generateFreeProLink(config);
-      }
-      
-      if (shareData) {
-        this.showShareModal(shareData);
-      } else {
-        this.showError('Erro ao gerar link de compartilhamento');
       }
     } catch (error) {
-      console.error('Erro ao compartilhar:', error);
-      this.showError('Erro ao preparar compartilhamento');
-    }
-  }
-
-  // Extrai configuração do ArbiPro
-  extractArbiProConfig(arbiPro) {
-    return {
-      numHouses: arbiPro.numHouses,
-      rounding: arbiPro.roundingValue,
-      houses: arbiPro.houses
-    };
-  }
-
-  // Extrai configuração do FreePro
-  extractFreeProConfig() {
-    // Busca valores do iframe do FreePro
-    const iframe = document.getElementById('calc2frame');
-    if (!iframe || !iframe.contentDocument) {
-      throw new Error('FreePro não carregado');
-    }
-    
-    const doc = iframe.contentDocument;
-    
-    return {
-      numEntradas: parseInt(doc.getElementById('numEntradas')?.value || '3'),
-      roundStep: parseFloat(doc.getElementById('round_step')?.value || '1.00'),
-      promoOdd: doc.getElementById('o1')?.value || '',
-      promoComm: doc.getElementById('c1')?.value || '',
-      promoStake: doc.getElementById('s1')?.value || '',
-      freebetValue: doc.getElementById('F')?.value || '',
-      extractionRate: doc.getElementById('r')?.value || '70',
-      coverages: this.extractFreeProCoverages(doc)
-    };
-  }
-
-  // Extrai coberturas do FreePro
-  extractFreeProCoverages(doc) {
-    const coverages = [];
-    const oddInputs = doc.querySelectorAll('#oddsContainer input[data-type="odd"]');
-    const commInputs = doc.querySelectorAll('#oddsContainer input[data-type="comm"]');
-    const layInputs = doc.querySelectorAll('#oddsContainer input[data-type="lay"]');
-    
-    for (let i = 0; i < oddInputs.length; i++) {
-      coverages.push({
-        odd: oddInputs[i]?.value || '',
-        comm: commInputs[i]?.value || '',
-        lay: layInputs[i]?.checked || false
-      });
-    }
-    
-    return coverages;
-  }
-
-  // Aplica configuração compartilhada
-  applySharedConfig(config) {
-    if (!config || !this.shareSystem.validateConfig(config)) {
-      this.showError('Configuração inválida');
-      return false;
+      console.warn('Erro ao encurtar URL:', error);
     }
 
+    // Fallback: retorna URL original
+    return longUrl;
+  }
+
+  // Gera URL do QR Code
+  generateQRCodeUrl(url, size = 200) {
+    // Usa QR Server gratuito
+    const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}`;
+    return qrUrl;
+  }
+
+  // Copia texto para área de transferência
+  async copyToClipboard(text) {
     try {
-      if (config.t === 'arbipro') {
-        this.applyArbiProConfig(config);
-      } else if (config.t === 'freepro') {
-        this.applyFreeProConfig(config);
+      // Método moderno (navegadores novos)
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
       }
       
-      this.showSuccess('Configuração aplicada com sucesso! 🎉');
+      // Fallback para navegadores mais antigos
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
       
-      // Limpa URL
-      this.shareSystem.cleanUrl();
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
       
-      return true;
+      return successful;
     } catch (error) {
-      console.error('Erro ao aplicar configuração:', error);
-      this.showError('Erro ao aplicar configuração');
+      console.error('Erro ao copiar:', error);
       return false;
     }
   }
 
-  // Aplica configuração do ArbiPro
-  applyArbiProConfig(config) {
-    const arbiPro = window.SharkGreen?.getModules()?.arbiPro;
-    if (!arbiPro) throw new Error('ArbiPro não disponível');
-
-    // Configura número de casas
-    const numHousesSelect = document.getElementById('numHouses');
-    if (numHousesSelect) {
-      numHousesSelect.value = config.n;
-      arbiPro.numHouses = config.n;
-    }
-
-    // Configura arredondamento
-    const roundingSelect = document.getElementById('rounding');
-    if (roundingSelect) {
-      roundingSelect.value = config.r;
-      arbiPro.roundingValue = config.r;
-    }
-
-    // Configura casas
-    config.h.forEach((house, idx) => {
-      if (idx < arbiPro.houses.length) {
-        arbiPro.houses[idx] = {
-          ...arbiPro.houses[idx],
-          odd: house.o || '',
-          stake: house.s || '',
-          commission: house.c,
-          freebet: house.f || false,
-          increase: house.i,
-          lay: house.l || false,
-          fixedStake: house.x || false
-        };
-      }
-    });
-
-    // Atualiza interface
-    arbiPro.renderHouses();
-    arbiPro.scheduleUpdate();
-  }
-
-  // Aplica configuração do FreePro
-  applyFreeProConfig(config) {
-    const iframe = document.getElementById('calc2frame');
-    if (!iframe || !iframe.contentDocument) {
-      throw new Error('FreePro não carregado');
-    }
-
-    const doc = iframe.contentDocument;
-
-    // Configura valores básicos
-    if (doc.getElementById('numEntradas')) {
-      doc.getElementById('numEntradas').value = config.n;
-    }
-    if (doc.getElementById('round_step')) {
-      doc.getElementById('round_step').value = config.r;
-    }
-
-    // Configura casa promoção
-    if (config.p) {
-      if (doc.getElementById('o1')) doc.getElementById('o1').value = config.p.o || '';
-      if (doc.getElementById('c1')) doc.getElementById('c1').value = config.p.c || '';
-      if (doc.getElementById('s1')) doc.getElementById('s1').value = config.p.s || '';
-      if (doc.getElementById('F')) doc.getElementById('F').value = config.p.f || '';
-      if (doc.getElementById('r')) doc.getElementById('r').value = config.p.e || '70';
-    }
-
-    // Atualiza coberturas
-    if (config.cov && Array.isArray(config.cov)) {
-      // Dispara evento para recriar as coberturas
-      const numEntradasEl = doc.getElementById('numEntradas');
-      if (numEntradasEl) {
-        numEntradasEl.dispatchEvent(new Event('change'));
-      }
-
-      // Aguarda um pouco para os campos serem criados
-      setTimeout(() => {
-        const oddInputs = doc.querySelectorAll('#oddsContainer input[data-type="odd"]');
-        const commInputs = doc.querySelectorAll('#oddsContainer input[data-type="comm"]');
-        const layInputs = doc.querySelectorAll('#oddsContainer input[data-type="lay"]');
-
-        config.cov.forEach((coverage, idx) => {
-          if (oddInputs[idx]) oddInputs[idx].value = coverage.odd || '';
-          if (commInputs[idx]) commInputs[idx].value = coverage.comm || '';
-          if (layInputs[idx]) layInputs[idx].checked = coverage.lay || false;
-        });
-      }, 100);
-    }
-  }
-
-  // Mostra mensagem de sucesso
-  showSuccess(message) {
-    this.showToast(message, 'success');
-  }
-
-  // Mostra mensagem de erro
-  showError(message) {
-    this.showToast(message, 'error');
-  }
-
-  // Mostra toast de notificação
-  showToast(message, type = 'info') {
-    const toast = document.createElement('div');
-    toast.className = `share-toast share-toast-${type}`;
-    toast.textContent = message;
-    
-    document.body.appendChild(toast);
-    
-    // Animação de entrada
-    setTimeout(() => {
-      toast.classList.add('show');
-    }, 100);
-    
-    // Remove após 3 segundos
-    setTimeout(() => {
-      toast.classList.remove('show');
-      setTimeout(() => {
-        if (toast.parentNode) {
-          document.body.removeChild(toast);
+  // Carrega configuração da URL atual
+  loadFromUrl() {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const configParam = urlParams.get('config');
+      
+      if (configParam) {
+        const config = this.decompressConfig(configParam);
+        if (config && this.validateConfig(config)) {
+          console.log('Configuração carregada da URL:', config);
+          return config;
         }
-      }, 300);
-    }, 3000);
+      }
+      
+      return null;
+    } catch (error) {
+      console.error('Erro ao carregar da URL:', error);
+      return null;
+    }
   }
 
-  // Inicializa sistema de compartilhamento
-  init() {
-    // Verifica se há configuração para carregar
-    const sharedConfig = this.shareSystem.loadFromUrl();
-    if (sharedConfig) {
-      // Aguarda carregamento das calculadoras
-      setTimeout(() => {
-        this.applySharedConfig(sharedConfig);
-      }, 2000);
+  // Valida configuração
+  validateConfig(config) {
+    if (!config || typeof config !== 'object') {
+      return false;
     }
+
+    // Verifica se tem tipo válido
+    if (!config.t || !['arbipro', 'freepro'].includes(config.t)) {
+      return false;
+    }
+
+    // Validações específicas por tipo
+    if (config.t === 'arbipro') {
+      return this.validateArbiProConfig(config);
+    } else if (config.t === 'freepro') {
+      return this.validateFreeProConfig(config);
+    }
+
+    return false;
+  }
+
+  // Valida configuração ArbiPro
+  validateArbiProConfig(config) {
+    return (
+      typeof config.n === 'number' &&
+      config.n >= 2 && config.n <= 6 &&
+      typeof config.r === 'number' &&
+      Array.isArray(config.h) &&
+      config.h.length <= config.n
+    );
+  }
+
+  // Valida configuração FreePro
+  validateFreeProConfig(config) {
+    return (
+      typeof config.n === 'number' &&
+      config.n >= 2 && config.n <= 6 &&
+      typeof config.r === 'number' &&
+      config.p && typeof config.p === 'object'
+    );
+  }
+
+  // Limpa URL removendo parâmetros de compartilhamento
+  cleanUrl() {
+    try {
+      const url = new URL(window.location);
+      url.searchParams.delete('config');
+      
+      // Atualiza URL sem recarregar página
+      window.history.replaceState({}, document.title, url.pathname + url.search);
+    } catch (error) {
+      console.error('Erro ao limpar URL:', error);
+    }
+  }
+
+  // Estatísticas de uso (futuro)
+  trackShare(type, calculator) {
+    try {
+      // Implementar analytics se necessário
+      console.log(`Share tracked: ${type} for ${calculator}`);
+    } catch (error) {
+      console.warn('Erro ao rastrear compartilhamento:', error);
+    }
+  }
+
+  // Verifica se link expirou (30 dias)
+  isLinkExpired(timestamp) {
+    if (!timestamp) return false;
+    
+    const thirtyDays = 30 * 24 * 60 * 60 * 1000; // 30 dias em ms
+    const now = Date.now();
+    
+    return (now - timestamp) > thirtyDays;
+  }
+
+  // Gera ID único para links
+  generateLinkId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
   }
 }
