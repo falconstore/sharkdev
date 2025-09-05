@@ -564,11 +564,15 @@ export class ArbiPro {
     // Verifica se há alguma aposta LAY para mostrar coluna responsabilidade
     const hasLayBets = active.some(h => h.lay);
     
+    // Verifica se há algum aumento de odd ativo para mostrar "ODD FINAL"
+    const hasOddIncrease = active.some(h => h.increase !== null);
+    
     // Cabeçalho da tabela dinâmico
     const headerHTML = `
       <tr>
         <th>Casa</th>
-        <th>Odd Final</th>
+        <th>Odd</th>
+        ${hasOddIncrease ? '<th>Odd Final</th>' : ''}
         <th>Comissão</th>
         <th>Stake</th>
         ${hasLayBets ? '<th>Responsabilidade</th>' : ''}
@@ -579,6 +583,10 @@ export class ArbiPro {
     const rowsHTML = active.map((h, idx) => {
       const oddOriginal = Utils.parseFlex(h.odd) || 0;
       const oddText = oddOriginal.toFixed(2).replace('.', ',');
+      
+      // Odd Final (só quando há aumento de odd)
+      const oddFinalText = hasOddIncrease ? 
+        `<td>${h.finalOdd ? h.finalOdd.toFixed(2).replace('.', ',') : oddText}</td>` : '';
       
       const commissionText = (h.commission === null)
         ? '—'
@@ -597,6 +605,7 @@ export class ArbiPro {
         <tr>
           <td><strong>Casa ${idx + 1}</strong></td>
           <td>${oddText}</td>
+          ${oddFinalText}
           <td>${commissionText}</td>
           <td><strong>R$ ${stakeText}</strong>${h.freebet ? '<br><span class="text-small">(Freebet)</span>' : ''}${h.lay ? '<br><span class="text-small">(LAY)</span>' : ''}</td>
           ${responsibilityCell}
@@ -612,4 +621,3 @@ export class ArbiPro {
     if (thead) thead.innerHTML = headerHTML;
     if (tbody) tbody.innerHTML = rowsHTML;
   }
-}
