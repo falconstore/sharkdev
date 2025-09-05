@@ -579,7 +579,7 @@ export function getFreeProfHTML() {
     if(s===undefined||s===null) return NaN; 
     var str=String(s).trim(); 
     if(!str) return NaN; 
-    if(str.indexOf(',')!==-1 && str.indexOf('.')!==-1) return parseFloat(str.replace(/\\./g,'').replace(',','.')); 
+    if(str.indexOf(',')!==-1 && str.indexOf('.')!==-1) return parseFloat(str.replace(/\./g,'').replace(',','.')); 
     if(str.indexOf(',')!==-1) return parseFloat(str.replace(',','.')); 
     return parseFloat(str); 
   }
