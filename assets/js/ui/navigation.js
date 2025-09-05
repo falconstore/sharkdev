@@ -134,19 +134,34 @@ export class Navigation {
           <div class="hero-content">
             <h1 class="hero-title">Sobre o Shark 100% Green</h1>
             <p class="hero-subtitle">
-              Ferramentas profissionais para trading esportivo e aproveitamento de promoções de casas de apostas
-            </p>
+          Ferramentas exclusivas para potencializar seus ganhos através de <strong>arbitragem de bônus e promoções de casas de apostas</strong>.
+          </p>
           </div>
         </div>
 
         <!-- O que é o Shark Green -->
         <div class="about-intro">
           <div class="intro-card">
-            <h2 class="section-title">O que é o Shark 100% Green?</h2>
-            <p class="intro-text">
-              Somos um grupo especializado em mostrar, de forma 100% didática, como aproveitar 
-              promoções de casas de apostas e oportunidades de trading esportivo de forma responsável.
-            </p>
+           <h2 class="section-title">O que é o Shark 100% Green?</h2>
+<p class="intro-text">
+  Somos um grupo especializado em <strong>arbitragem de bônus</strong>, mostrando de forma 
+  <strong>100% didática e prática</strong> como transformar promoções de casas de apostas em lucro garantido.
+</p>
+<p class="intro-text">
+  Nosso foco não é trading, mas sim <strong>estratégias seguras e comprovadas</strong>, onde cada cálculo 
+  é feito para minimizar riscos e maximizar resultados.
+</p>
+<div class="intro-benefits">
+  <p class="benefits-intro">Com nossas calculadoras avançadas, você tem acesso a:</p>
+  <ul class="benefits-list">
+    <li><strong>Precisão Matemática</strong>: fórmulas otimizadas para cada tipo de promoção.</li>
+    <li><strong>Agilidade</strong>: resultados em tempo real, sem complicação.</li>
+    <li><strong>Gestão de Risco</strong>: visão clara de cada movimento, garantindo decisões inteligentes.</li>
+  </ul>
+  <p class="benefits-conclusion">
+    Aqui você encontra a combinação perfeita entre <strong>simplicidade, segurança e lucratividade</strong>.
+  </p>
+</div>
             
             <div class="features-list">
               <div class="feature-item">
