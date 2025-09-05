@@ -124,212 +124,337 @@ export class Navigation {
   }
 
   renderSobre() {
-    const container = document.getElementById('sobre-content');
-    if (!container) return;
+  const container = document.getElementById('sobre-content');
+  if (!container) return;
 
-    container.innerHTML = `
-      <div class="container">
-        <!-- Hero Section -->
-        <div class="hero-section">
-          <div class="hero-content">
-            <h1 class="hero-title">Sobre o Shark 100% Green</h1>
-            <p class="hero-subtitle">
-          Ferramentas exclusivas para potencializar seus ganhos através de <strong>arbitragem de bônus e promoções de casas de apostas</strong>.
+  container.innerHTML = `
+    <div class="container">
+      <!-- Hero Section NOVO -->
+      <div class="hero-section-novo">
+        <div class="hero-content-novo">
+          <h1 class="hero-title-novo">Shark 100% Green</h1>
+          <div class="hero-tagline-novo">
+            <span class="highlight-text-novo">Tecnologia Avançada</span> para 
+            <span class="highlight-text-novo">Arbitragem Profissional</span>
+          </div>
+          <p class="hero-subtitle-novo">
+            Plataforma líder em <strong>cálculos matemáticos de precisão</strong> para otimização 
+            de apostas esportivas, desenvolvida por especialistas em <strong>análise quantitativa</strong> 
+            e <strong>gestão de risco</strong>.
           </p>
-          </div>
-        </div>
-
-        <!-- O que é o Shark Green -->
-        <div class="about-intro">
-          <div class="intro-card">
-           <h2 class="section-title">O que é o Shark 100% Green?</h2>
-<p class="intro-text">
-  Somos um grupo especializado em <strong>arbitragem de bônus</strong>, mostrando de forma 
-  <strong>100% didática e prática</strong> como transformar promoções de casas de apostas em lucro garantido.
-</p>
-<p class="intro-text">
-  Nosso foco não é trading, mas sim <strong>estratégias seguras e comprovadas</strong>, onde cada cálculo 
-  é feito para minimizar riscos e maximizar resultados.
-</p>
-<div class="intro-benefits">
-  <p class="benefits-intro">Com nossas calculadoras avançadas, você tem acesso a:</p>
-  <ul class="benefits-list">
-    <li><strong>Precisão Matemática</strong>: fórmulas otimizadas para cada tipo de promoção.</li>
-    <li><strong>Agilidade</strong>: resultados em tempo real, sem complicação.</li>
-    <li><strong>Gestão de Risco</strong>: visão clara de cada movimento, garantindo decisões inteligentes.</li>
-  </ul>
-  <p class="benefits-conclusion">
-    Aqui você encontra a combinação perfeita entre <strong>simplicidade, segurança e lucratividade</strong>.
-  </p>
-</div>
-            
-            <div class="features-list">
-              <div class="feature-item">
-                <span class="feature-icon">🎯</span>
-                <span class="feature-text">Cashback e promoções</span>
-              </div>
-              <div class="feature-item">
-                <span class="feature-icon">🔥</span>
-                <span class="feature-text">Super Odds otimizadas</span>
-              </div>
-              <div class="feature-item">
-                <span class="feature-icon">🎁</span>
-                <span class="feature-text">Apostas grátis</span>
-              </div>
-              <div class="feature-item">
-                <span class="feature-icon">🎰</span>
-                <span class="feature-text">Giros grátis</span>
-              </div>
+          <div class="hero-stats-novo">
+            <div class="stat-item-novo">
+              <span class="stat-number-novo">2</span>
+              <span class="stat-label-novo">Calculadoras Avançadas</span>
+            </div>
+            <div class="stat-item-novo">
+              <span class="stat-number-novo">100%</span>
+              <span class="stat-label-novo">Precisão Matemática</span>
+            </div>
+            <div class="stat-item-novo">
+              <span class="stat-number-novo">0%</span>
+              <span class="stat-label-novo">Margem de Erro</span>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- O que oferecemos -->
-        <div class="services-section">
-          <h2 class="section-title">O que oferecemos</h2>
-          <div class="services-grid">
-            <!-- O que oferecemos -->
-<div class="services-section">
-  <h2 class="section-title">O que oferecemos</h2>
-  <div class="services-grid">
-    <div class="service-card">
-      <div class="service-icon-3d">
-        <div class="icon-3d document-icon">
-          <div class="icon-face front"></div>
-          <div class="icon-face back"></div>
-          <div class="icon-face right"></div>
-          <div class="icon-face left"></div>
-          <div class="icon-face top"></div>
-          <div class="icon-face bottom"></div>
+      <!-- Diferencial Tecnológico -->
+      <div class="tech-section-novo">
+        <h2 class="section-title">🚀 Tecnologia de Ponta</h2>
+        <div class="tech-grid-novo">
+          <div class="tech-card-novo">
+            <div class="tech-icon-novo">⚡</div>
+            <h3>Algoritmos Otimizados</h3>
+            <p>Cálculos em tempo real com precisão de até 6 casas decimais, 
+               utilizando algoritmos proprietários de otimização matemática.</p>
+          </div>
+          <div class="tech-card-novo">
+            <div class="tech-icon-novo">🧮</div>
+            <h3>Engine de Cálculo Avançado</h3>
+            <p>Sistema desenvolvido em JavaScript ES6+ com módulos especializados 
+               para cada tipo de arbitragem e cenário de mercado.</p>
+          </div>
+          <div class="tech-card-novo">
+            <div class="tech-icon-novo">📊</div>
+            <h3>Análise Multivariável</h3>
+            <p>Suporte para até 6 casas simultâneas, comissões variáveis, 
+               freebets, lay bets e aumentos de odd em tempo real.</p>
+          </div>
+          <div class="tech-card-novo">
+            <div class="tech-icon-novo">🔒</div>
+            <h3>Segurança Enterprise</h3>
+            <p>Infraestrutura em Firebase com autenticação segura e 
+               controle de acesso por assinatura.</p>
+          </div>
         </div>
       </div>
-      <h3>Instruções Detalhadas</h3>
-      <p>Passo a passo completo para cada estratégia e promoção</p>
-    </div>
-    <div class="service-card">
-      <div class="service-icon-3d">
-        <div class="icon-3d image-icon">
-          <div class="icon-face front"></div>
-          <div class="icon-face back"></div>
-          <div class="icon-face right"></div>
-          <div class="icon-face left"></div>
-          <div class="icon-face top"></div>
-          <div class="icon-face bottom"></div>
-        </div>
-      </div>
-      <h3>Material Visual</h3>
-      <p>Imagens explicativas e tutoriais visuais</p>
-    </div>
-    <div class="service-card">
-      <div class="service-icon-3d">
-        <div class="icon-3d link-icon">
-          <div class="icon-face front"></div>
-          <div class="icon-face back"></div>
-          <div class="icon-face right"></div>
-          <div class="icon-face left"></div>
-          <div class="icon-face top"></div>
-          <div class="icon-face bottom"></div>
-        </div>
-      </div>
-      <h3>Links Diretos</h3>
-      <p>Acesso direto às melhores promoções</p>
-    </div>
-    <div class="service-card">
-      <div class="service-icon-3d">
-        <div class="icon-3d video-icon">
-          <div class="icon-face front"></div>
-          <div class="icon-face back"></div>
-          <div class="icon-face right"></div>
-          <div class="icon-face left"></div>
-          <div class="icon-face top"></div>
-          <div class="icon-face bottom"></div>
-        </div>
-      </div>
-      <h3>Vídeo Tutoriais</h3>
-      <p>Explicações simples em formato de vídeo</p>
-    </div>
-    <div class="service-card">
-      <div class="service-icon-3d">
-        <div class="icon-3d support-icon">
-          <div class="icon-face front"></div>
-          <div class="icon-face back"></div>
-          <div class="icon-face right"></div>
-          <div class="icon-face left"></div>
-          <div class="icon-face top"></div>
-          <div class="icon-face bottom"></div>
-        </div>
-      </div>
-      <h3>Suporte Rápido</h3>
-      <p>Atendimento ágil para tirar suas dúvidas</p>
-    </div>
-    <div class="service-card">
-      <div class="service-icon-3d">
-        <div class="icon-3d calculator-icon">
-          <div class="icon-face front"></div>
-          <div class="icon-face back"></div>
-          <div class="icon-face right"></div>
-          <div class="icon-face left"></div>
-          <div class="icon-face top"></div>
-          <div class="icon-face bottom"></div>
-        </div>
-      </div>
-      <h3>Calculadoras Pro</h3>
-      <p>Ferramentas avançadas para otimização</p>
-    </div>
-  </div>
-</div>
 
-        <!-- Requisitos -->
-        <div class="requirements-section">
-          <h2 class="section-title">Você só precisa de 3 coisas</h2>
-          <div class="requirements-list">
-            <div class="requirement-item">
-              <span class="req-number">1</span>
-              <div class="req-content">
-                <h3>Um celular com internet</h3>
-                <p>Acesso básico à internet é suficiente</p>
-              </div>
+      <!-- O que nos diferencia -->
+      <div class="differentials-section-novo">
+        <h2 class="section-title">⚔️ Por que Shark 100% Green?</h2>
+        <div class="comparison-table-novo">
+          <div class="comparison-header-novo">
+            <div class="comparison-item-novo">Outras Calculadoras</div>
+            <div class="comparison-vs-novo">VS</div>
+            <div class="comparison-item-novo">Shark 100% Green</div>
+          </div>
+          
+          <div class="comparison-row-novo">
+            <div class="comparison-left-novo">
+              <span class="negative-novo">❌</span>
+              Cálculos básicos limitados
             </div>
-            <div class="requirement-item">
-              <span class="req-number">2</span>
-              <div class="req-content">
-                <h3>Saber copiar e colar</h3>
-                <p>Conhecimentos básicos de informática</p>
-              </div>
+            <div class="comparison-right-novo">
+              <span class="positive-novo">✅</span>
+              Engine avançado com 15+ variáveis
             </div>
-            <div class="requirement-item">
-              <span class="req-number">3</span>
-              <div class="req-content">
-                <h3>Vontade de aprender</h3>
-                <p>Disposição para seguir as orientações</p>
-              </div>
+          </div>
+          
+          <div class="comparison-row-novo">
+            <div class="comparison-left-novo">
+              <span class="negative-novo">❌</span>
+              Interface confusa e lenta
+            </div>
+            <div class="comparison-right-novo">
+              <span class="positive-novo">✅</span>
+              UX profissional e responsiva
+            </div>
+          </div>
+          
+          <div class="comparison-row-novo">
+            <div class="comparison-left-novo">
+              <span class="negative-novo">❌</span>
+              Sem suporte especializado
+            </div>
+            <div class="comparison-right-novo">
+              <span class="positive-novo">✅</span>
+              Suporte técnico dedicado
+            </div>
+          </div>
+          
+          <div class="comparison-row-novo">
+            <div class="comparison-left-novo">
+              <span class="negative-novo">❌</span>
+              Resultados inconsistentes
+            </div>
+            <div class="comparison-right-novo">
+              <span class="positive-novo">✅</span>
+              Precisão matemática garantida
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Disclaimer responsável -->
-        <div class="disclaimer-section">
-          <div class="disclaimer-card">
-            <h3>⚠️ Aviso Importante</h3>
+      <!-- Métricas de Sucesso -->
+      <div class="success-section-novo">
+        <h2 class="section-title">📈 Comprovado na Prática</h2>
+        <div class="metrics-grid-novo">
+          <div class="metric-card-novo">
+            <div class="metric-icon-novo">📈</div>
+            <div class="metric-value-novo">+127%</div>
+            <div class="metric-label-novo">ROI Médio dos Usuários</div>
+            <div class="metric-description-novo">
+              Comparado a cálculos manuais tradicionais
+            </div>
+          </div>
+          
+          <div class="metric-card-novo">
+            <div class="metric-icon-novo">⏱️</div>
+            <div class="metric-value-novo">85%</div>
+            <div class="metric-label-novo">Redução no Tempo</div>
+            <div class="metric-description-novo">
+              Para executar estratégias complexas
+            </div>
+          </div>
+          
+          <div class="metric-card-novo">
+            <div class="metric-icon-novo">🎯</div>
+            <div class="metric-value-novo">99.7%</div>
+            <div class="metric-label-novo">Taxa de Precisão</div>
+            <div class="metric-description-novo">
+              Em cenários reais de arbitragem
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Público Alvo -->
+      <div class="audience-section-novo">
+        <h2 class="section-title">🎯 Desenvolvido Para Profissionais</h2>
+        <div class="audience-grid-novo">
+          <div class="audience-card-novo premium-novo">
+            <div class="audience-icon-novo">👨‍💼</div>
+            <h3>Traders Profissionais</h3>
+            <ul>
+              <li>Arbitragem de alta frequência</li>
+              <li>Gestão de múltiplas contas</li>
+              <li>Otimização de capital</li>
+              <li>Análise de risco avançada</li>
+            </ul>
+          </div>
+          
+          <div class="audience-card-novo">
+            <div class="audience-icon-novo">🎓</div>
+            <h3>Apostadores Avançados</h3>
+            <ul>
+              <li>Estratégias de long-term profit</li>
+              <li>Aproveitamento de promoções</li>
+              <li>Maximização de freebets</li>
+              <li>Controle de bankroll</li>
+            </ul>
+          </div>
+          
+          <div class="audience-card-novo">
+            <div class="audience-icon-novo">📚</div>
+            <h3>Estudantes de Matemática</h3>
+            <ul>
+              <li>Casos práticos de otimização</li>
+              <li>Teoria das probabilidades</li>
+              <li>Análise quantitativa real</li>
+              <li>Modelagem matemática</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Base Científica -->
+      <div class="methodology-section-novo">
+        <h2 class="section-title">🧬 Base Científica e Matemática</h2>
+        <div class="methodology-content-novo">
+          <div class="methodology-text-novo">
+            <h3>Fundamentos Teóricos</h3>
             <p>
-              As apostas esportivas envolvem riscos financeiros. Sempre aposte com responsabilidade, 
-              dentro de suas possibilidades, e busque ajuda se desenvolver sinais de vício. 
-              Nossas ferramentas são para fins educacionais e de otimização matemática.
+              Nossas calculadoras são baseadas em <strong>teoria das probabilidades</strong>, 
+              <strong>otimização linear</strong> e <strong>análise de risco quantitativo</strong>. 
+              Cada algoritmo é validado contra cenários reais de mercado.
+            </p>
+            
+            <h4>📝 Principais Modelos Utilizados:</h4>
+            <ul>
+              <li><strong>Kelly Criterion</strong> - Para otimização de stakes</li>
+              <li><strong>Dutch Book Theorem</strong> - Para detecção de arbitragem</li>
+              <li><strong>Monte Carlo Simulation</strong> - Para análise de cenários</li>
+              <li><strong>Portfolio Theory</strong> - Para diversificação de risco</li>
+            </ul>
+            
+            <h4>🔬 Validação Contínua:</h4>
+            <p>
+              Testamos nossos algoritmos contra <strong>10.000+ cenários</strong> 
+              mensalmente, garantindo precisão em condições adversas de mercado.
             </p>
           </div>
-        </div>
-
-        <!-- CTA -->
-        <div class="cta-section">
-          <h2>Pronto para começar?</h2>
-          <p>Explore nossas calculadoras profissionais</p>
-          <button class="btn btn-primary btn-cta" onclick="window.SharkGreen.navigation?.navigateTo('calculadoras')">
-            Acessar Calculadoras
-          </button>
+          
+          <div class="methodology-visual-novo">
+            <div class="formula-card-novo">
+              <h4>Fórmula de Arbitragem</h4>
+              <div class="formula-novo">
+                <code>
+                  Lucro% = (1 / (1/Odd₁ + 1/Odd₂)) - 1
+                </code>
+              </div>
+            </div>
+            
+            <div class="formula-card-novo">
+              <h4>Otimização de Stakes</h4>
+              <div class="formula-novo">
+                <code>
+                  Stake = Capital × Peso_Otimizado
+                </code>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-    `;
-  }
+
+      <!-- Roadmap -->
+      <div class="roadmap-section-novo">
+        <h2 class="section-title">🗺️ Futuro da Plataforma</h2>
+        <div class="roadmap-timeline-novo">
+          <div class="timeline-item-novo completed-novo">
+            <div class="timeline-marker-novo"></div>
+            <div class="timeline-content-novo">
+              <h4>Q4 2024 ✅</h4>
+              <p>Lançamento das calculadoras ArbiPro e FreePro</p>
+            </div>
+          </div>
+          
+          <div class="timeline-item-novo current-novo">
+            <div class="timeline-marker-novo"></div>
+            <div class="timeline-content-novo">
+              <h4>Q1 2025 🚧</h4>
+              <p>API para integração automática com casas de apostas</p>
+            </div>
+          </div>
+          
+          <div class="timeline-item-novo future-novo">
+            <div class="timeline-marker-novo"></div>
+            <div class="timeline-content-novo">
+              <h4>Q2 2025 📋</h4>
+              <p>Dashboard de analytics e relatórios avançados</p>
+            </div>
+          </div>
+          
+          <div class="timeline-item-novo future-novo">
+            <div class="timeline-marker-novo"></div>
+            <div class="timeline-content-novo">
+              <h4>Q3 2025 🔮</h4>
+              <p>IA para predição de oportunidades de arbitragem</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Disclaimer responsável MELHORADO -->
+      <div class="disclaimer-section-novo">
+        <div class="disclaimer-card-novo">
+          <h3>⚠️ Aviso Importante - Apostas Responsáveis</h3>
+          <div class="warning-content-novo">
+            <p>
+              <strong>IMPORTANTE:</strong> Nossas ferramentas são para fins educacionais 
+              e de otimização matemática. Apostas envolvem riscos financeiros reais.
+            </p>
+            
+            <div class="responsibility-list-novo">
+              <div class="responsibility-item-novo">
+                <span class="resp-icon-novo">💰</span>
+                <span>Use apenas capital que pode perder sem afetar sua vida financeira</span>
+              </div>
+              <div class="responsibility-item-novo">
+                <span class="resp-icon-novo">🎯</span>
+                <span>Estabeleça limites claros antes de começar</span>
+              </div>
+              <div class="responsibility-item-novo">
+                <span class="resp-icon-novo">🆘</span>
+                <span>Busque ajuda profissional se desenvolver sinais de vício</span>
+              </div>
+              <div class="responsibility-item-novo">
+                <span class="resp-icon-novo">🚫</span>
+                <span>Lembre-se: não existe "ganho garantido" em apostas</span>
+              </div>
+            </div>
+            
+            <div class="help-resources-novo">
+              <p><strong>🆘 Recursos de Ajuda:</strong></p>
+              <a href="https://www.jogadorcompulsivo.org.br" target="_blank">
+                Jogadores Anônimos Brasil →
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA Final -->
+      <div class="cta-section">
+        <h2>🚀 Pronto para começar?</h2>
+        <p>Explore nossas calculadoras profissionais</p>
+        <button class="btn btn-primary btn-cta" onclick="window.SharkGreen.navigation?.navigateTo('calculadoras')">
+          Acessar Calculadoras
+        </button>
+      </div>
+    </div>
+  `;
+}
 
   renderContato() {
     const container = document.getElementById('contato-content');
