@@ -188,38 +188,96 @@ export class Navigation {
         <div class="services-section">
           <h2 class="section-title">O que oferecemos</h2>
           <div class="services-grid">
-            <div class="service-card">
-              <div class="service-icon">📄</div>
-              <h3>Instruções Detalhadas</h3>
-              <p>Passo a passo completo para cada estratégia e promoção</p>
-            </div>
-            <div class="service-card">
-              <div class="service-icon">🖼</div>
-              <h3>Material Visual</h3>
-              <p>Imagens explicativas e tutoriais visuais</p>
-            </div>
-            <div class="service-card">
-              <div class="service-icon">🔗</div>
-              <h3>Links Diretos</h3>
-              <p>Acesso direto às melhores promoções</p>
-            </div>
-            <div class="service-card">
-              <div class="service-icon">📽</div>
-              <h3>Vídeo Tutoriais</h3>
-              <p>Explicações simples em formato de vídeo</p>
-            </div>
-            <div class="service-card">
-              <div class="service-icon">🧑‍💻</div>
-              <h3>Suporte Rápido</h3>
-              <p>Atendimento ágil para tirar suas dúvidas</p>
-            </div>
-            <div class="service-card">
-              <div class="service-icon">⚡</div>
-              <h3>Calculadoras Pro</h3>
-              <p>Ferramentas avançadas para otimização</p>
-            </div>
-          </div>
+            <!-- O que oferecemos -->
+<div class="services-section">
+  <h2 class="section-title">O que oferecemos</h2>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-icon-3d">
+        <div class="icon-3d document-icon">
+          <div class="icon-face front"></div>
+          <div class="icon-face back"></div>
+          <div class="icon-face right"></div>
+          <div class="icon-face left"></div>
+          <div class="icon-face top"></div>
+          <div class="icon-face bottom"></div>
         </div>
+      </div>
+      <h3>Instruções Detalhadas</h3>
+      <p>Passo a passo completo para cada estratégia e promoção</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon-3d">
+        <div class="icon-3d image-icon">
+          <div class="icon-face front"></div>
+          <div class="icon-face back"></div>
+          <div class="icon-face right"></div>
+          <div class="icon-face left"></div>
+          <div class="icon-face top"></div>
+          <div class="icon-face bottom"></div>
+        </div>
+      </div>
+      <h3>Material Visual</h3>
+      <p>Imagens explicativas e tutoriais visuais</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon-3d">
+        <div class="icon-3d link-icon">
+          <div class="icon-face front"></div>
+          <div class="icon-face back"></div>
+          <div class="icon-face right"></div>
+          <div class="icon-face left"></div>
+          <div class="icon-face top"></div>
+          <div class="icon-face bottom"></div>
+        </div>
+      </div>
+      <h3>Links Diretos</h3>
+      <p>Acesso direto às melhores promoções</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon-3d">
+        <div class="icon-3d video-icon">
+          <div class="icon-face front"></div>
+          <div class="icon-face back"></div>
+          <div class="icon-face right"></div>
+          <div class="icon-face left"></div>
+          <div class="icon-face top"></div>
+          <div class="icon-face bottom"></div>
+        </div>
+      </div>
+      <h3>Vídeo Tutoriais</h3>
+      <p>Explicações simples em formato de vídeo</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon-3d">
+        <div class="icon-3d support-icon">
+          <div class="icon-face front"></div>
+          <div class="icon-face back"></div>
+          <div class="icon-face right"></div>
+          <div class="icon-face left"></div>
+          <div class="icon-face top"></div>
+          <div class="icon-face bottom"></div>
+        </div>
+      </div>
+      <h3>Suporte Rápido</h3>
+      <p>Atendimento ágil para tirar suas dúvidas</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon-3d">
+        <div class="icon-3d calculator-icon">
+          <div class="icon-face front"></div>
+          <div class="icon-face back"></div>
+          <div class="icon-face right"></div>
+          <div class="icon-face left"></div>
+          <div class="icon-face top"></div>
+          <div class="icon-face bottom"></div>
+        </div>
+      </div>
+      <h3>Calculadoras Pro</h3>
+      <p>Ferramentas avançadas para otimização</p>
+    </div>
+  </div>
+</div>
 
         <!-- Requisitos -->
         <div class="requirements-section">
