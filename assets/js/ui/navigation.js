@@ -380,6 +380,82 @@ export class Navigation {
   this.initRevolutionaryAnimations();
 }
 
+initRevolutionaryAnimations() {
+  // Animação das formas flutuantes
+  const shapes = document.querySelectorAll('.shape');
+  shapes.forEach((shape, index) => {
+    const duration = 8 + index * 2;
+    const delay = index * 0.5;
+    shape.style.animationDuration = `${duration}s`;
+    shape.style.animationDelay = `${delay}s`;
+  });
+
+  // Animação hover nos cards
+  const featureCards = document.querySelectorAll('.feature-card-revolutionary');
+  featureCards.forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      card.classList.add('active');
+    });
+    
+    card.addEventListener('mouseleave', () => {
+      card.classList.remove('active');
+    });
+  });
+
+  // Animação de typing no título
+  this.typeWriterEffect();
+
+  // Scroll reveal animations
+  this.initScrollReveal();
+}
+
+typeWriterEffect() {
+  const titleElement = document.querySelector('.hero-title-revolutionary');
+  if (!titleElement) return;
+
+  const text = titleElement.innerHTML;
+  titleElement.innerHTML = '';
+  titleElement.style.opacity = '1';
+
+  let index = 0;
+  const speed = 50;
+
+  function typeChar() {
+    if (index < text.length) {
+      titleElement.innerHTML += text.charAt(index);
+      index++;
+      setTimeout(typeChar, speed);
+    }
+  }
+
+  setTimeout(typeChar, 1000);
+}
+
+initScrollReveal() {
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('reveal');
+      }
+    });
+  }, observerOptions);
+
+  // Observa todos os elementos que devem ser revelados
+  const elementsToReveal = document.querySelectorAll(
+    '.feature-card-revolutionary, .tech-showcase, .revolutionary-cta'
+  );
+  
+  elementsToReveal.forEach(el => {
+    el.classList.add('hidden-initially');
+    observer.observe(el);
+  });
+}
+
   renderContatoPage(container) {
     container.innerHTML = `
       <div class="page-container">
