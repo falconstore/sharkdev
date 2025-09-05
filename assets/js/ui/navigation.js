@@ -304,4 +304,152 @@ export class Navigation {
               <div class="channel-icon">💬</div>
               <h3>Grupo Free Telegram</h3>
               <p>Participe da nossa comunidade gratuita</p>
-              <a href="https://t.me/+M1SY4YU6T-pjYWQx" target="_bl
+              <a href="https://t.me/+M1SY4YU6T-pjYWQx" target="_blank" class="btn btn-secondary">
+                Entrar no Grupo
+              </a>
+            </div>
+
+            <!-- Email -->
+            <div class="channel-card">
+              <div class="channel-icon">📧</div>
+              <h3>E-mail</h3>
+              <p>Entre em contato direto conosco</p>
+              <a href="mailto:sharkgreenvip@hotmail.com" class="btn btn-secondary">
+                Enviar E-mail
+              </a>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Suporte Especializado -->
+        <div class="support-section">
+          <h2 class="section-title">Suporte Especializado</h2>
+          <div class="support-grid">
+            
+            <div class="support-card">
+              <div class="support-icon">📋</div>
+              <h3>Suporte Procedimentos</h3>
+              <p>Dúvidas sobre estratégias e tutoriais</p>
+              <a href="https://t.me/SuporteSharkGreen_procedimentos" target="_blank" class="btn btn-primary">
+                Acessar Suporte
+              </a>
+            </div>
+
+            <div class="support-card">
+              <div class="support-icon">💰</div>
+              <h3>Suporte Financeiro</h3>
+              <p>Questões sobre pagamentos e assinaturas</p>
+              <a href="https://t.me/SuporteSharkGreen_financeiro" target="_blank" class="btn btn-primary">
+                Acessar Suporte
+              </a>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- FAQ Rápido -->
+        <div class="faq-section">
+          <h2 class="section-title">Perguntas Frequentes</h2>
+          <div class="faq-list">
+            
+            <div class="faq-item">
+              <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+                <span>Como funcionam as calculadoras?</span>
+                <span class="faq-toggle">+</span>
+              </div>
+              <div class="faq-answer">
+                <p>
+                  Nossas calculadoras (ArbiPro e FreePro) fazem cálculos matemáticos precisos 
+                  para otimizar apostas e freebets, garantindo o melhor aproveitamento das promoções.
+                </p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+                <span>Preciso pagar para usar as calculadoras?</span>
+                <span class="faq-toggle">+</span>
+              </div>
+              <div class="faq-answer">
+                <p>
+                  As calculadoras básicas são gratuitas. Para funcionalidades avançadas e 
+                  suporte premium, temos planos de assinatura.
+                </p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+                <span>Como recebo suporte?</span>
+                <span class="faq-toggle">+</span>
+              </div>
+              <div class="faq-answer">
+                <p>
+                  Oferecemos suporte via Telegram especializado: um canal para dúvidas sobre 
+                  procedimentos e outro para questões financeiras.
+                </p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question" onclick="this.parentElement.classList.toggle('active')">
+                <span>É seguro usar as estratégias?</span>
+                <span class="faq-toggle">+</span>
+              </div>
+              <div class="faq-answer">
+                <p>
+                  Nossas estratégias são baseadas em matemática e aproveitamento de promoções legais. 
+                  Sempre recomendamos apostar com responsabilidade e dentro de suas possibilidades.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- CTA de Volta -->
+        <div class="cta-section">
+          <h2>Experimente nossas ferramentas</h2>
+          <p>Comece a otimizar suas estratégias agora mesmo</p>
+          <button class="btn btn-primary btn-cta" onclick="window.SharkGreen.navigation?.navigateTo('calculadoras')">
+            Usar Calculadoras
+          </button>
+        </div>
+      </div>
+    `;
+
+    // Bind FAQ toggle
+    setTimeout(() => {
+      this.bindFAQEvents();
+    }, 100);
+  }
+
+  bindFAQEvents() {
+    const faqItems = document.querySelectorAll('.faq-item');
+    faqItems.forEach(item => {
+      const question = item.querySelector('.faq-question');
+      const toggle = item.querySelector('.faq-toggle');
+      
+      question.addEventListener('click', () => {
+        const isActive = item.classList.contains('active');
+        
+        // Fecha todos os outros
+        faqItems.forEach(otherItem => {
+          otherItem.classList.remove('active');
+          const otherToggle = otherItem.querySelector('.faq-toggle');
+          if (otherToggle) otherToggle.textContent = '+';
+        });
+        
+        // Toggle do atual
+        if (!isActive) {
+          item.classList.add('active');
+          if (toggle) toggle.textContent = '−';
+        } else {
+          item.classList.remove('active');
+          if (toggle) toggle.textContent = '+';
+        }
+      });
+    });
+  }
+}
