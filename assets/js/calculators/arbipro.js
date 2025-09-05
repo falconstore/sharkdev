@@ -212,11 +212,10 @@ export class ArbiPro {
 </div>
 
       <div class="stats-grid">
-        <div class="card">
-          <div class="section-title" style="font-size: 0.875rem; margin-bottom: 0.75rem;">Configurações</div>
-          <div class="form-group">
-            <label class="form-label">Número de Casas:</label>
-            <select id="numHouses" class="form-select">
+        <div class="stat-card">
+          <div class="stat-label">Configurações</div>
+          <div class="form-group" style="margin: 0.75rem 0 0 0;">
+            <select id="numHouses" class="form-select" style="font-size: 0.75rem; padding: 0.5rem;">
               <option value="2" ${this.numHouses===2?'selected':''}>2 Casas</option>
               <option value="3" ${this.numHouses===3?'selected':''}>3 Casas</option>
               <option value="4" ${this.numHouses===4?'selected':''}>4 Casas</option>
@@ -226,11 +225,10 @@ export class ArbiPro {
           </div>
         </div>
 
-        <div class="card">
-          <div class="section-title" style="font-size: 0.875rem; margin-bottom: 0.75rem;">Arredondamento</div>
-          <div class="form-group">
-            <label class="form-label">Stakes Para:</label>
-            <select id="rounding" class="form-select">
+        <div class="stat-card">
+          <div class="stat-label">Arredondamento</div>
+          <div class="form-group" style="margin: 0.75rem 0 0 0;">
+            <select id="rounding" class="form-select" style="font-size: 0.75rem; padding: 0.5rem;">
               <option value="0.01">R$ 0,01</option>
               <option value="0.10">R$ 0,10</option>
               <option value="0.50">R$ 0,50</option>
@@ -247,6 +245,13 @@ export class ArbiPro {
         <div class="stat-card">
           <div class="stat-value profit-highlight" id="roi">0,00%</div>
           <div class="stat-label">ROI Médio</div>
+        </div>
+
+        <div class="stat-card" id="shareCard">
+          <div class="stat-label">Compartilhar</div>
+          <button id="shareBtn" class="btn-share-card" style="margin-top: 0.75rem; width: 100%; padding: 0.5rem; font-size: 0.75rem; border: none; border-radius: 6px; background: linear-gradient(135deg, #8b5cf6, #3b82f6); color: white; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
+            🔗 Compartilhar
+          </button>
         </div>
       </div>
 
