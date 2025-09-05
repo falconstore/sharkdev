@@ -1,4 +1,4 @@
-// assets/js/main.js - Versão completa com todas as funcionalidades
+// assets/js/main.js - Versão segura sem imports assíncronos
 // Controlador principal da aplicação
 
 import { Theme } from './ui/theme.js';
@@ -6,63 +6,55 @@ import { TabSystem } from './ui/tabs.js';
 import { ArbiPro } from './calculators/arbipro.js';
 import { FreePro } from './calculators/freepro.js';
 
-// Importação condicional - só importa se os arquivos existirem
-let Navigation = null;
-let ShareUI = null;
-
-try {
-  const navModule = await import('./ui/navigation.js');
-  Navigation = navModule.Navigation;
-} catch (e) {
-  console.warn('Navigation não encontrado, usando fallback');
-}
-
-try {
-  const shareModule = await import('./ui/share-ui.js');
-  ShareUI = shareModule.ShareUI;
-} catch (e) {
-  console.warn('ShareUI não encontrado, usando fallback');
-}
-
 class App {
   constructor() {
     this.theme = new Theme();
-    this.navigation = Navigation ? new Navigation() : null;
     this.tabSystem = null;
     this.arbiPro = null;
     this.freePro = null;
-    this.shareUI = ShareUI ? new ShareUI() : null;
+    this.navigation = null;
+    this.shareUI = null;
   }
 
   async init() {
     try {
       console.log('Iniciando Calculadoras Shark 100% Green...');
       
-      // Carrega módulos opcionais primeiro
-      await loadOptionalModules();
-      
       // Inicializa tema
       this.theme.init();
       
-      // Inicializa navegação se disponível
-      if (Navigation) {
-        this.navigation = new Navigation();
-        this.navigation.init();
-      }
+      // Tenta carregar módulos opcionais
+      await this.loadOptionalModules();
       
-      // Inicializa sistema de compartilhamento se disponível
-      if (ShareUI) {
-        this.shareUI = new ShareUI();
-        this.shareUI.init();
-      }
-      
-      // Carrega aplicação principal diretamente
+      // Carrega aplicação principal
       await this.loadMainApp();
       
       console.log('Calculadoras Shark 100% Green inicializadas com sucesso');
     } catch (error) {
       console.error('Erro ao inicializar app:', error);
-      this.showError('Erro ao inicializar aplicação');
+      this.showError('Erro ao inicializar aplicação: ' + error.message);
+    }
+  }
+
+  async loadOptionalModules() {
+    // Tenta carregar Navigation
+    try {
+      const { Navigation } = await import('./ui/navigation.js');
+      this.navigation = new Navigation();
+      this.navigation.init();
+      console.log('✅ Navigation carregado');
+    } catch (e) {
+      console.warn('⚠️ Navigation não encontrado:', e.message);
+    }
+
+    // Tenta carregar ShareUI
+    try {
+      const { ShareUI } = await import('./ui/share-ui.js');
+      this.shareUI = new ShareUI();
+      this.shareUI.init();
+      console.log('✅ ShareUI carregado');
+    } catch (e) {
+      console.warn('⚠️ ShareUI não encontrado:', e.message);
     }
   }
 
@@ -73,10 +65,13 @@ class App {
       // Mostra loading inicial
       this.showLoadingScreen();
       
-      // Simula carregamento de 2 segundos
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Aguarda um pouco
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
       const container = document.getElementById('app-container');
+      if (!container) {
+        throw new Error('Container app-container não encontrado');
+      }
 
       // Template das calculadoras com navegação condicional
       const navigationTabs = this.navigation ? `
@@ -135,7 +130,7 @@ class App {
       await this.arbiPro.init();
       this.freePro.init();
       
-      // Adiciona botões de compartilhamento após carregamento
+      // Adiciona botões de compartilhamento se disponível
       if (this.shareUI) {
         setTimeout(() => {
           this.addShareButtons();
@@ -146,25 +141,25 @@ class App {
       
     } catch (error) {
       console.error('Erro ao carregar calculadoras:', error);
-      this.showError('Erro ao carregar calculadoras');
+      this.showError('Erro ao carregar calculadoras: ' + error.message);
     }
   }
 
   addShareButtons() {
-    if (!this.shareUI) return;
+    if (!this.shareUI || !this.shareUI.createShareButton) return;
     
     try {
-      // Adiciona botão no ArbiPro (na seção de configurações)
+      // Adiciona botão no ArbiPro
       const arbiProConfig = document.querySelector('#panel-1 .stats-grid .card:first-child');
-      if (arbiProConfig && this.shareUI.createShareButton) {
+      if (arbiProConfig) {
         const shareBtn = this.shareUI.createShareButton('arbipro');
         shareBtn.style.marginTop = '1rem';
         shareBtn.style.width = '100%';
         arbiProConfig.appendChild(shareBtn);
-        console.log('Botão de compartilhamento adicionado ao ArbiPro');
+        console.log('✅ Botão ArbiPro adicionado');
       }
 
-      // Sistema melhorado para FreePro
+      // Tenta adicionar no FreePro
       this.setupFreeProButton();
 
     } catch (error) {
@@ -172,12 +167,11 @@ class App {
     }
   }
 
-  // Método específico para FreePro
   setupFreeProButton() {
     if (!this.shareUI) return;
     
     let attempts = 0;
-    const maxAttempts = 20;
+    const maxAttempts = 10;
     
     const tryAddButton = () => {
       attempts++;
@@ -188,77 +182,61 @@ class App {
         const actions = doc.querySelector('.actions');
         
         if (actions && !doc.querySelector('.btn-share')) {
-          this.addFreeProShareButton(doc);
-          console.log(`✅ Botão FreePro adicionado na tentativa ${attempts}`);
+          const shareBtn = doc.createElement('button');
+          shareBtn.className = 'btn btn-share';
+          shareBtn.innerHTML = '🔗 Compartilhar';
+          shareBtn.style.background = 'linear-gradient(135deg, #8b5cf6, #3b82f6)';
+          shareBtn.style.color = 'white';
+          shareBtn.style.marginTop = '0.75rem';
+          
+          shareBtn.addEventListener('click', () => {
+            if (this.shareUI.handleShareClick) {
+              this.shareUI.handleShareClick('freepro');
+            }
+          });
+          
+          actions.appendChild(shareBtn);
+          console.log('✅ Botão FreePro adicionado');
           return;
         }
       }
       
       if (attempts < maxAttempts) {
         setTimeout(tryAddButton, 500);
-      } else {
-        console.warn('⚠️ Não foi possível adicionar botão FreePro após 10 segundos');
       }
     };
     
     tryAddButton();
   }
 
-  addFreeProShareButton(doc) {
-    if (!this.shareUI) return false;
-    
-    try {
-      const actions = doc.querySelector('.actions');
-      if (actions && !doc.querySelector('.btn-share')) {
-        const shareBtn = doc.createElement('button');
-        shareBtn.className = 'btn btn-share';
-        shareBtn.innerHTML = '🔗 Compartilhar';
-        shareBtn.style.background = 'linear-gradient(135deg, #8b5cf6, #3b82f6)';
-        shareBtn.style.color = 'white';
-        shareBtn.style.marginTop = '0.75rem';
-        
-        shareBtn.addEventListener('click', () => {
-          if (this.shareUI.handleShareClick) {
-            this.shareUI.handleShareClick('freepro');
-          }
-        });
-        
-        actions.appendChild(shareBtn);
-        console.log('✅ Botão de compartilhamento adicionado ao FreePro');
-        
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.warn('Erro ao adicionar botão no FreePro:', error);
-      return false;
-    }
-  }
-
   showLoadingScreen() {
     const container = document.getElementById('app-container');
-    container.innerHTML = `
-      <div class="post-login-loading">
-        <div class="post-login-content">
-          <div class="post-login-title">Carregando Shark 100% Green</div>
-          <div class="post-login-spinner"></div>
-          <div class="post-login-message">Inicializando calculadoras profissionais...</div>
+    if (container) {
+      container.innerHTML = `
+        <div class="post-login-loading">
+          <div class="post-login-content">
+            <div class="post-login-title">Carregando Shark 100% Green</div>
+            <div class="post-login-spinner"></div>
+            <div class="post-login-message">Inicializando calculadoras profissionais...</div>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
   }
 
   showError(message) {
     const container = document.getElementById('app-container');
-    container.innerHTML = `
-      <div class="container" style="text-align: center; margin-top: 2rem;">
-        <div class="auth-container">
-          <h2 style="color: var(--danger); margin-bottom: 1rem;">❌ Erro</h2>
-          <p style="color: var(--text-secondary); margin-bottom: 2rem;">${message}</p>
-          <button onclick="location.reload()" class="btn btn-primary">Recarregar Página</button>
+    if (container) {
+      container.innerHTML = `
+        <div class="container" style="text-align: center; margin-top: 2rem;">
+          <div class="card" style="max-width: 500px; margin: 0 auto; padding: 2rem;">
+            <h2 style="color: var(--danger); margin-bottom: 1rem;">⚠️ Erro</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">${message}</p>
+            <button onclick="location.reload()" class="btn btn-primary">Recarregar Página</button>
+          </div>
         </div>
-      </div>
-    `;
+      `;
+    }
   }
 
   // Métodos públicos para debug
@@ -276,7 +254,21 @@ class App {
 
 // Inicializa app quando DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
-  const app = new App();
-  window.SharkGreen = app; // Para debug global
-  app.init();
+  try {
+    const app = new App();
+    window.SharkGreen = app; // Para debug global
+    app.init();
+  } catch (error) {
+    console.error('Erro crítico ao inicializar:', error);
+    document.body.innerHTML = `
+      <div style="text-align: center; padding: 2rem; color: #dc2626;">
+        <h1>Erro Crítico</h1>
+        <p>Não foi possível inicializar a aplicação.</p>
+        <p>Erro: ${error.message}</p>
+        <button onclick="location.reload()" style="padding: 1rem 2rem; margin-top: 1rem; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">
+          Recarregar
+        </button>
+      </div>
+    `;
+  }
 });
