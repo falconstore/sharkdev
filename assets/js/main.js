@@ -1,21 +1,18 @@
-// assets/js/main.js - Versão completa com navegação e compartilhamento
+// assets/js/main.js - Versão corrigida e funcional
 // Controlador principal da aplicação
 
 import { Theme } from './ui/theme.js';
 import { TabSystem } from './ui/tabs.js';
 import { ArbiPro } from './calculators/arbipro.js';
 import { FreePro } from './calculators/freepro.js';
-import { ShareUI } from './ui/share-ui.js';
-import { Navigation } from './ui/navigation.js';
 
 class App {
   constructor() {
     this.theme = new Theme();
-    this.navigation = new Navigation();
     this.tabSystem = null;
     this.arbiPro = null;
     this.freePro = null;
-    this.shareUI = new ShareUI();
+    // Removidos componentes que não existem
   }
 
   async init() {
@@ -24,12 +21,6 @@ class App {
       
       // Inicializa tema
       this.theme.init();
-      
-      // Inicializa navegação
-      this.navigation.init();
-      
-      // Inicializa sistema de compartilhamento
-      this.shareUI.init();
       
       // Carrega aplicação principal diretamente
       await this.loadMainApp();
@@ -93,11 +84,6 @@ class App {
       await this.arbiPro.init();
       this.freePro.init();
       
-      // Adiciona botões de compartilhamento após carregamento
-      setTimeout(() => {
-        this.addShareButtons();
-      }, 1000);
-      
       console.log('Calculadoras carregadas com sucesso');
       
     } catch (error) {
@@ -106,121 +92,12 @@ class App {
     }
   }
 
-  addShareButtons() {
-    try {
-      // Adiciona botão no ArbiPro (na seção de configurações)
-      const arbiProConfig = document.querySelector('#panel-1 .stats-grid .card:first-child');
-      if (arbiProConfig) {
-        const shareBtn = this.shareUI.createShareButton('arbipro');
-        shareBtn.style.marginTop = '1rem';
-        shareBtn.style.width = '100%';
-        arbiProConfig.appendChild(shareBtn);
-        console.log('Botão de compartilhamento adicionado ao ArbiPro');
-      }
-
-      // Sistema melhorado para FreePro
-      this.setupFreeProButton();
-
-    } catch (error) {
-      console.warn('Erro ao adicionar botões de compartilhamento:', error);
-    }
-  }
-
-  // Novo método específico para FreePro
-  setupFreeProButton() {
-    let attempts = 0;
-    const maxAttempts = 20; // 20 tentativas = 10 segundos
-    
-    const tryAddButton = () => {
-      attempts++;
-      
-      const iframe = document.getElementById('calc2frame');
-      if (iframe && iframe.contentDocument) {
-        const doc = iframe.contentDocument;
-        const actions = doc.querySelector('.actions');
-        
-        if (actions && !doc.querySelector('.btn-share')) {
-          this.addFreeProShareButton(doc);
-          console.log(`✅ Botão FreePro adicionado na tentativa ${attempts}`);
-          return; // Sucesso - para as tentativas
-        }
-      }
-      
-      // Se não conseguiu e ainda tem tentativas, tenta novamente
-      if (attempts < maxAttempts) {
-        setTimeout(tryAddButton, 500); // Tenta a cada 500ms
-      } else {
-        console.warn('⚠️ Não foi possível adicionar botão FreePro após 10 segundos');
-      }
-    };
-    
-    // Começa as tentativas
-    tryAddButton();
-    
-    // Também observa mudanças no DOM (backup)
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          const iframe = document.querySelector('#calc2frame');
-          if (iframe && iframe.contentDocument) {
-            const doc = iframe.contentDocument;
-            const actions = doc.querySelector('.actions');
-            
-            if (actions && !doc.querySelector('.btn-share')) {
-              this.addFreeProShareButton(doc);
-              observer.disconnect();
-            }
-          }
-        }
-      });
-    });
-
-    // Observa mudanças
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-    
-    // Para o observer após 15 segundos
-    setTimeout(() => {
-      observer.disconnect();
-    }, 15000);
-  }
-
-  // Método melhorado addFreeProShareButton
-  addFreeProShareButton(doc) {
-    try {
-      const actions = doc.querySelector('.actions');
-      if (actions && !doc.querySelector('.btn-share')) {
-        const shareBtn = doc.createElement('button');
-        shareBtn.className = 'btn btn-share';
-        shareBtn.innerHTML = '🔗 Compartilhar';
-        shareBtn.style.background = 'linear-gradient(135deg, #8b5cf6, #3b82f6)';
-        shareBtn.style.color = 'white';
-        shareBtn.style.marginTop = '0.75rem';
-        
-        shareBtn.addEventListener('click', () => {
-          this.shareUI.handleShareClick('freepro');
-        });
-        
-        actions.appendChild(shareBtn);
-        console.log('✅ Botão de compartilhamento adicionado ao FreePro');
-        
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.warn('Erro ao adicionar botão no FreePro:', error);
-      return false;
-    }
-  }
-
   showLoadingScreen() {
     const container = document.getElementById('app-container');
     container.innerHTML = `
       <div class="post-login-loading">
         <div class="post-login-content">
-          <div class="post-login-title"> Carregando Shark 100% Green</div>
+          <div class="post-login-title">Carregando Shark 100% Green</div>
           <div class="post-login-spinner"></div>
           <div class="post-login-message">Inicializando calculadoras profissionais...</div>
         </div>
@@ -245,11 +122,9 @@ class App {
   getModules() {
     return {
       theme: this.theme,
-      navigation: this.navigation,
       tabSystem: this.tabSystem,
       arbiPro: this.arbiPro,
-      freePro: this.freePro,
-      shareUI: this.shareUI
+      freePro: this.freePro
     };
   }
 }
