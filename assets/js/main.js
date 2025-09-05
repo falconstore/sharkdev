@@ -156,23 +156,22 @@ class App {
     if (!this.shareUI || !this.shareUI.createShareButton) return;
     
     try {
-      // Adiciona botão no ArbiPro
-      const arbiProCard = document.querySelector('#panel-1 .stats-grid .card:first-child');
-      if (arbiProCard && !arbiProCard.querySelector('.btn-share')) {
-        const shareBtn = this.shareUI.createShareButton('arbipro');
-        if (shareBtn) {
-          shareBtn.style.marginTop = '1rem';
-          shareBtn.style.width = '100%';
-          arbiProCard.appendChild(shareBtn);
-          console.log('✅ Botão ArbiPro adicionado');
-        }
+      // Conecta o botão existente do ArbiPro ao sistema de compartilhamento
+      const shareBtn = document.getElementById('shareBtn');
+      if (shareBtn) {
+        shareBtn.addEventListener('click', () => {
+          if (this.shareUI.handleShareClick) {
+            this.shareUI.handleShareClick('arbipro');
+          }
+        });
+        console.log('✅ Botão ArbiPro conectado ao sistema de compartilhamento');
       }
 
       // Adiciona botão no FreePro (dentro do iframe)
       this.setupFreeProShareButton();
 
     } catch (error) {
-      console.warn('Erro ao adicionar botões de compartilhamento:', error);
+      console.warn('Erro ao configurar botões de compartilhamento:', error);
     }
   }
 
