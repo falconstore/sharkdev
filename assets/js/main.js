@@ -1,4 +1,4 @@
-// assets/js/main.js - Versão sem autenticação
+// assets/js/main.js - Versão completa com navegação e compartilhamento
 // Controlador principal da aplicação
 
 import { Theme } from './ui/theme.js';
@@ -6,10 +6,12 @@ import { TabSystem } from './ui/tabs.js';
 import { ArbiPro } from './calculators/arbipro.js';
 import { FreePro } from './calculators/freepro.js';
 import { ShareUI } from './ui/share-ui.js';
+import { Navigation } from './ui/navigation.js';
 
 class App {
   constructor() {
     this.theme = new Theme();
+    this.navigation = new Navigation();
     this.tabSystem = null;
     this.arbiPro = null;
     this.freePro = null;
@@ -20,15 +22,18 @@ class App {
     try {
       console.log('Iniciando Calculadoras Shark 100% Green...');
       
-     // Inicializa tema
-  this.theme.init();
-
-// Inicializa sistema de compartilhamento
-  this.shareUI.init();
-
-// Carrega aplicação principal diretamente
-  await this.loadMainApp();
-
+      // Inicializa tema
+      this.theme.init();
+      
+      // Inicializa navegação
+      this.navigation.init();
+      
+      // Inicializa sistema de compartilhamento
+      this.shareUI.init();
+      
+      // Carrega aplicação principal diretamente
+      await this.loadMainApp();
+      
       console.log('Calculadoras Shark 100% Green inicializadas com sucesso');
     } catch (error) {
       console.error('Erro ao inicializar app:', error);
@@ -86,18 +91,127 @@ class App {
       this.freePro = new FreePro();
 
       await this.arbiPro.init();
-    this.freePro.init();
-
-    // Adiciona botões de compartilhamento após carregamento
+      this.freePro.init();
+      
+      // Adiciona botões de compartilhamento após carregamento
       setTimeout(() => {
-    this.addShareButtons();
-    }, 1000);
-
-console.log('Calculadoras carregadas com sucesso');
+        this.addShareButtons();
+      }, 1000);
+      
+      console.log('Calculadoras carregadas com sucesso');
       
     } catch (error) {
       console.error('Erro ao carregar calculadoras:', error);
       this.showError('Erro ao carregar calculadoras');
+    }
+  }
+
+  addShareButtons() {
+    try {
+      // Adiciona botão no ArbiPro (na seção de configurações)
+      const arbiProConfig = document.querySelector('#panel-1 .stats-grid .card:first-child');
+      if (arbiProConfig) {
+        const shareBtn = this.shareUI.createShareButton('arbipro');
+        shareBtn.style.marginTop = '1rem';
+        shareBtn.style.width = '100%';
+        arbiProConfig.appendChild(shareBtn);
+        console.log('Botão de compartilhamento adicionado ao ArbiPro');
+      }
+
+      // Sistema melhorado para FreePro
+      this.setupFreeProButton();
+
+    } catch (error) {
+      console.warn('Erro ao adicionar botões de compartilhamento:', error);
+    }
+  }
+
+  // Novo método específico para FreePro
+  setupFreeProButton() {
+    let attempts = 0;
+    const maxAttempts = 20; // 20 tentativas = 10 segundos
+    
+    const tryAddButton = () => {
+      attempts++;
+      
+      const iframe = document.getElementById('calc2frame');
+      if (iframe && iframe.contentDocument) {
+        const doc = iframe.contentDocument;
+        const actions = doc.querySelector('.actions');
+        
+        if (actions && !doc.querySelector('.btn-share')) {
+          this.addFreeProShareButton(doc);
+          console.log(`✅ Botão FreePro adicionado na tentativa ${attempts}`);
+          return; // Sucesso - para as tentativas
+        }
+      }
+      
+      // Se não conseguiu e ainda tem tentativas, tenta novamente
+      if (attempts < maxAttempts) {
+        setTimeout(tryAddButton, 500); // Tenta a cada 500ms
+      } else {
+        console.warn('⚠️ Não foi possível adicionar botão FreePro após 10 segundos');
+      }
+    };
+    
+    // Começa as tentativas
+    tryAddButton();
+    
+    // Também observa mudanças no DOM (backup)
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList') {
+          const iframe = document.querySelector('#calc2frame');
+          if (iframe && iframe.contentDocument) {
+            const doc = iframe.contentDocument;
+            const actions = doc.querySelector('.actions');
+            
+            if (actions && !doc.querySelector('.btn-share')) {
+              this.addFreeProShareButton(doc);
+              observer.disconnect();
+            }
+          }
+        }
+      });
+    });
+
+    // Observa mudanças
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+    
+    // Para o observer após 15 segundos
+    setTimeout(() => {
+      observer.disconnect();
+    }, 15000);
+  }
+
+  // Método melhorado addFreeProShareButton
+  addFreeProShareButton(doc) {
+    try {
+      const actions = doc.querySelector('.actions');
+      if (actions && !doc.querySelector('.btn-share')) {
+        const shareBtn = doc.createElement('button');
+        shareBtn.className = 'btn btn-share';
+        shareBtn.innerHTML = '🔗 Compartilhar';
+        shareBtn.style.background = 'linear-gradient(135deg, #8b5cf6, #3b82f6)';
+        shareBtn.style.color = 'white';
+        shareBtn.style.marginTop = '0.75rem';
+        
+        shareBtn.addEventListener('click', () => {
+          this.shareUI.handleShareClick('freepro');
+        });
+        
+        actions.appendChild(shareBtn);
+        console.log('✅ Botão de compartilhamento adicionado ao FreePro');
+        
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.warn('Erro ao adicionar botão no FreePro:', error);
+      return false;
     }
   }
 
@@ -127,82 +241,17 @@ console.log('Calculadoras carregadas com sucesso');
     `;
   }
 
-addShareButtons() {
-  try {
-    // Adiciona botão no ArbiPro (na seção de configurações)
-    const arbiProConfig = document.querySelector('#panel-1 .stats-grid .card:first-child');
-    if (arbiProConfig) {
-      const shareBtn = this.shareUI.createShareButton('arbipro');
-      shareBtn.style.marginTop = '1rem';
-      shareBtn.style.width = '100%';
-      arbiProConfig.appendChild(shareBtn);
-      console.log('Botão de compartilhamento adicionado ao ArbiPro');
-    }
-
-    // Adiciona observador para quando FreePro carregar
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          const freeProActions = document.querySelector('#calc2frame');
-          if (freeProActions && freeProActions.contentDocument) {
-            this.addFreeProShareButton(freeProActions.contentDocument);
-            observer.disconnect();
-          }
-        }
-      });
-    });
-
-    // Observa mudanças no iframe do FreePro
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-
-    // Também tenta adicionar depois de um delay
-    setTimeout(() => {
-      const iframe = document.getElementById('calc2frame');
-      if (iframe && iframe.contentDocument) {
-        this.addFreeProShareButton(iframe.contentDocument);
-      }
-    }, 2000);
-
-  } catch (error) {
-    console.warn('Erro ao adicionar botões de compartilhamento:', error);
-  }
-}
-
-addFreeProShareButton(doc) {
-  try {
-    const actions = doc.querySelector('.actions');
-    if (actions && !doc.querySelector('.btn-share')) {
-      const shareBtn = doc.createElement('button');
-      shareBtn.className = 'btn btn-share';
-      shareBtn.innerHTML = '🔗 Compartilhar';
-      shareBtn.style.background = 'linear-gradient(135deg, #8b5cf6, #3b82f6)';
-      shareBtn.style.color = 'white';
-      
-      shareBtn.addEventListener('click', () => {
-        this.shareUI.handleShareClick('freepro');
-      });
-      
-      actions.appendChild(shareBtn);
-      console.log('Botão de compartilhamento adicionado ao FreePro');
-    }
-  } catch (error) {
-    console.warn('Erro ao adicionar botão no FreePro:', error);
-  }
-}
-
- // Métodos públicos para debug
+  // Métodos públicos para debug
   getModules() {
-  return {
-    theme: this.theme,
-    tabSystem: this.tabSystem,
-    arbiPro: this.arbiPro,
-    freePro: this.freePro,
-    shareUI: this.shareUI
-  };
-}
+    return {
+      theme: this.theme,
+      navigation: this.navigation,
+      tabSystem: this.tabSystem,
+      arbiPro: this.arbiPro,
+      freePro: this.freePro,
+      shareUI: this.shareUI
+    };
+  }
 }
 
 // Inicializa app quando DOM estiver pronto
