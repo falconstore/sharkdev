@@ -374,7 +374,7 @@ export class Navigation {
           <div class="timeline-item-novo completed-novo">
             <div class="timeline-marker-novo"></div>
             <div class="timeline-content-novo">
-              <h4>Q4 2024 ✅</h4>
+              <h4>Q3 2025 ✅</h4>
               <p>Lançamento das calculadoras ArbiPro e FreePro</p>
             </div>
           </div>
@@ -382,7 +382,15 @@ export class Navigation {
           <div class="timeline-item-novo current-novo">
             <div class="timeline-marker-novo"></div>
             <div class="timeline-content-novo">
-              <h4>Q1 2025 🚧</h4>
+              <h4>Q4 2025 🚧</h4>
+              <p>Dashboard de analytics e relatórios avançados</p>
+            </div>
+          </div>
+           
+          <div class="timeline-item-novo future-novo">
+            <div class="timeline-marker-novo"></div>
+            <div class="timeline-content-novo">
+              <h4>Q 2026 📋</h4>
               <p>API para integração automática com casas de apostas</p>
             </div>
           </div>
@@ -390,15 +398,7 @@ export class Navigation {
           <div class="timeline-item-novo future-novo">
             <div class="timeline-marker-novo"></div>
             <div class="timeline-content-novo">
-              <h4>Q2 2025 📋</h4>
-              <p>Dashboard de analytics e relatórios avançados</p>
-            </div>
-          </div>
-          
-          <div class="timeline-item-novo future-novo">
-            <div class="timeline-marker-novo"></div>
-            <div class="timeline-content-novo">
-              <h4>Q3 2025 🔮</h4>
+              <h4>Q2 2026 🔮</h4>
               <p>IA para predição de oportunidades de arbitragem</p>
             </div>
           </div>
