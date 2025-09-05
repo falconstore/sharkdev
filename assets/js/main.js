@@ -38,16 +38,21 @@ class App {
     try {
       console.log('Iniciando Calculadoras Shark 100% Green...');
       
+      // Carrega módulos opcionais primeiro
+      await loadOptionalModules();
+      
       // Inicializa tema
       this.theme.init();
       
       // Inicializa navegação se disponível
-      if (this.navigation) {
+      if (Navigation) {
+        this.navigation = new Navigation();
         this.navigation.init();
       }
       
       // Inicializa sistema de compartilhamento se disponível
-      if (this.shareUI) {
+      if (ShareUI) {
+        this.shareUI = new ShareUI();
         this.shareUI.init();
       }
       
