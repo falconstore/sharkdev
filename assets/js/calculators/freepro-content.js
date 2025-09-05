@@ -382,26 +382,41 @@ export function getFreeProfHTML() {
         grid-template-columns: 1fr;
         gap: 0.75rem;
       }
-      .header-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-      }
-      .action-cards {
-        grid-template-columns: repeat(2, 1fr);
+      .horizontal-cards {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
       }
     }
 
     @media (max-width: 600px) {
-      .action-cards {
+      .horizontal-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+      }
+      .action-card {
+        min-height: 70px;
+        padding: 0.5rem;
+      }
+      .action-btn {
+        font-size: 0.625rem;
+        padding: 0.375rem;
+      }
+      .action-label {
+        font-size: 0.5rem;
+      }
+      .action-value {
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .horizontal-cards {
         grid-template-columns: 1fr;
+        gap: 0.5rem;
       }
       .action-card {
         min-height: 60px;
         padding: 0.5rem;
-      }
-      .action-btn {
-        font-size: 0.5rem;
-        padding: 0.375rem;
       }
     }
   </style>
