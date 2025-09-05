@@ -606,4 +606,5 @@ export class ArbiPro {
   
   if (thead) thead.innerHTML = headerHTML;
   if (tbody) tbody.innerHTML = rowsHTML;
-}
+ }
+  }
