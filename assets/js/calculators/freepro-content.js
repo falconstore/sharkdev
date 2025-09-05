@@ -341,6 +341,27 @@ export function getFreeProfHTML() {
         grid-template-columns: 1fr;
         gap: 0.75rem;
       }
+      .header-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      .action-cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 600px) {
+      .action-cards {
+        grid-template-columns: 1fr;
+      }
+      .action-card {
+        min-height: 60px;
+        padding: 0.5rem;
+      }
+      .action-btn {
+        font-size: 0.5rem;
+        padding: 0.375rem;
+      }
     }
   </style>
 </head>
