@@ -559,65 +559,51 @@ export class ArbiPro {
   }
 
   updateResultsTable() {
-    const active = this.activeHouses();
+  const active = this.activeHouses();
+  const hasLayBets = active.some(h => h.lay);
+  const hasOddIncrease = active.some(h => h.increase !== null);
+  
+  const headerHTML = `
+    <tr>
+      <th>Casa</th>
+      <th>Odd</th>
+      ${hasOddIncrease ? '<th>Odd Final</th>' : ''}
+      <th>Comissão</th>
+      <th>Stake</th>
+      ${hasLayBets ? '<th>Responsabilidade</th>' : ''}
+      <th>Lucro</th>
+    </tr>
+  `;
+  
+  const rowsHTML = active.map((h, idx) => {
+    const oddOriginal = Utils.parseFlex(h.odd) || 0;
+    const oddText = oddOriginal.toFixed(2).replace('.', ',');
+    const oddFinalText = hasOddIncrease ? 
+      `<td>${h.finalOdd ? h.finalOdd.toFixed(2).replace('.', ',') : oddText}</td>` : '';
+    const commissionText = (h.commission === null) ? '—' : (h.commission || 0).toFixed(2) + '%';
+    const stakeText = h.stake ? h.stake : "0,00";
+    const profit = this.results.profits[idx] || 0;
+    const profitClass = profit >= 0 ? 'profit-positive' : 'profit-negative';
+    const profitValue = Utils.formatBRL(profit);
+    const responsibilityCell = hasLayBets ? 
+      `<td>${h.lay ? '<strong>R$ ' + (h.responsibility || '0,00') + '</strong>' : '—'}</td>` : '';
     
-    // Verifica se há alguma aposta LAY para mostrar coluna responsabilidade
-    const hasLayBets = active.some(h => h.lay);
-    
-    // Verifica se há algum aumento de odd ativo para mostrar "ODD FINAL"
-    const hasOddIncrease = active.some(h => h.increase !== null);
-    
-    // Cabeçalho da tabela dinâmico
-    const headerHTML = `
+    return `
       <tr>
-        <th>Casa</th>
-        <th>Odd</th>
-        ${hasOddIncrease ? '<th>Odd Final</th>' : ''}
-        <th>Comissão</th>
-        <th>Stake</th>
-        ${hasLayBets ? '<th>Responsabilidade</th>' : ''}
-        <th>Lucro</th>
+        <td><strong>Casa ${idx + 1}</strong></td>
+        <td>${oddText}</td>
+        ${oddFinalText}
+        <td>${commissionText}</td>
+        <td><strong>R$ ${stakeText}</strong>${h.freebet ? '<br><span class="text-small">(Freebet)</span>' : ''}${h.lay ? '<br><span class="text-small">(LAY)</span>' : ''}</td>
+        ${responsibilityCell}
+        <td class="${profitClass}"><strong>${profitValue}</strong></td>
       </tr>
     `;
-    
-    const rowsHTML = active.map((h, idx) => {
-      const oddOriginal = Utils.parseFlex(h.odd) || 0;
-      const oddText = oddOriginal.toFixed(2).replace('.', ',');
-      
-      // Odd Final (só quando há aumento de odd)
-      const oddFinalText = hasOddIncrease ? 
-        `<td>${h.finalOdd ? h.finalOdd.toFixed(2).replace('.', ',') : oddText}</td>` : '';
-      
-      const commissionText = (h.commission === null)
-        ? '—'
-        : (h.commission || 0).toFixed(2) + '%';
-      
-      const stakeText = h.stake ? h.stake : "0,00";
-      const profit = this.results.profits[idx] || 0;
-      const profitClass = profit >= 0 ? 'profit-positive' : 'profit-negative';
-      const profitValue = Utils.formatBRL(profit);
-      
-      // Responsabilidade para apostas LAY
-      const responsibilityCell = hasLayBets ? 
-        `<td>${h.lay ? '<strong>R$ ' + (h.responsibility || '0,00') + '</strong>' : '—'}</td>` : '';
-      
-      return `
-        <tr>
-          <td><strong>Casa ${idx + 1}</strong></td>
-          <td>${oddText}</td>
-          ${oddFinalText}
-          <td>${commissionText}</td>
-          <td><strong>R$ ${stakeText}</strong>${h.freebet ? '<br><span class="text-small">(Freebet)</span>' : ''}${h.lay ? '<br><span class="text-small">(LAY)</span>' : ''}</td>
-          ${responsibilityCell}
-          <td class="${profitClass}"><strong>${profitValue}</strong></td>
-        </tr>
-      `;
-    }).join("");
+  }).join("");
 
-    // Atualiza cabeçalho e corpo da tabela
-    const thead = document.querySelector('#panel-1 .results-table thead');
-    const tbody = document.getElementById("resultsRows");
-    
-    if (thead) thead.innerHTML = headerHTML;
-    if (tbody) tbody.innerHTML = rowsHTML;
-  }
+  const thead = document.querySelector('#panel-1 .results-table thead');
+  const tbody = document.getElementById("resultsRows");
+  
+  if (thead) thead.innerHTML = headerHTML;
+  if (tbody) tbody.innerHTML = rowsHTML;
+}
