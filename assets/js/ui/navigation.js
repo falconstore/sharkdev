@@ -457,160 +457,291 @@ initScrollReveal() {
 }
 
   renderContatoPage(container) {
-    container.innerHTML = `
-      <div class="page-container">
-        <!-- Contact Hero -->
-        <div class="contact-hero">
-          <div class="container">
-            <h1 class="hero-title">Entre em Contato</h1>
-            <p class="hero-subtitle">
-              Estamos aqui para ajudar! Entre em contato conosco através dos canais abaixo 
-              ou envie sua mensagem diretamente.
-            </p>
+  container.innerHTML = `
+    <div class="page-container">
+      <!-- Contact Hero Revolucionário -->
+      <div class="contact-hero-revolutionary">
+        <div class="contact-background">
+          <div class="contact-grid-bg">
+            <div class="grid-line"></div>
+            <div class="grid-line"></div>
+            <div class="grid-line"></div>
+            <div class="grid-line"></div>
+          </div>
+          <div class="contact-orbs">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
           </div>
         </div>
-
         <div class="container">
-          <div class="contact-content">
-            <!-- Contact Cards -->
-            <div class="contact-cards">
-              <div class="contact-card">
-                <div class="contact-icon">📧</div>
-                <h3>E-mail</h3>
-                <p>suporte@sharkgreen.com.br</p>
-                <a href="mailto:suporte@sharkgreen.com.br" class="btn btn-secondary">
-                  Enviar E-mail
-                </a>
-              </div>
-
-              <div class="contact-card">
-                <div class="contact-icon">💬</div>
-                <h3>WhatsApp</h3>
-                <p>+55 (11) 99999-9999</p>
-                <a href="https://wa.me/5511999999999" target="_blank" class="btn btn-secondary">
-                  Abrir WhatsApp
-                </a>
-              </div>
-
-              <div class="contact-card">
-                <div class="contact-icon">📱</div>
-                <h3>Telegram</h3>
-                <p>@SharkGreenSuport</p>
-                <a href="https://t.me/SharkGreenSuport" target="_blank" class="btn btn-secondary">
-                  Abrir Telegram
-                </a>
-              </div>
-
-              <div class="contact-card">
-                <div class="contact-icon">🌐</div>
-                <h3>Discord</h3>
-                <p>Comunidade Shark Green</p>
-                <a href="#" class="btn btn-secondary">
-                  Entrar no Discord
-                </a>
-              </div>
-            </div>
-
-            <!-- Contact Form -->
-            <div class="contact-form-section">
-              <div class="form-container">
-                <h2>Envie sua Mensagem</h2>
-                <form class="contact-form" id="contactForm">
-                  <div class="form-grid">
-                    <div class="form-group">
-                      <label class="form-label" for="contactName">Nome Completo</label>
-                      <input type="text" id="contactName" class="form-input" required>
-                    </div>
-                    <div class="form-group">
-                      <label class="form-label" for="contactEmail">E-mail</label>
-                      <input type="email" id="contactEmail" class="form-input" required>
-                    </div>
-                  </div>
-                  
-                  <div class="form-group">
-                    <label class="form-label" for="contactSubject">Assunto</label>
-                    <select id="contactSubject" class="form-select" required>
-                      <option value="">Selecione um assunto</option>
-                      <option value="suporte">Suporte Técnico</option>
-                      <option value="sugestao">Sugestão de Melhoria</option>
-                      <option value="bug">Relatar Bug</option>
-                      <option value="parceria">Parceria</option>
-                      <option value="outro">Outro</option>
-                    </select>
-                  </div>
-                  
-                  <div class="form-group">
-                    <label class="form-label" for="contactMessage">Mensagem</label>
-                    <textarea id="contactMessage" class="form-textarea" rows="5" 
-                              placeholder="Descreva sua dúvida, sugestão ou problema..." required></textarea>
-                  </div>
-                  
-                  <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">
-                      📤 Enviar Mensagem
-                    </button>
-                    <button type="reset" class="btn btn-secondary">
-                      🗑️ Limpar
-                    </button>
-                  </div>
-                </form>
-              </div>
-
-              <!-- FAQ Section -->
-              <div class="faq-container">
-                <h2>Perguntas Frequentes</h2>
-                <div class="faq-list">
-                  <div class="faq-item">
-                    <div class="faq-question">
-                      <span>Como funcionam as calculadoras?</span>
-                      <span class="faq-toggle">+</span>
-                    </div>
-                    <div class="faq-answer hidden">
-                      <p>Nossas calculadoras utilizam algoritmos matemáticos avançados para calcular automaticamente as distribuições de stake ideais para arbitragem e otimização de freebets.</p>
-                    </div>
-                  </div>
-
-                  <div class="faq-item">
-                    <div class="faq-question">
-                      <span>É seguro usar as calculadoras?</span>
-                      <span class="faq-toggle">+</span>
-                    </div>
-                    <div class="faq-answer hidden">
-                      <p>Sim! Todos os cálculos são feitos localmente no seu navegador. Nenhum dado é enviado para nossos servidores, garantindo total privacidade.</p>
-                    </div>
-                  </div>
-
-                  <div class="faq-item">
-                    <div class="faq-question">
-                      <span>Posso usar no celular?</span>
-                      <span class="faq-toggle">+</span>
-                    </div>
-                    <div class="faq-answer hidden">
-                      <p>Claro! Nossa interface é totalmente responsiva e funciona perfeitamente em smartphones, tablets e computadores.</p>
-                    </div>
-                  </div>
-
-                  <div class="faq-item">
-                    <div class="faq-question">
-                      <span>Como compartilhar configurações?</span>
-                      <span class="faq-toggle">+</span>
-                    </div>
-                    <div class="faq-answer hidden">
-                      <p>Use o botão "🔗 Compartilhar" em cada calculadora para gerar links seguros que preservam todas as suas configurações.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+          <div class="contact-hero-content">
+            <div class="contact-badge">💬 CANAL DIRETO</div>
+            <h1 class="contact-title">
+              Conecte-se ao <span class="text-cyber">Futuro</span>
+            </h1>
+            <p class="contact-subtitle">
+              Nossa equipe de especialistas está online 24/7 para revolucionar sua experiência
+            </p>
+            <div class="contact-status">
+              <div class="status-indicator"></div>
+              <span>Sistema Online • Resposta Instantânea</span>
             </div>
           </div>
         </div>
       </div>
-    `;
 
-    // Adiciona funcionalidade ao FAQ
-    this.initFAQ();
-    this.initContactForm();
-  }
+      <div class="container">
+        <div class="contact-main-content">
+          <!-- Canais de Contato Futuristas -->
+          <div class="contact-channels">
+            <h2 class="channels-title">Canais de Comunicação</h2>
+            <div class="channels-grid">
+              
+              <!-- WhatsApp -->
+              <div class="channel-card whatsapp-card">
+                <div class="channel-bg"></div>
+                <div class="channel-icon">
+                  <div class="icon-container">📱</div>
+                  <div class="icon-pulse"></div>
+                </div>
+                <div class="channel-content">
+                  <h3 class="channel-name">WhatsApp Business</h3>
+                  <p class="channel-description">Chat direto com IA + Humanos</p>
+                  <div class="channel-info">
+                    <span class="info-item">
+                      <span class="info-icon">⚡</span>
+                      Resposta em 30s
+                    </span>
+                    <span class="info-item">
+                      <span class="info-icon">🤖</span>
+                      IA Integrada
+                    </span>
+                  </div>
+                  <button class="channel-btn" onclick="window.open('https://wa.me/5511999999999', '_blank')">
+                    <span class="btn-text">Iniciar Chat</span>
+                    <div class="btn-ripple"></div>
+                  </button>
+                </div>
+                <div class="card-glow"></div>
+              </div>
+
+              <!-- Discord -->
+              <div class="channel-card discord-card">
+                <div class="channel-bg"></div>
+                <div class="channel-icon">
+                  <div class="icon-container">🎮</div>
+                  <div class="icon-pulse"></div>
+                </div>
+                <div class="channel-content">
+                  <h3 class="channel-name">Comunidade Discord</h3>
+                  <p class="channel-description">Hub de traders avançados</p>
+                  <div class="channel-info">
+                    <span class="info-item">
+                      <span class="info-icon">👥</span>
+                      5.2k+ Membros
+                    </span>
+                    <span class="info-item">
+                      <span class="info-icon">🚀</span>
+                      Sala VIP
+                    </span>
+                  </div>
+                  <button class="channel-btn">
+                    <span class="btn-text">Entrar Server</span>
+                    <div class="btn-ripple"></div>
+                  </button>
+                </div>
+                <div class="card-glow"></div>
+              </div>
+
+              <!-- Telegram -->
+              <div class="channel-card telegram-card">
+                <div class="channel-bg"></div>
+                <div class="channel-icon">
+                  <div class="icon-container">✈️</div>
+                  <div class="icon-pulse"></div>
+                </div>
+                <div class="channel-content">
+                  <h3 class="channel-name">Telegram Premium</h3>
+                  <p class="channel-description">Sinais e alertas em tempo real</p>
+                  <div class="channel-info">
+                    <span class="info-item">
+                      <span class="info-icon">📊</span>
+                      Live Alerts
+                    </span>
+                    <span class="info-item">
+                      <span class="info-icon">🔔</span>
+                      Push Notify
+                    </span>
+                  </div>
+                  <button class="channel-btn" onclick="window.open('https://t.me/SharkGreenSuport', '_blank')">
+                    <span class="btn-text">Acessar Canal</span>
+                    <div class="btn-ripple"></div>
+                  </button>
+                </div>
+                <div class="card-glow"></div>
+              </div>
+
+              <!-- Email -->
+              <div class="channel-card email-card">
+                <div class="channel-bg"></div>
+                <div class="channel-icon">
+                  <div class="icon-container">📧</div>
+                  <div class="icon-pulse"></div>
+                </div>
+                <div class="channel-content">
+                  <h3 class="channel-name">E-mail Corporativo</h3>
+                  <p class="channel-description">Suporte técnico especializado</p>
+                  <div class="channel-info">
+                    <span class="info-item">
+                      <span class="info-icon">🎯</span>
+                      Prioridade Alta
+                    </span>
+                    <span class="info-item">
+                      <span class="info-icon">📋</span>
+                      Tickets
+                    </span>
+                  </div>
+                  <button class="channel-btn" onclick="window.open('mailto:suporte@sharkgreen.com.br', '_blank')">
+                    <span class="btn-text">Enviar E-mail</span>
+                    <div class="btn-ripple"></div>
+                  </button>
+                </div>
+                <div class="card-glow"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulário Futurista -->
+          <div class="contact-form-revolutionary">
+            <div class="form-header">
+              <h2 class="form-title">Mensagem Direta</h2>
+              <p class="form-subtitle">IA analisa e roteia automaticamente sua solicitação</p>
+            </div>
+            
+            <form class="cyber-form" id="contactForm">
+              <div class="form-scanning">
+                <div class="scan-line"></div>
+                <div class="scan-dots">
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+              
+              <div class="form-row">
+                <div class="cyber-input-group">
+                  <input type="text" id="contactName" class="cyber-input" required>
+                  <label class="cyber-label">Nome Completo</label>
+                  <div class="input-border"></div>
+                  <div class="input-focus"></div>
+                </div>
+                <div class="cyber-input-group">
+                  <input type="email" id="contactEmail" class="cyber-input" required>
+                  <label class="cyber-label">E-mail</label>
+                  <div class="input-border"></div>
+                  <div class="input-focus"></div>
+                </div>
+              </div>
+              
+              <div class="cyber-input-group">
+                <select id="contactSubject" class="cyber-select" required>
+                  <option value="">Selecione o Tipo</option>
+                  <option value="suporte">🔧 Suporte Técnico</option>
+                  <option value="parceria">🤝 Parceria Estratégica</option>
+                  <option value="feedback">💡 Feedback & Sugestões</option>
+                  <option value="bug">🐛 Report de Bug</option>
+                  <option value="feature">⭐ Solicitação de Feature</option>
+                  <option value="outro">💬 Outro Assunto</option>
+                </select>
+                <label class="cyber-label">Categoria</label>
+                <div class="input-border"></div>
+                <div class="input-focus"></div>
+              </div>
+              
+              <div class="cyber-input-group">
+                <textarea id="contactMessage" class="cyber-textarea" rows="5" required
+                          placeholder="Descreva sua necessidade com detalhes..."></textarea>
+                <label class="cyber-label">Mensagem</label>
+                <div class="input-border"></div>
+                <div class="input-focus"></div>
+              </div>
+              
+              <div class="form-ai-analysis">
+                <div class="ai-indicator">
+                  <div class="ai-avatar">🤖</div>
+                  <div class="ai-status">
+                    <span class="ai-text">IA analisando mensagem...</span>
+                    <div class="ai-progress">
+                      <div class="progress-bar"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-actions-revolutionary">
+                <button type="submit" class="cyber-submit-btn">
+                  <span class="btn-icon">🚀</span>
+                  <span class="btn-text">Enviar Mensagem</span>
+                  <div class="btn-loading">
+                    <div class="loading-ring"></div>
+                  </div>
+                  <div class="btn-success">✅</div>
+                </button>
+                <button type="reset" class="cyber-reset-btn">
+                  <span class="btn-icon">🗑️</span>
+                  <span class="btn-text">Limpar Tudo</span>
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- FAQ Inteligente -->
+          <div class="faq-revolutionary">
+            <div class="faq-header">
+              <h2 class="faq-title">Central de Conhecimento</h2>
+              <p class="faq-subtitle">Respostas instantâneas alimentadas por IA</p>
+            </div>
+            
+            <div class="faq-search">
+              <div class="search-container">
+                <input type="text" class="search-input" placeholder="Buscar dúvidas..." id="faqSearch">
+                <div class="search-icon">🔍</div>
+                <div class="search-ai">🤖</div>
+              </div>
+            </div>
+
+            <div class="faq-categories">
+              <button class="faq-category active" data-category="all">
+                <span class="category-icon">📚</span>
+                Todas
+              </button>
+              <button class="faq-category" data-category="calculadoras">
+                <span class="category-icon">🧮</span>
+                Calculadoras
+              </button>
+              <button class="faq-category" data-category="conta">
+                <span class="category-icon">👤</span>
+                Conta
+              </button>
+              <button class="faq-category" data-category="tecnico">
+                <span class="category-icon">⚙️</span>
+                Técnico
+              </button>
+            </div>
+
+            <div class="faq-list-revolutionary" id="faqList">
+              <!-- FAQ items serão inseridos aqui -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Inicializa funcionalidades
+  this.initRevolutionaryContact();
+  this.initCyberForm();
+  this.initIntelligentFAQ();
+}
 
   initFAQ() {
     document.querySelectorAll('.faq-question').forEach(question => {
