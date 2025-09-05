@@ -83,298 +83,246 @@ export class Navigation {
     }
   }
 
-  renderSobrePage(container) {
-  container.innerHTML = `
-    <div class="page-container">
-      <!-- Revolutionary Hero Section -->
-      <div class="revolutionary-hero">
-        <div class="hero-background-animation">
-          <div class="floating-shapes">
-            <div class="shape shape-1"></div>
-            <div class="shape shape-2"></div>
-            <div class="shape shape-3"></div>
-            <div class="shape shape-4"></div>
-            <div class="shape shape-5"></div>
-          </div>
+  initRevolutionaryContact() {
+  // Animação dos cards de canal
+  const channelCards = document.querySelectorAll('.channel-card');
+  channelCards.forEach((card, index) => {
+    setTimeout(() => {
+      card.classList.add('animate-in');
+    }, index * 200);
+    
+    card.addEventListener('mouseenter', () => {
+      card.classList.add('hover-active');
+    });
+    
+    card.addEventListener('mouseleave', () => {
+      card.classList.remove('hover-active');
+    });
+  });
+
+  // Animação do indicador de status
+  const statusIndicator = document.querySelector('.status-indicator');
+  if (statusIndicator) {
+    setInterval(() => {
+      statusIndicator.classList.add('pulse');
+      setTimeout(() => {
+        statusIndicator.classList.remove('pulse');
+      }, 1000);
+    }, 3000);
+  }
+}
+
+initCyberForm() {
+  const form = document.getElementById('contactForm');
+  if (!form) return;
+
+  // Animação dos inputs
+  const inputs = form.querySelectorAll('.cyber-input, .cyber-textarea');
+  inputs.forEach(input => {
+    input.addEventListener('focus', (e) => {
+      e.target.closest('.cyber-input-group').classList.add('focused');
+    });
+    
+    input.addEventListener('blur', (e) => {
+      if (!e.target.value) {
+        e.target.closest('.cyber-input-group').classList.remove('focused');
+      }
+    });
+    
+    input.addEventListener('input', (e) => {
+      if (e.target.value) {
+        e.target.closest('.cyber-input-group').classList.add('has-value');
+      } else {
+        e.target.closest('.cyber-input-group').classList.remove('has-value');
+      }
+    });
+  });
+
+  // Submit do formulário
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    this.submitCyberForm(form);
+  });
+}
+
+submitCyberForm(form) {
+  const submitBtn = form.querySelector('.cyber-submit-btn');
+  const aiAnalysis = form.querySelector('.form-ai-analysis');
+  
+  // Mostra análise da IA
+  aiAnalysis.style.display = 'block';
+  
+  // Animação de loading
+  submitBtn.classList.add('loading');
+  
+  setTimeout(() => {
+    // Simula sucesso
+    submitBtn.classList.remove('loading');
+    submitBtn.classList.add('success');
+    
+    // Feedback visual
+    this.showCyberSuccess();
+    
+    // Reset depois de 3 segundos
+    setTimeout(() => {
+      submitBtn.classList.remove('success');
+      form.reset();
+      aiAnalysis.style.display = 'none';
+      
+      // Remove classes dos inputs
+      form.querySelectorAll('.cyber-input-group').forEach(group => {
+        group.classList.remove('focused', 'has-value');
+      });
+    }, 3000);
+  }, 2000);
+}
+
+showCyberSuccess() {
+  // Reutiliza o sistema de toast
+  if (window.SharkGreen?.getModules()?.shareUI) {
+    window.SharkGreen.getModules().shareUI.showSuccess(
+      '🚀 Mensagem transmitida com sucesso! Nossa IA direcionou sua solicitação.'
+    );
+  }
+}
+
+initIntelligentFAQ() {
+  const faqData = [
+    {
+      category: 'calculadoras',
+      question: 'Como as calculadoras garantem precisão de 99.7%?',
+      answer: 'Nossos algoritmos utilizam matemática quantitativa avançada, validação cruzada de dados e sistemas de verificação multicamadas para garantir precisão excepcional.'
+    },
+    {
+      category: 'calculadoras', 
+      question: 'Posso usar as calculadoras em dispositivos móveis?',
+      answer: 'Sim! Nossa tecnologia responsiva funciona perfeitamente em smartphones, tablets e desktops com interface otimizada para cada dispositivo.'
+    },
+    {
+      category: 'conta',
+      question: 'Como funciona o sistema de compartilhamento?',
+      answer: 'Geramos links criptografados que preservam suas configurações. Você pode compartilhar via QR Code, redes sociais ou URLs diretas.'
+    },
+    {
+      category: 'tecnico',
+      question: 'Os dados são enviados para servidores externos?',
+      answer: 'Não! Todos os cálculos são processados localmente no seu navegador. Seus dados permanecem 100% privados e seguros.'
+    },
+    {
+      category: 'conta',
+      question: 'Como acessar funcionalidades premium?',
+      answer: 'Nossa plataforma é totalmente gratuita! Estamos comprometidos em democratizar o acesso a ferramentas profissionais de arbitragem.'
+    },
+    {
+      category: 'tecnico',
+      question: 'Qual a latência dos cálculos em tempo real?',
+      answer: 'Nosso sistema processa cálculos em menos de 0.002 segundos, oferecendo feedback instantâneo conforme você digita.'
+    }
+  ];
+
+  this.renderFAQItems(faqData);
+  this.bindFAQEvents(faqData);
+}
+
+renderFAQItems(faqData, filteredData = null) {
+  const faqList = document.getElementById('faqList');
+  const items = filteredData || faqData;
+  
+  faqList.innerHTML = items.map((item, index) => `
+    <div class="faq-item-revolutionary" data-category="${item.category}">
+      <div class="faq-question-revolutionary">
+        <div class="question-content">
+          <span class="question-icon">❓</span>
+          <span class="question-text">${item.question}</span>
         </div>
-        <div class="container">
-          <div class="hero-content-revolutionary">
-            <div class="hero-badge">🦈 SHARK GREEN TECHNOLOGY</div>
-            <h1 class="hero-title-revolutionary">
-              <span class="text-gradient">Revolução</span> em 
-              <span class="text-neon">Arbitragem Esportiva</span>
-            </h1>
-            <p class="hero-description-revolutionary">
-              Descubra a próxima geração de ferramentas de análise quantitativa. 
-              Nossos algoritmos de machine learning transformam dados em lucro garantido.
-            </p>
-            <div class="hero-stats">
-              <div class="stat-item">
-                <div class="stat-number">99.7%</div>
-                <div class="stat-label">Precisão</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-number">0.2s</div>
-                <div class="stat-label">Velocidade</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-number">24/7</div>
-                <div class="stat-label">Disponível</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Revolutionary Features Grid -->
-      <div class="revolutionary-features">
-        <div class="container">
-          <div class="section-header-revolutionary">
-            <h2 class="section-title-revolutionary">Tecnologias de Vanguarda</h2>
-            <p class="section-subtitle-revolutionary">
-              Cada funcionalidade foi desenvolvida para superar os limites do possível
-            </p>
-          </div>
-
-          <div class="features-grid-revolutionary">
-            <!-- Feature 1 - AI Powered -->
-            <div class="feature-card-revolutionary feature-ai" data-feature="ai">
-              <div class="feature-glow"></div>
-              <div class="feature-icon-revolutionary">
-                <div class="icon-brain">🧠</div>
-                <div class="ai-particles">
-                  <span></span><span></span><span></span>
-                </div>
-              </div>
-              <div class="feature-content-revolutionary">
-                <h3 class="feature-title-revolutionary">Inteligência Artificial</h3>
-                <p class="feature-description-revolutionary">
-                  Algoritmos neurais avançados analisam milhões de cenários simultaneamente, 
-                  identificando oportunidades invisíveis ao olho humano.
-                </p>
-                <div class="feature-metrics">
-                  <div class="metric">
-                    <span class="metric-value">1M+</span>
-                    <span class="metric-label">Cálculos/seg</span>
-                  </div>
-                </div>
-              </div>
-              <div class="feature-hover-effect"></div>
-            </div>
-
-            <!-- Feature 2 - Real Time -->
-            <div class="feature-card-revolutionary feature-realtime" data-feature="realtime">
-              <div class="feature-glow"></div>
-              <div class="feature-icon-revolutionary">
-                <div class="icon-lightning">⚡</div>
-                <div class="lightning-effects">
-                  <div class="lightning-bolt"></div>
-                </div>
-              </div>
-              <div class="feature-content-revolutionary">
-                <h3 class="feature-title-revolutionary">Processamento Quântico</h3>
-                <p class="feature-description-revolutionary">
-                  Atualizações em tempo real com latência inferior a milissegundos. 
-                  Seus cálculos acontecem antes mesmo de você terminar de digitar.
-                </p>
-                <div class="feature-metrics">
-                  <div class="metric">
-                    <span class="metric-value">0.002s</span>
-                    <span class="metric-label">Latência</span>
-                  </div>
-                </div>
-              </div>
-              <div class="feature-hover-effect"></div>
-            </div>
-
-            <!-- Feature 3 - Security -->
-            <div class="feature-card-revolutionary feature-security" data-feature="security">
-              <div class="feature-glow"></div>
-              <div class="feature-icon-revolutionary">
-                <div class="icon-shield">🛡️</div>
-                <div class="security-grid">
-                  <div class="grid-dot"></div>
-                  <div class="grid-dot"></div>
-                  <div class="grid-dot"></div>
-                  <div class="grid-dot"></div>
-                </div>
-              </div>
-              <div class="feature-content-revolutionary">
-                <h3 class="feature-title-revolutionary">Fortaleza Digital</h3>
-                <p class="feature-description-revolutionary">
-                  Criptografia militar de 256 bits protege cada operação. 
-                  Seus dados nunca saem do seu dispositivo - privacidade absoluta.
-                </p>
-                <div class="feature-metrics">
-                  <div class="metric">
-                    <span class="metric-value">256-bit</span>
-                    <span class="metric-label">Criptografia</span>
-                  </div>
-                </div>
-              </div>
-              <div class="feature-hover-effect"></div>
-            </div>
-
-            <!-- Feature 4 - Analytics -->
-            <div class="feature-card-revolutionary feature-analytics" data-feature="analytics">
-              <div class="feature-glow"></div>
-              <div class="feature-icon-revolutionary">
-                <div class="icon-chart">📊</div>
-                <div class="chart-animation">
-                  <div class="chart-bar" style="height: 40%"></div>
-                  <div class="chart-bar" style="height: 70%"></div>
-                  <div class="chart-bar" style="height: 55%"></div>
-                  <div class="chart-bar" style="height: 85%"></div>
-                </div>
-              </div>
-              <div class="feature-content-revolutionary">
-                <h3 class="feature-title-revolutionary">Analytics Avançado</h3>
-                <p class="feature-description-revolutionary">
-                  Visualizações interativas revelam padrões ocultos nos mercados. 
-                  Dashboards adaptativos que evoluem com sua estratégia.
-                </p>
-                <div class="feature-metrics">
-                  <div class="metric">
-                    <span class="metric-value">360°</span>
-                    <span class="metric-label">Análise</span>
-                  </div>
-                </div>
-              </div>
-              <div class="feature-hover-effect"></div>
-            </div>
-
-            <!-- Feature 5 - Automation -->
-            <div class="feature-card-revolutionary feature-automation" data-feature="automation">
-              <div class="feature-glow"></div>
-              <div class="feature-icon-revolutionary">
-                <div class="icon-robot">🤖</div>
-                <div class="automation-gears">
-                  <div class="gear gear-1"></div>
-                  <div class="gear gear-2"></div>
-                </div>
-              </div>
-              <div class="feature-content-revolutionary">
-                <h3 class="feature-title-revolutionary">Automação Inteligente</h3>
-                <p class="feature-description-revolutionary">
-                  Robôs especializados executam suas estratégias 24/7. 
-                  Otimização contínua que aprende com cada operação realizada.
-                </p>
-                <div class="feature-metrics">
-                  <div class="metric">
-                    <span class="metric-value">24/7</span>
-                    <span class="metric-label">Ativo</span>
-                  </div>
-                </div>
-              </div>
-              <div class="feature-hover-effect"></div>
-            </div>
-
-            <!-- Feature 6 - Innovation -->
-            <div class="feature-card-revolutionary feature-innovation" data-feature="innovation">
-              <div class="feature-glow"></div>
-              <div class="feature-icon-revolutionary">
-                <div class="icon-rocket">🚀</div>
-                <div class="rocket-trail">
-                  <div class="trail-particle"></div>
-                  <div class="trail-particle"></div>
-                  <div class="trail-particle"></div>
-                </div>
-              </div>
-              <div class="feature-content-revolutionary">
-                <h3 class="feature-title-revolutionary">Inovação Perpétua</h3>
-                <p class="feature-description-revolutionary">
-                  Atualizações semanais com novas funcionalidades. 
-                  Sempre um passo à frente da concorrência com tecnologia de ponta.
-                </p>
-                <div class="feature-metrics">
-                  <div class="metric">
-                    <span class="metric-value">52x</span>
-                    <span class="metric-label">Updates/ano</span>
-                  </div>
-                </div>
-              </div>
-              <div class="feature-hover-effect"></div>
-            </div>
-          </div>
+        <div class="question-toggle">
+          <div class="toggle-icon">+</div>
         </div>
       </div>
-
-      <!-- Revolutionary Technology Showcase -->
-      <div class="tech-showcase">
-        <div class="container">
-          <div class="showcase-content">
-            <div class="showcase-text">
-              <h2 class="showcase-title">
-                Construído para o <span class="text-highlight">Futuro</span>
-              </h2>
-              <p class="showcase-description">
-                Nossa infraestrutura combina computação em nuvem, edge computing 
-                e blockchain para criar a experiência mais avançada do mercado.
-              </p>
-              <div class="tech-badges">
-                <div class="tech-badge">
-                  <span class="badge-icon">⚛️</span>
-                  <span class="badge-text">React 18</span>
-                </div>
-                <div class="tech-badge">
-                  <span class="badge-icon">🔥</span>
-                  <span class="badge-text">WebAssembly</span>
-                </div>
-                <div class="tech-badge">
-                  <span class="badge-icon">🌐</span>
-                  <span class="badge-text">Edge Computing</span>
-                </div>
-                <div class="tech-badge">
-                  <span class="badge-icon">🔗</span>
-                  <span class="badge-text">Blockchain</span>
-                </div>
-              </div>
-            </div>
-            <div class="showcase-visual">
-              <div class="hologram-container">
-                <div class="hologram-circle">
-                  <div class="hologram-ring ring-1"></div>
-                  <div class="hologram-ring ring-2"></div>
-                  <div class="hologram-ring ring-3"></div>
-                  <div class="hologram-center">🦈</div>
-                </div>
-                <div class="hologram-particles">
-                  <div class="particle"></div>
-                  <div class="particle"></div>
-                  <div class="particle"></div>
-                  <div class="particle"></div>
-                  <div class="particle"></div>
-                </div>
-              </div>
-            </div>
+      <div class="faq-answer-revolutionary">
+        <div class="answer-content">
+          <div class="answer-ai-badge">
+            <span class="ai-icon">🤖</span>
+            <span>Resposta verificada por IA</span>
           </div>
-        </div>
-      </div>
-
-      <!-- Revolutionary CTA -->
-      <div class="revolutionary-cta">
-        <div class="cta-background">
-          <div class="cta-waves">
-            <div class="wave wave-1"></div>
-            <div class="wave wave-2"></div>
-            <div class="wave wave-3"></div>
-          </div>
-        </div>
-        <div class="container">
-          <div class="cta-content-revolutionary">
-            <h2 class="cta-title">Pronto para Dominar os Mercados?</h2>
-            <p class="cta-subtitle">
-              Junte-se à elite de traders que já descobriram o futuro da arbitragem
-            </p>
-            <button class="btn-revolutionary" onclick="window.SharkGreen.getModules().navigation.navigateTo('calculadora')">
-              <span class="btn-text">🎯 Iniciar Jornada</span>
-              <div class="btn-glow"></div>
-            </button>
-          </div>
+          <p>${item.answer}</p>
         </div>
       </div>
     </div>
-  `;
+  `).join('');
+}
+
+bindFAQEvents(faqData) {
+  // Clique nas perguntas
+  document.addEventListener('click', (e) => {
+    const faqQuestion = e.target.closest('.faq-question-revolutionary');
+    if (faqQuestion) {
+      const faqItem = faqQuestion.closest('.faq-item-revolutionary');
+      const answer = faqItem.querySelector('.faq-answer-revolutionary');
+      const toggle = faqQuestion.querySelector('.toggle-icon');
+      
+      // Toggle answer
+      faqItem.classList.toggle('open');
+      
+      // Atualiza ícone
+      toggle.textContent = faqItem.classList.contains('open') ? '−' : '+';
+      
+      // Fecha outros itens (comportamento accordion)
+      document.querySelectorAll('.faq-item-revolutionary').forEach(otherItem => {
+        if (otherItem !== faqItem) {
+          otherItem.classList.remove('open');
+          otherItem.querySelector('.toggle-icon').textContent = '+';
+        }
+      });
+    }
+  });
+
+  // Filtros de categoria
+  document.querySelectorAll('.faq-category').forEach(categoryBtn => {
+    categoryBtn.addEventListener('click', () => {
+      // Remove active de todos
+      document.querySelectorAll('.faq-category').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Adiciona active no clicado
+      categoryBtn.classList.add('active');
+      
+      // Filtra itens
+      const category = categoryBtn.dataset.category;
+      const filteredItems = category === 'all' ? faqData : faqData.filter(item => item.category === category);
+      this.renderFAQItems(faqData, filteredItems);
+    });
+  });
+
+  // Busca inteligente
+  const searchInput = document.getElementById('faqSearch');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      
+      if (searchTerm === '') {
+        this.renderFAQItems(faqData);
+        return;
+      }
+      
+      const filteredItems = faqData.filter(item => 
+        item.question.toLowerCase().includes(searchTerm) || 
+        item.answer.toLowerCase().includes(searchTerm)
+      );
+      
+      this.renderFAQItems(faqData, filteredItems);
+      
+      // Efeito visual na busca
+      const searchContainer = searchInput.closest('.search-container');
+      searchContainer.classList.add('searching');
+      
+      setTimeout(() => {
+        searchContainer.classList.remove('searching');
+      }, 500);
+    });
+  }
+}
 
   // Inicializa animações
   this.initRevolutionaryAnimations();
