@@ -581,7 +581,7 @@ export class Navigation {
     // Bind FAQ toggle
     setTimeout(() => {
       this.bindFAQEvents();
-    }, 100);
+    }, 500); // Aumentei o delay para garantir que o DOM esteja pronto
   }
 
   bindFAQEvents() {
