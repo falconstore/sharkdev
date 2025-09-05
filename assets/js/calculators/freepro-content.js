@@ -383,17 +383,22 @@ export function getFreeProfHTML() {
         gap: 0.75rem;
       }
       .horizontal-cards {
-        grid-template-columns: repeat(3, 1fr);
+        flex-wrap: wrap;
         gap: 0.5rem;
+      }
+      .action-card {
+        flex: 1 1 calc(50% - 0.25rem);
+        min-width: 120px;
       }
     }
 
     @media (max-width: 600px) {
       .horizontal-cards {
-        grid-template-columns: repeat(2, 1fr);
+        flex-direction: column;
         gap: 0.5rem;
       }
       .action-card {
+        flex: 1;
         min-height: 70px;
         padding: 0.5rem;
       }
@@ -410,10 +415,6 @@ export function getFreeProfHTML() {
     }
 
     @media (max-width: 480px) {
-      .horizontal-cards {
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
-      }
       .action-card {
         min-height: 60px;
         padding: 0.5rem;
