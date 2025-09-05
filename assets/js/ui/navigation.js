@@ -390,7 +390,7 @@ export class Navigation {
           <div class="timeline-item-novo future-novo">
             <div class="timeline-marker-novo"></div>
             <div class="timeline-content-novo">
-              <h4>Q 2026 📋</h4>
+              <h4>Q1 2026 📋</h4>
               <p>API para integração automática com casas de apostas</p>
             </div>
           </div>
@@ -400,45 +400,6 @@ export class Navigation {
             <div class="timeline-content-novo">
               <h4>Q2 2026 🔮</h4>
               <p>IA para predição de oportunidades de arbitragem</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Disclaimer responsável MELHORADO -->
-      <div class="disclaimer-section-novo">
-        <div class="disclaimer-card-novo">
-          <h3>⚠️ Aviso Importante - Apostas Responsáveis</h3>
-          <div class="warning-content-novo">
-            <p>
-              <strong>IMPORTANTE:</strong> Nossas ferramentas são para fins educacionais 
-              e de otimização matemática. Apostas envolvem riscos financeiros reais.
-            </p>
-            
-            <div class="responsibility-list-novo">
-              <div class="responsibility-item-novo">
-                <span class="resp-icon-novo">💰</span>
-                <span>Use apenas capital que pode perder sem afetar sua vida financeira</span>
-              </div>
-              <div class="responsibility-item-novo">
-                <span class="resp-icon-novo">🎯</span>
-                <span>Estabeleça limites claros antes de começar</span>
-              </div>
-              <div class="responsibility-item-novo">
-                <span class="resp-icon-novo">🆘</span>
-                <span>Busque ajuda profissional se desenvolver sinais de vício</span>
-              </div>
-              <div class="responsibility-item-novo">
-                <span class="resp-icon-novo">🚫</span>
-                <span>Lembre-se: não existe "ganho garantido" em apostas</span>
-              </div>
-            </div>
-            
-            <div class="help-resources-novo">
-              <p><strong>🆘 Recursos de Ajuda:</strong></p>
-              <a href="https://www.jogadorcompulsivo.org.br" target="_blank">
-                Jogadores Anônimos Brasil →
-              </a>
             </div>
           </div>
         </div>
