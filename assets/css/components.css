@@ -1223,3 +1223,71 @@
     font-size: 1rem;
   }
 }
+
+/* === ESTILOS PARA NOVA SEÇÃO SOBRE === */
+.intro-benefits {
+  margin-top: 2rem;
+  padding: 2rem;
+  background: rgba(59, 130, 246, 0.05);
+  border-radius: 12px;
+  border-left: 4px solid var(--primary);
+}
+
+.benefits-intro {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+}
+
+.benefits-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1.5rem 0;
+}
+
+.benefits-list li {
+  padding: 0.75rem 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.6;
+  position: relative;
+  padding-left: 2rem;
+}
+
+.benefits-list li::before {
+  content: '📊';
+  position: absolute;
+  left: 0;
+  top: 0.75rem;
+}
+
+.benefits-list li:nth-child(2)::before {
+  content: '⚡';
+}
+
+.benefits-list li:nth-child(3)::before {
+  content: '🛡️';
+}
+
+.benefits-conclusion {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  margin: 0;
+  padding: 1rem;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+@media (max-width: 768px) {
+  .intro-benefits {
+    padding: 1.5rem;
+  }
+  
+  .benefits-list li {
+    padding-left: 1.5rem;
+  }
+}
