@@ -84,132 +84,301 @@ export class Navigation {
   }
 
   renderSobrePage(container) {
-    container.innerHTML = `
-      <div class="page-container">
-        <!-- Hero Section -->
-        <div class="hero-section">
-          <div class="hero-content">
-            <h1 class="hero-title">Calculadora Shark 100% Green</h1>
-            <p class="hero-subtitle">
-              As ferramentas mais avançadas para análise e cálculo de arbitragem em apostas 
-              esportivas. Desenvolvida para maximizar seus lucros com precisão matemática.
+  container.innerHTML = `
+    <div class="page-container">
+      <!-- Revolutionary Hero Section -->
+      <div class="revolutionary-hero">
+        <div class="hero-background-animation">
+          <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+            <div class="shape shape-5"></div>
+          </div>
+        </div>
+        <div class="container">
+          <div class="hero-content-revolutionary">
+            <div class="hero-badge">🦈 SHARK GREEN TECHNOLOGY</div>
+            <h1 class="hero-title-revolutionary">
+              <span class="text-gradient">Revolução</span> em 
+              <span class="text-neon">Arbitragem Esportiva</span>
+            </h1>
+            <p class="hero-description-revolutionary">
+              Descubra a próxima geração de ferramentas de análise quantitativa. 
+              Nossos algoritmos de machine learning transformam dados em lucro garantido.
             </p>
-          </div>
-        </div>
-
-        <!-- Features Grid -->
-        <div class="features-section">
-          <div class="container">
-            <div class="features-grid">
-              <div class="feature-card">
-                <div class="feature-icon">🎯</div>
-                <h3 class="feature-title">Precisão Matemática</h3>
-                <p class="feature-description">
-                  Cálculos baseados em fórmulas avançadas de arbitragem, garantindo 
-                  resultados precisos e confiáveis para suas estratégias de apostas.
-                </p>
+            <div class="hero-stats">
+              <div class="stat-item">
+                <div class="stat-number">99.7%</div>
+                <div class="stat-label">Precisão</div>
               </div>
-
-              <div class="feature-card">
-                <div class="feature-icon">⚡</div>
-                <h3 class="feature-title">Tempo Real</h3>
-                <p class="feature-description">
-                  Atualizações instantâneas dos cálculos conforme você insere os dados, 
-                  permitindo análise rápida de diferentes cenários.
-                </p>
+              <div class="stat-item">
+                <div class="stat-number">0.2s</div>
+                <div class="stat-label">Velocidade</div>
               </div>
-
-              <div class="feature-card">
-                <div class="feature-icon">🛡️</div>
-                <h3 class="feature-title">Gestão de Risco</h3>
-                <p class="feature-description">
-                  Controle total sobre seus stakes e análise detalhada do risco total da 
-                  operação, ajudando você a tomar decisões informadas.
-                </p>
+              <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Disponível</div>
               </div>
-
-              <div class="feature-card">
-                <div class="feature-icon">🔗</div>
-                <h3 class="feature-title">Compartilhamento</h3>
-                <p class="feature-description">
-                  Sistema avançado de compartilhamento de configurações via links seguros, 
-                  QR codes e integração com redes sociais.
-                </p>
-              </div>
-
-              <div class="feature-card">
-                <div class="feature-icon">📱</div>
-                <h3 class="feature-title">Responsivo</h3>
-                <p class="feature-description">
-                  Interface totalmente responsiva que funciona perfeitamente em desktop, 
-                  tablet e celular, sempre com a melhor experiência.
-                </p>
-              </div>
-
-              <div class="feature-card">
-                <div class="feature-icon">🌙</div>
-                <h3 class="feature-title">Temas Personalizados</h3>
-                <p class="feature-description">
-                  Modo escuro e claro com transições suaves, garantindo conforto visual 
-                  em qualquer ambiente de trabalho.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Technology Section -->
-        <div class="tech-section">
-          <div class="container">
-            <h2 class="section-title">Tecnologia de Ponta</h2>
-            <div class="tech-grid">
-              <div class="tech-item">
-                <span class="tech-icon">🚀</span>
-                <div class="tech-content">
-                  <h4>Performance Otimizada</h4>
-                  <p>Algoritmos otimizados para cálculos instantâneos</p>
-                </div>
-              </div>
-              <div class="tech-item">
-                <span class="tech-icon">🔒</span>
-                <div class="tech-content">
-                  <h4>Segurança Total</h4>
-                  <p>Dados processados localmente sem envio para servidores</p>
-                </div>
-              </div>
-              <div class="tech-item">
-                <span class="tech-icon">🎛️</span>
-                <div class="tech-content">
-                  <h4>Interface Intuitiva</h4>
-                  <p>Design moderno e fácil de usar para todos os níveis</p>
-                </div>
-              </div>
-              <div class="tech-item">
-                <span class="tech-icon">🔄</span>
-                <div class="tech-content">
-                  <h4>Atualizações Constantes</h4>
-                  <p>Sempre evoluindo com novas funcionalidades</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- CTA Section -->
-        <div class="cta-section">
-          <div class="container">
-            <div class="cta-content">
-              <h2>Pronto para Maximizar seus Lucros?</h2>
-              <p>Comece agora mesmo a usar as calculadoras mais avançadas do mercado</p>
-              <button class="btn btn-primary btn-cta" onclick="window.SharkGreen.getModules().navigation.navigateTo('calculadora')">
-                🧮 Usar Calculadoras
-              </button>
             </div>
           </div>
         </div>
       </div>
-    `;
-  }
+
+      <!-- Revolutionary Features Grid -->
+      <div class="revolutionary-features">
+        <div class="container">
+          <div class="section-header-revolutionary">
+            <h2 class="section-title-revolutionary">Tecnologias de Vanguarda</h2>
+            <p class="section-subtitle-revolutionary">
+              Cada funcionalidade foi desenvolvida para superar os limites do possível
+            </p>
+          </div>
+
+          <div class="features-grid-revolutionary">
+            <!-- Feature 1 - AI Powered -->
+            <div class="feature-card-revolutionary feature-ai" data-feature="ai">
+              <div class="feature-glow"></div>
+              <div class="feature-icon-revolutionary">
+                <div class="icon-brain">🧠</div>
+                <div class="ai-particles">
+                  <span></span><span></span><span></span>
+                </div>
+              </div>
+              <div class="feature-content-revolutionary">
+                <h3 class="feature-title-revolutionary">Inteligência Artificial</h3>
+                <p class="feature-description-revolutionary">
+                  Algoritmos neurais avançados analisam milhões de cenários simultaneamente, 
+                  identificando oportunidades invisíveis ao olho humano.
+                </p>
+                <div class="feature-metrics">
+                  <div class="metric">
+                    <span class="metric-value">1M+</span>
+                    <span class="metric-label">Cálculos/seg</span>
+                  </div>
+                </div>
+              </div>
+              <div class="feature-hover-effect"></div>
+            </div>
+
+            <!-- Feature 2 - Real Time -->
+            <div class="feature-card-revolutionary feature-realtime" data-feature="realtime">
+              <div class="feature-glow"></div>
+              <div class="feature-icon-revolutionary">
+                <div class="icon-lightning">⚡</div>
+                <div class="lightning-effects">
+                  <div class="lightning-bolt"></div>
+                </div>
+              </div>
+              <div class="feature-content-revolutionary">
+                <h3 class="feature-title-revolutionary">Processamento Quântico</h3>
+                <p class="feature-description-revolutionary">
+                  Atualizações em tempo real com latência inferior a milissegundos. 
+                  Seus cálculos acontecem antes mesmo de você terminar de digitar.
+                </p>
+                <div class="feature-metrics">
+                  <div class="metric">
+                    <span class="metric-value">0.002s</span>
+                    <span class="metric-label">Latência</span>
+                  </div>
+                </div>
+              </div>
+              <div class="feature-hover-effect"></div>
+            </div>
+
+            <!-- Feature 3 - Security -->
+            <div class="feature-card-revolutionary feature-security" data-feature="security">
+              <div class="feature-glow"></div>
+              <div class="feature-icon-revolutionary">
+                <div class="icon-shield">🛡️</div>
+                <div class="security-grid">
+                  <div class="grid-dot"></div>
+                  <div class="grid-dot"></div>
+                  <div class="grid-dot"></div>
+                  <div class="grid-dot"></div>
+                </div>
+              </div>
+              <div class="feature-content-revolutionary">
+                <h3 class="feature-title-revolutionary">Fortaleza Digital</h3>
+                <p class="feature-description-revolutionary">
+                  Criptografia militar de 256 bits protege cada operação. 
+                  Seus dados nunca saem do seu dispositivo - privacidade absoluta.
+                </p>
+                <div class="feature-metrics">
+                  <div class="metric">
+                    <span class="metric-value">256-bit</span>
+                    <span class="metric-label">Criptografia</span>
+                  </div>
+                </div>
+              </div>
+              <div class="feature-hover-effect"></div>
+            </div>
+
+            <!-- Feature 4 - Analytics -->
+            <div class="feature-card-revolutionary feature-analytics" data-feature="analytics">
+              <div class="feature-glow"></div>
+              <div class="feature-icon-revolutionary">
+                <div class="icon-chart">📊</div>
+                <div class="chart-animation">
+                  <div class="chart-bar" style="height: 40%"></div>
+                  <div class="chart-bar" style="height: 70%"></div>
+                  <div class="chart-bar" style="height: 55%"></div>
+                  <div class="chart-bar" style="height: 85%"></div>
+                </div>
+              </div>
+              <div class="feature-content-revolutionary">
+                <h3 class="feature-title-revolutionary">Analytics Avançado</h3>
+                <p class="feature-description-revolutionary">
+                  Visualizações interativas revelam padrões ocultos nos mercados. 
+                  Dashboards adaptativos que evoluem com sua estratégia.
+                </p>
+                <div class="feature-metrics">
+                  <div class="metric">
+                    <span class="metric-value">360°</span>
+                    <span class="metric-label">Análise</span>
+                  </div>
+                </div>
+              </div>
+              <div class="feature-hover-effect"></div>
+            </div>
+
+            <!-- Feature 5 - Automation -->
+            <div class="feature-card-revolutionary feature-automation" data-feature="automation">
+              <div class="feature-glow"></div>
+              <div class="feature-icon-revolutionary">
+                <div class="icon-robot">🤖</div>
+                <div class="automation-gears">
+                  <div class="gear gear-1"></div>
+                  <div class="gear gear-2"></div>
+                </div>
+              </div>
+              <div class="feature-content-revolutionary">
+                <h3 class="feature-title-revolutionary">Automação Inteligente</h3>
+                <p class="feature-description-revolutionary">
+                  Robôs especializados executam suas estratégias 24/7. 
+                  Otimização contínua que aprende com cada operação realizada.
+                </p>
+                <div class="feature-metrics">
+                  <div class="metric">
+                    <span class="metric-value">24/7</span>
+                    <span class="metric-label">Ativo</span>
+                  </div>
+                </div>
+              </div>
+              <div class="feature-hover-effect"></div>
+            </div>
+
+            <!-- Feature 6 - Innovation -->
+            <div class="feature-card-revolutionary feature-innovation" data-feature="innovation">
+              <div class="feature-glow"></div>
+              <div class="feature-icon-revolutionary">
+                <div class="icon-rocket">🚀</div>
+                <div class="rocket-trail">
+                  <div class="trail-particle"></div>
+                  <div class="trail-particle"></div>
+                  <div class="trail-particle"></div>
+                </div>
+              </div>
+              <div class="feature-content-revolutionary">
+                <h3 class="feature-title-revolutionary">Inovação Perpétua</h3>
+                <p class="feature-description-revolutionary">
+                  Atualizações semanais com novas funcionalidades. 
+                  Sempre um passo à frente da concorrência com tecnologia de ponta.
+                </p>
+                <div class="feature-metrics">
+                  <div class="metric">
+                    <span class="metric-value">52x</span>
+                    <span class="metric-label">Updates/ano</span>
+                  </div>
+                </div>
+              </div>
+              <div class="feature-hover-effect"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revolutionary Technology Showcase -->
+      <div class="tech-showcase">
+        <div class="container">
+          <div class="showcase-content">
+            <div class="showcase-text">
+              <h2 class="showcase-title">
+                Construído para o <span class="text-highlight">Futuro</span>
+              </h2>
+              <p class="showcase-description">
+                Nossa infraestrutura combina computação em nuvem, edge computing 
+                e blockchain para criar a experiência mais avançada do mercado.
+              </p>
+              <div class="tech-badges">
+                <div class="tech-badge">
+                  <span class="badge-icon">⚛️</span>
+                  <span class="badge-text">React 18</span>
+                </div>
+                <div class="tech-badge">
+                  <span class="badge-icon">🔥</span>
+                  <span class="badge-text">WebAssembly</span>
+                </div>
+                <div class="tech-badge">
+                  <span class="badge-icon">🌐</span>
+                  <span class="badge-text">Edge Computing</span>
+                </div>
+                <div class="tech-badge">
+                  <span class="badge-icon">🔗</span>
+                  <span class="badge-text">Blockchain</span>
+                </div>
+              </div>
+            </div>
+            <div class="showcase-visual">
+              <div class="hologram-container">
+                <div class="hologram-circle">
+                  <div class="hologram-ring ring-1"></div>
+                  <div class="hologram-ring ring-2"></div>
+                  <div class="hologram-ring ring-3"></div>
+                  <div class="hologram-center">🦈</div>
+                </div>
+                <div class="hologram-particles">
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revolutionary CTA -->
+      <div class="revolutionary-cta">
+        <div class="cta-background">
+          <div class="cta-waves">
+            <div class="wave wave-1"></div>
+            <div class="wave wave-2"></div>
+            <div class="wave wave-3"></div>
+          </div>
+        </div>
+        <div class="container">
+          <div class="cta-content-revolutionary">
+            <h2 class="cta-title">Pronto para Dominar os Mercados?</h2>
+            <p class="cta-subtitle">
+              Junte-se à elite de traders que já descobriram o futuro da arbitragem
+            </p>
+            <button class="btn-revolutionary" onclick="window.SharkGreen.getModules().navigation.navigateTo('calculadora')">
+              <span class="btn-text">🎯 Iniciar Jornada</span>
+              <div class="btn-glow"></div>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Inicializa animações
+  this.initRevolutionaryAnimations();
+}
 
   renderContatoPage(container) {
     container.innerHTML = `
