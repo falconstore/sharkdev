@@ -374,7 +374,13 @@ export function getFreeProfHTML() {
     .profit-highlight { color: #3b82f6 !important; font-weight: 800 !important; }
     .text-small { font-size: 0.75rem; color: var(--text-muted); }
 
-    @media (max-width: 900px) {
+    @media (max-width: 991px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 767px) {
       .form-grid-3, .form-grid-auto { 
         grid-template-columns: 1fr; 
       }
@@ -382,42 +388,49 @@ export function getFreeProfHTML() {
         grid-template-columns: 1fr;
         gap: 0.75rem;
       }
-      .horizontal-cards {
-        flex-wrap: wrap;
-        gap: 0.5rem;
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
       }
-      .action-card {
-        flex: 1 1 calc(50% - 0.25rem);
-        min-width: 120px;
+      .stat-card {
+        min-height: 85px;
+        max-height: 85px;
+        padding: 0.75rem;
+      }
+      .stat-value {
+        font-size: 0.875rem;
+      }
+      .stat-label {
+        font-size: 0.5625rem;
+      }
+      .btn-share-card,
+      .btn-calc-card,
+      .btn-clear-card {
+        font-size: 0.625rem !important;
+        padding: 0.375rem !important;
+        margin-top: 0.25rem !important;
       }
     }
 
-    @media (max-width: 600px) {
-      .horizontal-cards {
-        flex-direction: column;
-        gap: 0.5rem;
-      }
-      .action-card {
-        flex: 1;
+    @media (max-width: 479px) {
+      .stat-card {
         min-height: 70px;
+        max-height: 70px;
         padding: 0.5rem;
       }
-      .action-btn {
-        font-size: 0.625rem;
-        padding: 0.375rem;
+      .stat-value {
+        font-size: 0.75rem;
       }
-      .action-label {
+      .stat-label {
         font-size: 0.5rem;
+        margin-bottom: 0.25rem;
       }
-      .action-value {
-        font-size: 1rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .action-card {
-        min-height: 60px;
-        padding: 0.5rem;
+      .btn-share-card,
+      .btn-calc-card,
+      .btn-clear-card {
+        font-size: 0.5625rem !important;
+        padding: 0.25rem !important;
+        margin-top: 0.5rem !important;
       }
     }
   </style>
