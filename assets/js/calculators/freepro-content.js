@@ -52,6 +52,14 @@ export function getFreeProfHTML() {
     .calc-header {
       text-align: center;
       margin-bottom: 1.5rem;
+      padding: 1rem;
+      background: rgba(31, 41, 59, 0.4);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    [data-theme="light"] .calc-header {
+      background: rgba(255, 255, 255, 0.6);
     }
 
     .calc-title {
@@ -66,6 +74,82 @@ export function getFreeProfHTML() {
     .calc-subtitle {
       color: var(--text-secondary);
       font-size: 0.875rem;
+    }
+
+    /* GRID DOS CARDS NO TOPO */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+
+    .stat-card {
+      background: rgba(17, 24, 39, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    [data-theme="light"] .stat-card {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .stat-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+      font-family: ui-monospace, monospace;
+      margin-bottom: 0.25rem;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 0.625rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .btn-share-card,
+    .btn-calc-card,
+    .btn-clear-card {
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      width: 100%;
+      margin-top: 0.75rem;
+    }
+
+    .btn-share-card {
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+      color: white;
+    }
+
+    .btn-calc-card {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+    }
+
+    .btn-clear-card {
+      background: rgba(55, 65, 81, 0.8);
+      color: var(--text-primary);
+      border: 2px solid var(--border);
+    }
+
+    [data-theme="light"] .btn-clear-card {
+      background: rgba(255, 255, 255, 0.9);
     }
 
     .card {
@@ -113,97 +197,6 @@ export function getFreeProfHTML() {
       font-weight: 600;
       text-transform: uppercase;
       background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white;
-    }
-
-    .header-grid {
-      display: grid;
-      grid-template-columns: 1fr 2fr;
-      gap: 2rem;
-      align-items: start;
-    }
-
-    .action-cards {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.75rem;
-    }
-
-    .action-card {
-      background: rgba(17, 24, 39, 0.6);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.75rem;
-      text-align: center;
-      transition: all 0.3s ease;
-      min-height: 80px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    [data-theme="light"] .action-card {
-      background: rgba(255, 255, 255, 0.8);
-    }
-
-    .action-card:hover {
-      transform: translateY(-2px);
-      border-color: var(--primary);
-    }
-
-    .action-card.total {
-      grid-column: 1 / -1;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 197, 94, 0.05));
-      border: 2px solid var(--primary);
-    }
-
-    .action-value {
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: var(--primary);
-      font-family: ui-monospace, monospace;
-      margin-bottom: 0.25rem;
-    }
-
-    .action-label {
-      font-size: 0.625rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-weight: 600;
-    }
-
-    .action-btn {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.025em;
-      border: none;
-      background: none;
-      color: var(--text-primary);
-      cursor: pointer;
-      transition: all 0.2s ease;
-      padding: 0.5rem;
-      border-radius: 6px;
-    }
-
-    .action-btn.primary {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white;
-    }
-
-    .action-btn.secondary {
-      background: rgba(55, 65, 81, 0.8);
-      border: 1px solid var(--border);
-    }
-
-    [data-theme="light"] .action-btn.secondary {
-      background: rgba(255, 255, 255, 0.9);
-    }
-
-    .action-btn.share {
-      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
       color: white;
     }
 
@@ -392,45 +385,12 @@ export function getFreeProfHTML() {
         grid-template-columns: 1fr;
         gap: 0.75rem;
       }
-      .stat-card {
-        min-height: 85px;
-        max-height: 85px;
-        padding: 0.75rem;
-      }
-      .stat-value {
-        font-size: 0.875rem;
-      }
-      .stat-label {
-        font-size: 0.5625rem;
-      }
-      .btn-share-card,
-      .btn-calc-card,
-      .btn-clear-card {
-        font-size: 0.625rem !important;
-        padding: 0.375rem !important;
-        margin-top: 0.25rem !important;
-      }
     }
 
     @media (max-width: 479px) {
       .stat-card {
         min-height: 70px;
-        max-height: 70px;
         padding: 0.5rem;
-      }
-      .stat-value {
-        font-size: 0.75rem;
-      }
-      .stat-label {
-        font-size: 0.5rem;
-        margin-bottom: 0.25rem;
-      }
-      .btn-share-card,
-      .btn-calc-card,
-      .btn-clear-card {
-        font-size: 0.5625rem !important;
-        padding: 0.25rem !important;
-        margin-top: 0.5rem !important;
       }
     }
   </style>
@@ -441,11 +401,11 @@ export function getFreeProfHTML() {
     <p class="calc-subtitle">Otimize seus lucros com freebets de apostas seguras - estratégias para perder a qualificação e ganhar a freebet</p>
   </div>
 
-  <div class="card">
-    <div class="header-grid">
-      <div class="form-group">
-        <label class="form-label" for="numEntradas">Número de Entradas</label>
-        <select id="numEntradas" class="form-control">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Configurações</div>
+      <div class="form-group" style="margin: 0.75rem 0 0 0;">
+        <select id="numEntradas" class="form-control" style="font-size: 0.75rem; padding: 0.5rem;">
           <option value="2">2 Mercados</option>
           <option value="3" selected>3 Mercados</option>
           <option value="4">4 Mercados</option>
@@ -453,25 +413,34 @@ export function getFreeProfHTML() {
           <option value="6">6 Mercados</option>
         </select>
       </div>
+    </div>
 
-      <div class="action-cards">
-        <div class="action-card total">
-          <div class="action-value" id="k_S">—</div>
-          <div class="action-label">Stake Total</div>
-        </div>
-        
-        <div class="action-card" id="calcCard">
-          <button class="action-btn primary" id="calcBtn">Calcular</button>
-        </div>
-        
-        <div class="action-card" id="clearCard">
-          <button class="action-btn secondary" id="clearBtn">Limpar</button>
-        </div>
-        
-        <div class="action-card" id="shareCard">
-          <button class="action-btn share" id="shareBtn">🔗 Compartilhar</button>
-        </div>
+    <div class="stat-card">
+      <div class="stat-label">Arredondamento</div>
+      <div class="form-group" style="margin: 0.75rem 0 0 0;">
+        <select id="round_step" class="form-control" style="font-size: 0.75rem; padding: 0.5rem;">
+          <option value="0.01">R$ 0,01</option>
+          <option value="0.10">R$ 0,10</option>
+          <option value="0.50">R$ 0,50</option>
+          <option value="1.00" selected>R$ 1,00</option>
+        </select>
       </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-value" id="k_S">R$ 0,00</div>
+      <div class="stat-label">Total Investido</div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Calcular</div>
+      <button id="calcBtn" class="btn-calc-card">Executar</button>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-label">Ações</div>
+      <button id="clearBtn" class="btn-clear-card" style="margin-bottom: 0.5rem;">Limpar</button>
+      <button id="shareBtn" class="btn-share-card">🔗 Compartilhar</button>
     </div>
   </div>
 
@@ -502,15 +471,6 @@ export function getFreeProfHTML() {
       <div class="form-group">
         <label class="form-label" for="r">Taxa de Extração (%)</label>
         <input id="r" class="form-control" placeholder="ex: 70" inputmode="decimal" />
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="round_step">Arredondamento</label>
-        <select id="round_step" class="form-control">
-          <option value="0.01">R$ 0,01</option>
-          <option value="0.10">R$ 0,10</option>
-          <option value="0.50">R$ 0,50</option>
-          <option value="1.00" selected>R$ 1,00</option>
-        </select>
       </div>
     </div>
   </div>
@@ -583,7 +543,7 @@ export function getFreeProfHTML() {
     if(s===undefined||s===null) return NaN; 
     var str=String(s).trim(); 
     if(!str) return NaN; 
-    if(str.indexOf(',')!==-1 && str.indexOf('.')!==-1) return parseFloat(str.replace(/\\./g,'').replace(',','.')); 
+    if(str.indexOf(',')!==-1 && str.indexOf('.')!==-1) return parseFloat(str.replace(/\./g,'').replace(',','.')); 
     if(str.indexOf(',')!==-1) return parseFloat(str.replace(',','.')); 
     return parseFloat(str); 
   }
@@ -735,7 +695,6 @@ export function getFreeProfHTML() {
     function roundStep(v){return Math.round(v/step)*step;} 
     stakes=stakes.map(roundStep);
     
-    // APLICA VALOR MÍNIMO DE R$ 0,50
     const MIN_STAKE = 0.50;
     stakes = stakes.map(stake => Math.max(stake, MIN_STAKE));
     
@@ -803,10 +762,8 @@ export function getFreeProfHTML() {
     renderOddsInputs(); 
   });
 
-  // Botão de compartilhamento
   $("shareBtn").addEventListener('click', function(){
     try {
-      // Tenta comunicar com o parent para ativar compartilhamento
       if (parent && parent.SharkGreen && parent.SharkGreen.shareUI) {
         parent.SharkGreen.shareUI.handleShareClick('freepro');
       } else {
@@ -825,4 +782,3 @@ export function getFreeProfHTML() {
 </script>
 </body>
 </html>`;
-}
