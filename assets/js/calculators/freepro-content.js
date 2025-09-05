@@ -116,6 +116,97 @@ export function getFreeProfHTML() {
       color: white;
     }
 
+    .header-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    .action-cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.75rem;
+    }
+
+    .action-card {
+      background: rgba(17, 24, 39, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    [data-theme="light"] .action-card {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .action-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--primary);
+    }
+
+    .action-card.total {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 197, 94, 0.05));
+      border: 2px solid var(--primary);
+    }
+
+    .action-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary);
+      font-family: ui-monospace, monospace;
+      margin-bottom: 0.25rem;
+    }
+
+    .action-label {
+      font-size: 0.625rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .action-btn {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+      border: none;
+      background: none;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      padding: 0.5rem;
+      border-radius: 6px;
+    }
+
+    .action-btn.primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+    }
+
+    .action-btn.secondary {
+      background: rgba(55, 65, 81, 0.8);
+      border: 1px solid var(--border);
+    }
+
+    [data-theme="light"] .action-btn.secondary {
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    .action-btn.share {
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+      color: white;
+    }
+
     .form-grid {
       display: grid;
       gap: 1rem;
@@ -221,56 +312,6 @@ export function getFreeProfHTML() {
       background: rgba(59, 130, 246, 0.05);
     }
 
-    .total-display {
-      text-align: center;
-      padding: 1.5rem;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 197, 94, 0.05));
-      border: 2px solid var(--primary);
-      border-radius: 12px;
-      margin: 1rem 0;
-    }
-
-    .total-value {
-      font-size: 1.75rem;
-      font-weight: 800;
-      color: var(--primary);
-      font-family: ui-monospace, monospace;
-    }
-
-    .btn {
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-transform: uppercase;
-      font-size: 0.75rem;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white;
-    }
-
-    .btn-secondary {
-      background: rgba(55, 65, 81, 0.8);
-      color: var(--text-primary);
-      border: 2px solid var(--border);
-      transition: all 0.3s ease;
-    }
-
-    [data-theme="light"] .btn-secondary {
-      background: rgba(255, 255, 255, 0.9);
-    }
-
-    .actions {
-      display: flex;
-      gap: 0.75rem;
-      justify-content: center;
-      margin: 1.5rem 0;
-    }
-
     .alert {
       padding: 1rem;
       border-radius: 8px;
@@ -372,15 +413,36 @@ export function getFreeProfHTML() {
   </div>
 
   <div class="card">
-    <div class="form-group">
-      <label class="form-label" for="numEntradas">Número de Entradas</label>
-      <select id="numEntradas" class="form-control">
-        <option value="2">2 Mercados</option>
-        <option value="3" selected>3 Mercados</option>
-        <option value="4">4 Mercados</option>
-        <option value="5">5 Mercados</option>
-        <option value="6">6 Mercados</option>
-      </select>
+    <div class="header-grid">
+      <div class="form-group">
+        <label class="form-label" for="numEntradas">Número de Entradas</label>
+        <select id="numEntradas" class="form-control">
+          <option value="2">2 Mercados</option>
+          <option value="3" selected>3 Mercados</option>
+          <option value="4">4 Mercados</option>
+          <option value="5">5 Mercados</option>
+          <option value="6">6 Mercados</option>
+        </select>
+      </div>
+
+      <div class="action-cards">
+        <div class="action-card total">
+          <div class="action-value" id="k_S">—</div>
+          <div class="action-label">Stake Total</div>
+        </div>
+        
+        <div class="action-card" id="calcCard">
+          <button class="action-btn primary" id="calcBtn">Calcular</button>
+        </div>
+        
+        <div class="action-card" id="clearCard">
+          <button class="action-btn secondary" id="clearBtn">Limpar</button>
+        </div>
+        
+        <div class="action-card" id="shareCard">
+          <button class="action-btn share" id="shareBtn">🔗 Compartilhar</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -429,16 +491,6 @@ export function getFreeProfHTML() {
       <div class="card-title">Coberturas</div>
     </div>
     <div id="oddsContainer" class="coverage-grid"></div>
-  </div>
-
-  <div class="total-display">
-    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.375rem; text-transform: uppercase;">Stake Total</div>
-    <div class="total-value" id="k_S">—</div>
-  </div>
-
-  <div class="actions">
-    <button class="btn btn-primary" id="calcBtn">Calcular Estratégia</button>
-    <button class="btn btn-secondary" id="clearBtn">Limpar Dados</button>
   </div>
 
   <div id="status" class="alert alert-warning"></div>
@@ -720,6 +772,21 @@ export function getFreeProfHTML() {
     $("k_S").textContent='—'; 
     hideStatus(); 
     renderOddsInputs(); 
+  });
+
+  // Botão de compartilhamento
+  $("shareBtn").addEventListener('click', function(){
+    try {
+      // Tenta comunicar com o parent para ativar compartilhamento
+      if (parent && parent.SharkGreen && parent.SharkGreen.shareUI) {
+        parent.SharkGreen.shareUI.handleShareClick('freepro');
+      } else {
+        alert('Sistema de compartilhamento não disponível');
+      }
+    } catch (e) {
+      console.warn('Erro ao compartilhar:', e);
+      alert('Erro ao compartilhar configuração');
+    }
   });
 
   window.addEventListener('DOMContentLoaded', function(){
