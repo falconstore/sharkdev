@@ -855,22 +855,7 @@ export function getFreeProfHTML() {
     isCalculating = false;
   }
 
-  // Cálculo manual (com validação e erros)
-  function manualCalc(){
-    hideStatus();
-    var o1=toNum($("o1").value), c1=toNum($("c1").value), n=parseInt($("numEntradas").value||'3',10), 
-        cov=readCoverage(), F=toNum($("F").value), rPerc=toNum($("r").value), s1=toNum($("s1").value);
-    
-    if(!Number.isFinite(o1)||o1<=1){ showStatus('warning','Odd inválida para Casa Promo'); return }
-    if(cov.odds.length!==(n-1)||cov.odds.some(function(v){return !Number.isFinite(v)||v<=1;})){ showStatus('warning','Informe '+(n-1)+' odds válidas para coberturas'); return }
-    if(!Number.isFinite(F)||F<0){ showStatus('warning','Valor da Freebet inválido'); return }
-    if(!Number.isFinite(rPerc)||rPerc<0||rPerc>100){ showStatus('warning','Taxa de extração deve estar entre 0-100%'); return }
-    if(!Number.isFinite(s1)||s1<=0){ showStatus('warning','Stake de qualificação inválido'); return }
-
-    // Força o cálculo imediato (bypassa debounce)
-    clearTimeout(autoCalcTimeout);
-    autoCalc();
-  }
+  // Função manual removida - só automático agora
 
   function clearAll() {
     ["o1","c1","F","r","s1"].forEach(function(id){ $(id).value=''; }); 
