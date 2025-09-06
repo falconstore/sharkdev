@@ -851,7 +851,8 @@ export function getFreeProfHTML() {
     if(!Number.isFinite(rPerc)||rPerc<0||rPerc>100){ showStatus('warning','Taxa de extração deve estar entre 0-100%'); return }
     if(!Number.isFinite(s1)||s1<=0){ showStatus('warning','Stake de qualificação inválido'); return }
 
-    // Chama o cálculo automático se validação passou
+    // Força o cálculo imediato (bypassa debounce)
+    clearTimeout(autoCalcTimeout);
     autoCalc();
   }
 
