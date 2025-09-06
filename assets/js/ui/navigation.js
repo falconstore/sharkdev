@@ -137,7 +137,7 @@ export class Navigation {
                 <div class="stat-label">Calculadoras Avançadas</div>
               </div>
               <div class="stat-item">
-                <div class="stat-number">5000+</div>
+                <div class="stat-number">2500+</div>
                 <div class="stat-label">Usuários Ativos</div>
               </div>
             </div>
@@ -282,7 +282,7 @@ export class Navigation {
           <div class="hero-content">
             <h1 class="hero-title">📞 Entre em Contato</h1>
             <p class="hero-subtitle">
-              Suporte especializado e comunidade ativa para maximizar seus resultados
+              O único grupo VIP do Brasil que realmente entrega lucro consistente em arbitragem de bônus. Suporte personalizado e resultados comprovados.
             </p>
           </div>
         </div>
@@ -363,9 +363,9 @@ export class Navigation {
                 <h3>Suporte Procedimentos</h3>
                 <p>Dúvidas sobre estratégias e procedimentos</p>
                 <div class="support-features">
-                  <span>⏱️ Resposta em 2-4h</span>
+                  <span>⏱️ Resposta em até 5 minutos</span>
                   <span>🎯 Especialistas em arbitragem</span>
-                  <span>📚 Tutoriais personalizados</span>
+                  <span>📚 atendimento personalizado</span>
                 </div>
                 <a href="https://t.me/SuporteSharkGreen_procedimentos" target="_blank" class="support-btn">
                   Abrir Suporte
@@ -379,9 +379,9 @@ export class Navigation {
                 <h3>Suporte Financeiro</h3>
                 <p>Questões sobre pagamentos e assinaturas</p>
                 <div class="support-features">
-                  <span>💳 Pagamentos e reembolsos</span>
+                  <span>💳 Pagamentos</span>
                   <span>🔄 Renovações e upgrades</span>
-                  <span>📊 Planos e pricing</span>
+                  <span>📊 Planos e preços</span>
                 </div>
                 <a href="https://t.me/SuporteSharkGreen_financeiro" target="_blank" class="support-btn">
                   Abrir Suporte
