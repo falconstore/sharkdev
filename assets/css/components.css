@@ -1348,3 +1348,85 @@
   grid-template-columns: repeat(2, 1fr); 
   gap: 1rem; 
 }
+
+/* === ADICIONAR NO FINAL DO components.css === */
+
+/* Estilos para ícones reais dos canais */
+.channel-icon {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 64px; /* Altura fixa para alinhamento */
+}
+
+/* Estilo das imagens dos ícones */
+.channel-icon img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+  transition: all 0.3s ease;
+  border-radius: 8px; /* Bordas levemente arredondadas */
+}
+
+/* Efeitos de hover nos ícones */
+.channel-card:hover .channel-icon img {
+  transform: scale(1.1) translateY(-2px);
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+}
+
+/* Estilos específicos por plataforma */
+.telegram .channel-icon img {
+  border-radius: 50%; /* Telegram geralmente é redondo */
+}
+
+.instagram .channel-icon img {
+  border-radius: 12px; /* Instagram com bordas mais arredondadas */
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  padding: 2px; /* Espaçamento para mostrar o gradiente */
+}
+
+.youtube .channel-icon img {
+  border-radius: 8px; /* YouTube com bordas suaves */
+}
+
+/* Bordas coloridas dos cards (mantém as existentes e adiciona YouTube) */
+.channel-card.telegram::before {
+  background: linear-gradient(90deg, #0088cc, #00aced);
+}
+
+.channel-card.instagram::before {
+  background: linear-gradient(90deg, #e4405f, #fd1d1d, #fcb045);
+}
+
+.channel-card.youtube::before {
+  background: linear-gradient(90deg, #ff0000, #cc0000);
+}
+
+/* Responsividade para mobile */
+@media (max-width: 768px) {
+  .channel-icon img {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .channel-icon {
+    height: 56px;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .channel-icon img {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .channel-icon {
+    height: 48px;
+    margin-bottom: 0.75rem;
+  }
+}
