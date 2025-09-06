@@ -1,4 +1,4 @@
-// PASSO 12 - assets/js/calculators/freepro-content.js
+// assets/js/calculators/freepro-content.js - VERSÃO CORRIGIDA
 // HTML completo da calculadora FreePro que roda no iframe
 
 export function getFreeProfHTML() {
@@ -237,6 +237,16 @@ export function getFreeProfHTML() {
       font-family: ui-monospace, monospace;
     }
 
+    /* BOTÕES CORRIGIDOS - MESMO TAMANHO E ALINHAMENTO */
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      align-items: center;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+    }
+
     .btn {
       padding: 0.75rem 1.5rem;
       border: none;
@@ -246,11 +256,26 @@ export function getFreeProfHTML() {
       transition: all 0.2s ease;
       text-transform: uppercase;
       font-size: 0.75rem;
+      letter-spacing: 0.025em;
+      white-space: nowrap;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      max-width: 200px;
+      min-width: 140px;
     }
 
     .btn-primary {
       background: linear-gradient(135deg, var(--primary), var(--secondary));
       color: white;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
     }
 
     .btn-secondary {
@@ -260,15 +285,48 @@ export function getFreeProfHTML() {
       transition: all 0.3s ease;
     }
 
-    [data-theme="light"] .btn-secondary {
-      background: rgba(255, 255, 255, 0.9);
+    .btn-secondary:hover {
+      background: rgba(55, 65, 81, 1);
+      border-color: var(--primary);
+      transform: translateY(-1px);
     }
 
-    .actions {
-      display: flex;
-      gap: 0.75rem;
-      justify-content: center;
-      margin: 1.5rem 0;
+    [data-theme="light"] .btn-secondary {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: var(--border);
+    }
+
+    [data-theme="light"] .btn-secondary:hover {
+      background: rgba(255, 255, 255, 1);
+      border-color: var(--primary);
+    }
+
+    .btn-share {
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6) !important;
+      color: white !important;
+      border: none !important;
+      border-radius: 8px !important;
+      padding: 0.75rem 1.5rem !important;
+      font-size: 0.75rem !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.025em !important;
+      white-space: nowrap !important;
+      min-height: 44px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex: 1 !important;
+      max-width: 200px !important;
+      min-width: 140px !important;
+      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2) !important;
+    }
+
+    .btn-share:hover {
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
     }
 
     .alert {
@@ -333,13 +391,36 @@ export function getFreeProfHTML() {
     .profit-highlight { color: #3b82f6 !important; font-weight: 800 !important; }
     .text-small { font-size: 0.75rem; color: var(--text-muted); }
 
-    @media (max-width: 900px) {
+    /* RESPONSIVIDADE PARA BOTÕES */
+    @media (max-width: 768px) {
       .form-grid-3, .form-grid-auto { 
         grid-template-columns: 1fr; 
       }
       .coverage-fields { 
         grid-template-columns: 1fr;
         gap: 0.75rem;
+      }
+      
+      .actions {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      
+      .btn,
+      .btn-share {
+        flex: none !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-width: none !important;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .btn,
+      .btn-share {
+        padding: 0.625rem 1.25rem !important;
+        font-size: 0.6875rem !important;
+        min-height: 40px !important;
       }
     }
   </style>
@@ -418,6 +499,7 @@ export function getFreeProfHTML() {
   <div class="actions">
     <button class="btn btn-primary" id="calcBtn">Calcular Estratégia</button>
     <button class="btn btn-secondary" id="clearBtn">Limpar Dados</button>
+    <button class="btn btn-share" id="shareBtn">🔗 Compartilhar</button>
   </div>
 
   <div id="status" class="alert alert-warning"></div>
@@ -699,6 +781,19 @@ export function getFreeProfHTML() {
     $("k_S").textContent='—'; 
     hideStatus(); 
     renderOddsInputs(); 
+  });
+
+  // Botão de compartilhamento
+  $("shareBtn").addEventListener('click', function(){
+    try {
+      if (window.parent && window.parent.SharkGreen && window.parent.SharkGreen.shareUI) {
+        window.parent.SharkGreen.shareUI.handleShareClick('freepro');
+      } else {
+        alert('Sistema de compartilhamento não disponível');
+      }
+    } catch (e) {
+      alert('Erro ao compartilhar configuração');
+    }
   });
 
   window.addEventListener('DOMContentLoaded', function(){
