@@ -297,7 +297,7 @@ export class Navigation {
               <div class="channel-icon">💬</div>
               <div class="channel-content">
                 <h3>Grupo Telegram FREE</h3>
-                <p>Comunidade ativa com +5000 membros</p>
+                <p>Comunidade ativa com +2000 membros</p>
                 <div class="channel-benefits">
                   <span>✅ Procedimentos gratuitos</span>
                   <span>✅ Comunidade ativa</span>
