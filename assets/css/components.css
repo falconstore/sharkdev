@@ -902,8 +902,8 @@
   background: linear-gradient(90deg, #e4405f, #fd1d1d, #fcb045);
 }
 
-.channel-card.website::before {
-  background: linear-gradient(90deg, var(--secondary), var(--accent));
+.channel-card.youtube::before {
+  background: linear-gradient(90deg, #ff0000, #cc0000);
 }
 
 .channel-card:hover {
