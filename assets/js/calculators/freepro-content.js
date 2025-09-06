@@ -1,5 +1,5 @@
-// assets/js/calculators/freepro-content.js - VERSÃO COM CÁLCULO AUTOMÁTICO
-// HTML completo da calculadora FreePro que roda no iframe
+// assets/js/calculators/freepro-content.js - CÓDIGO FINAL CORRIGIDO
+// Substitua todo o conteúdo do seu arquivo por este código
 
 export function getFreeProfHTML() {
   return `<!DOCTYPE html>
@@ -247,7 +247,6 @@ export function getFreeProfHTML() {
       font-family: ui-monospace, monospace;
     }
 
-    /* BOTÕES CORRIGIDOS */
     .actions {
       display: flex;
       gap: 0.75rem;
@@ -401,7 +400,6 @@ export function getFreeProfHTML() {
     .profit-highlight { color: #3b82f6 !important; font-weight: 800 !important; }
     .text-small { font-size: 0.75rem; color: var(--text-muted); }
 
-    /* RESPONSIVIDADE PARA BOTÕES */
     @media (max-width: 768px) {
       .form-grid-3, .form-grid-auto { 
         grid-template-columns: 1fr; 
@@ -525,14 +523,7 @@ export function getFreeProfHTML() {
     <div style="overflow-x:auto">
       <table class="results-table">
         <thead>
-          <tr>
-            <th>Cenário</th>
-            <th>Odd</th>
-            <th>Comissão</th>
-            <th>Apostar</th>
-            <th>Déficit</th>
-            <th>Lucro Final</th>
-          </tr>
+          <!-- Cabeçalho gerado dinamicamente -->
         </thead>
         <tbody id="tbody"></tbody>
       </table>
@@ -799,6 +790,39 @@ export function getFreeProfHTML() {
 
       $("k_S").textContent=nf(S);
 
+      // CÓDIGO CORRIGIDO PARA TABELA COM RESPONSABILIDADE
+      // Verifica se há apostas LAY para mostrar coluna de responsabilidade
+      var hasLayBets = cov.isLay.some(lay => lay);
+      
+      // Atualiza cabeçalho da tabela dinamicamente
+      var thead = document.querySelector('.results-table thead');
+      var headerHTML = '';
+      if (hasLayBets) {
+        headerHTML = \`
+          <tr>
+            <th>Cenário</th>
+            <th>Odd</th>
+            <th>Comissão</th>
+            <th>Apostar</th>
+            <th>Responsabilidade</th>
+            <th>Déficit</th>
+            <th>Lucro Final</th>
+          </tr>
+        \`;
+      } else {
+        headerHTML = \`
+          <tr>
+            <th>Cenário</th>
+            <th>Odd</th>
+            <th>Comissão</th>
+            <th>Apostar</th>
+            <th>Déficit</th>
+            <th>Lucro Final</th>
+          </tr>
+        \`;
+      }
+      thead.innerHTML = headerHTML;
+
       var tb=$("tbody"); 
       tb.innerHTML='';
       
@@ -815,7 +839,16 @@ export function getFreeProfHTML() {
       for(var rix=0; rix<rows.length; rix++){
         var nome=rows[rix][0], odd=rows[rix][1], comm=rows[rix][2], stake=rows[rix][3], 
             deficit=rows[rix][4], final=rows[rix][5], isLayRow=rows[rix][6], liabRow=rows[rix][7];
-        var apostarCell = '<strong>'+nf(stake)+'</strong>' + (isLayRow ? (' <span class="text-small">(resp. '+nf(liabRow)+')</span>') : '');
+        
+        // Célula de Apostar (APENAS o valor da aposta, sem responsabilidade)
+        var apostarCell = '<strong>'+nf(stake)+'</strong>' + (isLayRow ? '<br><span class="text-small">(LAY)</span>' : '');
+        
+        // Célula de Responsabilidade (só aparece se houver LAY em qualquer linha)
+        var responsabilidadeCell = '';
+        if (hasLayBets) {
+          responsabilidadeCell = '<td>' + (isLayRow ? '<strong>'+nf(liabRow)+'</strong>' : '—') + '</td>';
+        }
+        
         var deficitClass = deficit >= 0 ? 'profit-positive' : 'profit-negative';
         var finalClass = final >= 0 ? 'profit-positive' : 'profit-negative';
         
@@ -824,6 +857,7 @@ export function getFreeProfHTML() {
                        '<td>'+oddf(odd)+'</td>'+
                        '<td>'+pf(comm)+'</td>'+
                        '<td>'+apostarCell+'</td>'+
+                       responsabilidadeCell +
                        '<td class="'+deficitClass+'"><strong>'+nf(deficit)+'</strong></td>'+
                        '<td class="'+finalClass+'"><strong>'+nf(final)+'</strong></td>';
         tb.appendChild(tr);
@@ -913,5 +947,5 @@ export function getFreeProfHTML() {
 })();
 </script>
 </body>
-</html>`;
+</html>\`;
 }
