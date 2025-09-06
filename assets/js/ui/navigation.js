@@ -326,19 +326,19 @@ export class Navigation {
               </div>
             </div>
 
-            <!-- Website -->
-            <div class="channel-card website">
-              <div class="channel-icon">🌐</div>
+            <!-- YouTube -->
+            <div class="channel-card youtube">
+              <div class="channel-icon">📺</div>
               <div class="channel-content">
-                <h3>Website Oficial</h3>
-                <p>Plataforma completa com recursos</p>
+                <h3>Canal YouTube</h3>
+                <p>Tutoriais em vídeo e conteúdo exclusivo</p>
                 <div class="channel-benefits">
-                  <span>✅ Recursos completos</span>
-                  <span>✅ Tutoriais detalhados</span>
-                  <span>✅ Base de conhecimento</span>
+                  <span>✅ Vídeos tutoriais</span>
+                  <span>✅ Estratégias visuais</span>
+                  <span>✅ Lives exclusivas</span>
                 </div>
-                <a href="https://sharkgreen.com.br" target="_blank" class="channel-btn">
-                  Visitar Site
+                <a href="https://youtube.com/@sharkgreen" target="_blank" class="channel-btn">
+                  Assistir Canal
                 </a>
               </div>
             </div>
