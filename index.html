@@ -11,18 +11,11 @@
   <meta name="author" content="Shark 100% Green">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦈</text></svg>">
   
-  <!-- CSS Modules - NA ORDEM CORRETA -->
+  <!-- CSS Modules -->
   <link rel="stylesheet" href="assets/css/base.css">
   <link rel="stylesheet" href="assets/css/components.css">
   <link rel="stylesheet" href="assets/css/themes.css">
   <link rel="stylesheet" href="assets/css/responsive.css">
-  
-  <!-- PRELOAD CORRIGIDO - com crossorigin e as corretos -->
-  <link rel="modulepreload" href="assets/js/main.js" crossorigin>
-  <link rel="modulepreload" href="assets/js/ui/theme.js" crossorigin>
-  <link rel="modulepreload" href="assets/js/ui/tabs.js" crossorigin>
-  <link rel="modulepreload" href="assets/js/calculators/arbipro.js" crossorigin>
-  <link rel="modulepreload" href="assets/js/calculators/freepro.js" crossorigin>
 </head>
 <body>
   <!-- Header -->
@@ -58,12 +51,11 @@
   <main role="main">
     <!-- App container - content loaded dynamically -->
     <div id="app-container" aria-live="polite">
-      <!-- Loading inicial mais robusto -->
-      <div id="initial-loading" class="loading-container">
+      <!-- Loading inicial -->
+      <div class="loading-container">
         <div class="loading-box">
           <div class="loading-spinner"></div>
-          <p class="loading-text">Inicializando Shark 100% Green...</p>
-          <p class="loading-subtext">Carregando módulos da aplicação</p>
+          <p class="loading-text">Carregando Shark Green...</p>
         </div>
       </div>
     </div>
@@ -79,184 +71,59 @@
     </p>
   </footer>
 
-  <!-- Error fallback melhorado -->
-  <div id="error-fallback" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 9999;">
-    <div class="auth-container" style="max-width: 600px;">
-      <h2 style="color: var(--danger); margin-bottom: 1rem;">❌ Erro na Aplicação</h2>
+  <!-- Error fallback -->
+  <div id="error-fallback" class="hidden" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+    <div class="auth-container" style="max-width: 500px;">
+      <h2 style="color: var(--danger); margin-bottom: 1rem;">❌ Erro Crítico</h2>
       <p id="error-message" style="color: var(--text-secondary); margin-bottom: 2rem;"></p>
-      <div id="error-details" style="background: rgba(17, 24, 39, 0.8); padding: 1rem; border-radius: 8px; margin-bottom: 2rem; font-family: monospace; font-size: 0.875rem; color: var(--text-muted); max-height: 200px; overflow-y: auto; display: none;"></div>
-      <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-        <button onclick="location.reload()" class="btn btn-primary">
-          🔄 Recarregar Página
-        </button>
-        <button onclick="document.getElementById('error-fallback').classList.add('hidden')" class="btn btn-secondary">
-          ✖️ Fechar
-        </button>
-        <button onclick="toggleErrorDetails()" class="btn btn-secondary" id="toggle-details-btn">
-          🔍 Ver Detalhes
-        </button>
-      </div>
+      <button onclick="location.reload()" class="btn btn-primary" style="margin-right: 1rem;">
+        Recarregar Página
+      </button>
+      <button onclick="document.getElementById('error-fallback').classList.add('hidden')" class="btn btn-secondary">
+        Fechar
+      </button>
     </div>
   </div>
 
-  <!-- Main Application Module com tratamento robusto de erros -->
+  <!-- JAVASCRIPT SIMPLES -->
   <script type="module">
-    // Função para mostrar detalhes de erro
-    window.toggleErrorDetails = function() {
-      const details = document.getElementById('error-details');
-      const btn = document.getElementById('toggle-details-btn');
-      if (details.style.display === 'none') {
-        details.style.display = 'block';
-        btn.textContent = '🙈 Ocultar Detalhes';
-      } else {
-        details.style.display = 'none';
-        btn.textContent = '🔍 Ver Detalhes';
-      }
-    };
-
-    // Função melhorada para mostrar erros
-    window.showErrorFallback = function(message, error = null) {
-      console.error('🚨 Erro na aplicação:', message, error);
-      
+    // Função de erro simples
+    window.showErrorFallback = function(message) {
       const fallback = document.getElementById('error-fallback');
       const messageEl = document.getElementById('error-message');
-      const detailsEl = document.getElementById('error-details');
-      
       if (fallback && messageEl) {
         messageEl.textContent = message;
-        
-        if (error && detailsEl) {
-          detailsEl.textContent = error.stack || error.toString();
-          document.getElementById('toggle-details-btn').style.display = 'inline-block';
-        }
-        
-        // Remove loading se estiver visível
-        const loading = document.getElementById('initial-loading');
-        if (loading) loading.style.display = 'none';
-        
         fallback.classList.remove('hidden');
       }
     };
 
-    // Timeout para loading inicial
-    const loadingTimeout = setTimeout(() => {
-      const loading = document.getElementById('initial-loading');
-      if (loading && loading.style.display !== 'none') {
-        showErrorFallback(
-          'A aplicação demorou mais que o esperado para carregar. Verifique sua conexão com a internet e tente novamente.',
-          new Error('Timeout no carregamento da aplicação')
-        );
-      }
-    }, 15000); // 15 segundos
-
-    // Carregamento principal com tratamento robusto
-    async function initializeApp() {
+    // Carregamento com try/catch simples
+    async function loadApp() {
       try {
-        console.log('🚀 Iniciando carregamento da aplicação...');
+        console.log('Carregando aplicação...');
+        const { App } = await import('./assets/js/main.js');
+        console.log('App importada, inicializando...');
         
-        // Limpa timeout se carregamento for bem-sucedido
-        const clearLoadingTimeout = () => {
-          clearTimeout(loadingTimeout);
-          const loading = document.getElementById('initial-loading');
-          if (loading) loading.style.display = 'none';
-        };
-
-        // Importa módulo principal
-        const mainModule = await import('./assets/js/main.js');
-        console.log('✅ Módulo principal carregado');
+        const app = new App();
+        window.SharkGreen = app;
+        await app.init();
         
-        clearLoadingTimeout();
-        
+        console.log('App inicializada com sucesso!');
       } catch (error) {
-        clearTimeout(loadingTimeout);
-        
-        // Diagnóstico específico do erro
-        let errorMessage = 'Erro desconhecido no carregamento';
-        
-        if (error.message.includes('Failed to fetch')) {
-          errorMessage = 'Não foi possível carregar os arquivos da aplicação. Verifique sua conexão com a internet.';
-        } else if (error.message.includes('import')) {
-          errorMessage = 'Erro ao importar módulos da aplicação. O navegador pode não suportar módulos ES6.';
-        } else if (error.message.includes('Network')) {
-          errorMessage = 'Erro de rede ao carregar a aplicação. Tente novamente em alguns momentos.';
-        } else {
-          errorMessage = `Erro técnico: ${error.message}`;
-        }
-        
-        showErrorFallback(errorMessage, error);
+        console.error('Erro ao carregar:', error);
+        showErrorFallback('Erro ao carregar aplicação: ' + error.message);
       }
     }
 
-    // Aguarda DOM estar pronto
+    // Executa quando DOM estiver pronto
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initializeApp);
+      document.addEventListener('DOMContentLoaded', loadApp);
     } else {
-      initializeApp();
-    }
-  </script>
-  
-  <!-- Error Handling Global -->
-  <script>
-    // Global error handlers melhorados
-    window.addEventListener('error', function(e) {
-      console.error('🚨 Global error:', e.error);
-      
-      // Evita mostrar erros de recursos não críticos
-      if (e.filename && (e.filename.includes('logo.png') || e.filename.includes('extension'))) {
-        return;
-      }
-      
-      showErrorFallback(
-        'Erro inesperado na aplicação. Recarregue a página para tentar novamente.',
-        e.error
-      );
-    });
-
-    window.addEventListener('unhandledrejection', function(e) {
-      console.error('🚨 Unhandled promise rejection:', e.reason);
-      
-      // Evita mostrar erros de módulos opcionais
-      if (e.reason && e.reason.message && e.reason.message.includes('Failed to fetch')) {
-        console.warn('⚠️ Módulo opcional falhou ao carregar:', e.reason.message);
-        return;
-      }
-      
-      showErrorFallback(
-        'Erro de promessa não tratada. A aplicação pode não funcionar corretamente.',
-        e.reason
-      );
-    });
-
-    // Verifica suporte a módulos ES6
-    function checkModuleSupport() {
-      const script = document.createElement('script');
-      script.type = 'module';
-      script.textContent = 'window.ES6_SUPPORTED = true;';
-      document.head.appendChild(script);
-      
-      setTimeout(() => {
-        if (!window.ES6_SUPPORTED) {
-          showErrorFallback(
-            'Seu navegador não suporta módulos ES6. Por favor, atualize seu navegador para uma versão mais recente.',
-            new Error('ES6 modules not supported')
-          );
-        }
-        document.head.removeChild(script);
-      }, 100);
-    }
-
-    checkModuleSupport();
-
-    // Fallback para navegadores muito antigos
-    if (!window.fetch) {
-      showErrorFallback(
-        'Seu navegador é muito antigo e não suporta recursos necessários. Por favor, atualize para uma versão mais recente.',
-        new Error('Browser too old - fetch not supported')
-      );
+      loadApp();
     }
   </script>
 
-  <!-- CSS adicional para loading melhorado -->
+  <!-- CSS para loading -->
   <style>
     .loading-container {
       position: fixed;
@@ -279,14 +146,13 @@
       border: 1px solid var(--border);
       backdrop-filter: blur(10px);
       min-width: 300px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
 
     .loading-spinner {
       display: inline-block;
-      width: 40px;
-      height: 40px;
-      border: 4px solid var(--border);
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
       border-radius: 50%;
       border-top-color: var(--primary);
       animation: spin 1s linear infinite;
@@ -297,13 +163,6 @@
       color: var(--primary);
       font-size: 1.125rem;
       font-weight: 700;
-      margin-bottom: 0.5rem;
-    }
-
-    .loading-subtext {
-      color: var(--text-secondary);
-      font-size: 0.875rem;
-      opacity: 0.8;
     }
 
     @keyframes spin {
@@ -314,5 +173,22 @@
       background: rgba(255, 255, 255, 0.95);
     }
   </style>
+
+  <!-- Error Handling Global -->
+  <script>
+    window.addEventListener('error', function(e) {
+      console.error('Global error:', e.error);
+      if (window.showErrorFallback) {
+        showErrorFallback('Erro inesperado: ' + (e.error?.message || 'Erro desconhecido'));
+      }
+    });
+
+    window.addEventListener('unhandledrejection', function(e) {
+      console.error('Unhandled promise rejection:', e.reason);
+      if (window.showErrorFallback) {
+        showErrorFallback('Erro de promessa: ' + (e.reason?.message || 'Erro desconhecido'));
+      }
+    });
+  </script>
 </body>
 </html>
