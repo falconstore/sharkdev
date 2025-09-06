@@ -5,187 +5,133 @@ export function getFreeProfHTML() {
   return `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Calculadora FreePro</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FreePro</title>
   <style>
-    :root {
-      --primary: #3b82f6;
-      --secondary: #22c55e;
-      --accent: #8b5cf6;
-      --warning: #f59e0b;
-      --danger: #dc2626;
-      --success: #22c55e;
-      --bg-primary: #111827;
-      --bg-secondary: #1f2937;
-      --bg-card: #374151;
-      --text-primary: #f9fafb;
-      --text-secondary: #d1d5db;
-      --text-muted: #9ca3af;
-      --border: #4b5563;
-    }
-
-    [data-theme="light"] {
-      --bg-primary: #f8fafc;
-      --bg-secondary: #f1f5f9;
-      --bg-card: #ffffff;
-      --text-primary: #1e293b;
-      --text-secondary: #475569;
-      --text-muted: #64748b;
-      --border: #e2e8f0;
-    }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
-    html, body {
+    body {
       background: transparent;
-      color: var(--text-primary);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      line-height: 1.5;
+      color: #f9fafb;
+      font-family: system-ui, sans-serif;
       padding: 1rem;
-      margin: 0;
-      overflow: visible;
-      height: auto;
-      transition: color 0.3s ease;
+      line-height: 1.5;
     }
 
-    .calc-header {
+    .title {
       text-align: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .calc-title {
-      font-size: 1.75rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #3b82f6, #22c55e);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      margin-bottom: 0.5rem;
-    }
-
-    .calc-subtitle {
-      color: var(--text-secondary);
-      font-size: 0.875rem;
     }
 
     .card {
       background: rgba(31, 41, 59, 0.8);
-      border: 1px solid var(--border);
-      border-radius: 12px;
+      border: 1px solid #4b5563;
+      border-radius: 8px;
       padding: 1rem;
       margin-bottom: 1rem;
-      backdrop-filter: blur(10px);
-      transition: all 0.3s ease;
-    }
-
-    [data-theme="light"] .card {
-      background: rgba(255, 255, 255, 0.9);
     }
 
     .form-group {
-      margin-bottom: 0.75rem;
+      margin-bottom: 1rem;
     }
 
-    .form-label {
+    .label {
       display: block;
-      font-weight: 600;
       font-size: 0.75rem;
-      color: var(--text-secondary);
-      margin-bottom: 0.375rem;
+      color: #d1d5db;
+      margin-bottom: 0.5rem;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      font-weight: 600;
     }
 
-    .form-control {
+    .input {
       width: 100%;
       padding: 0.75rem;
-      border: 2px solid var(--border);
-      border-radius: 8px;
+      border: 2px solid #4b5563;
+      border-radius: 6px;
       background: rgba(17, 24, 39, 0.8);
-      color: var(--text-primary);
+      color: #f9fafb;
       font-size: 0.875rem;
-      transition: all 0.2s ease;
     }
 
-    [data-theme="light"] .form-control {
-      background: rgba(255, 255, 255, 0.9);
+    .input:focus {
+      outline: none;
+      border-color: #3b82f6;
     }
 
     .btn {
       padding: 0.75rem 1.5rem;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
-      text-transform: uppercase;
       font-size: 0.75rem;
+      text-transform: uppercase;
+      margin: 0.25rem;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      background: linear-gradient(135deg, #3b82f6, #22c55e);
       color: white;
     }
 
     .btn-secondary {
       background: rgba(55, 65, 81, 0.8);
-      color: var(--text-primary);
-      border: 2px solid var(--border);
-      transition: all 0.3s ease;
+      color: #f9fafb;
+      border: 2px solid #4b5563;
     }
 
-    [data-theme="light"] .btn-secondary {
-      background: rgba(255, 255, 255, 0.9);
-    }
-
-    .actions {
-      display: flex;
-      gap: 0.75rem;
-      justify-content: center;
-      margin: 1.5rem 0;
-    }
-
-    .alert {
-      padding: 1rem;
-      border-radius: 8px;
-      margin: 1rem 0;
-      font-weight: 600;
-      display: none;
-    }
-
-    .alert-warning {
-      background: rgba(245, 158, 11, 0.1);
-      border: 2px solid var(--warning);
-      color: #fbbf24;
-    }
-
-    .total-display {
+    .total {
       text-align: center;
       padding: 1.5rem;
       background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 197, 94, 0.05));
-      border: 2px solid var(--primary);
-      border-radius: 12px;
+      border: 2px solid #3b82f6;
+      border-radius: 8px;
       margin: 1rem 0;
     }
 
     .total-value {
-      font-size: 1.75rem;
-      font-weight: 800;
-      color: var(--primary);
-      font-family: ui-monospace, monospace;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #3b82f6;
+      font-family: monospace;
     }
+
+    .actions {
+      text-align: center;
+      margin: 1rem 0;
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: 6px;
+      margin: 1rem 0;
+      background: rgba(245, 158, 11, 0.1);
+      border: 2px solid #f59e0b;
+      color: #fbbf24;
+      display: none;
+    }
+
+    /* Tema claro */
+    [data-theme="light"] body { color: #1e293b; }
+    [data-theme="light"] .card { background: rgba(255, 255, 255, 0.9); border-color: #e2e8f0; }
+    [data-theme="light"] .input { background: rgba(255, 255, 255, 0.9); color: #1e293b; border-color: #e2e8f0; }
+    [data-theme="light"] .btn-secondary { background: rgba(255, 255, 255, 0.9); color: #1e293b; }
   </style>
 </head>
 <body>
-  <div class="calc-header">
-    <h1 class="calc-title">Calculadora Shark FreePro</h1>
-    <p class="calc-subtitle">Otimize seus lucros com freebets de apostas seguras</p>
-  </div>
-
+  <h1 class="title">Calculadora Shark FreePro</h1>
+  
   <div class="card">
     <div class="form-group">
-      <label class="form-label" for="numEntradas">Número de Entradas</label>
-      <select id="numEntradas" class="form-control">
+      <label class="label">Número de Entradas</label>
+      <select id="num" class="input">
         <option value="2">2 Mercados</option>
         <option value="3" selected>3 Mercados</option>
         <option value="4">4 Mercados</option>
@@ -196,95 +142,168 @@ export function getFreeProfHTML() {
   </div>
 
   <div class="card">
-    <h3>Casa Promoção</h3>
+    <h3 style="margin-bottom: 1rem; color: #3b82f6;">Casa Promoção</h3>
+    
     <div class="form-group">
-      <label class="form-label" for="o1">Odd da Casa</label>
-      <input id="o1" class="form-control" placeholder="ex: 3.00" />
+      <label class="label">Odd da Casa</label>
+      <input id="odd" class="input" type="text" placeholder="ex: 3.00">
     </div>
+    
     <div class="form-group">
-      <label class="form-label" for="F">Valor da Freebet</label>
-      <input id="F" class="form-control" placeholder="ex: 50" />
+      <label class="label">Stake Qualificação</label>
+      <input id="stake" class="input" type="text" placeholder="ex: 50">
+    </div>
+    
+    <div class="form-group">
+      <label class="label">Valor da Freebet</label>
+      <input id="freebet" class="input" type="text" placeholder="ex: 50">
+    </div>
+    
+    <div class="form-group">
+      <label class="label">Taxa de Extração (%)</label>
+      <input id="rate" class="input" type="text" placeholder="ex: 70" value="70">
     </div>
   </div>
 
-  <div class="total-display">
-    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.375rem;">Stake Total</div>
-    <div class="total-value" id="k_S">R$ 0,00</div>
+  <div class="total">
+    <div style="font-size: 0.75rem; color: #d1d5db; margin-bottom: 0.5rem;">STAKE TOTAL</div>
+    <div class="total-value" id="result">R$ 0,00</div>
   </div>
 
   <div class="actions">
-    <button class="btn btn-primary" id="calcBtn">Calcular</button>
-    <button class="btn btn-secondary" id="clearBtn">Limpar</button>
+    <button id="calc" class="btn btn-primary">Calcular Estratégia</button>
+    <button id="clear" class="btn btn-secondary">Limpar Dados</button>
   </div>
 
-  <div id="status" class="alert alert-warning"></div>
+  <div id="alert" class="alert"></div>
 
-<script>
-'use strict';
-
-// Sincronização de tema
-(function() {
-  function syncTheme() {
-    try {
-      const parentTheme = parent.document.body.getAttribute('data-theme');
-      if (parentTheme === 'light') {
-        document.body.setAttribute('data-theme', 'light');
-      } else {
-        document.body.removeAttribute('data-theme');
+  <script>
+    console.log('🚀 FreePro iniciando...');
+    
+    // Sincronização de tema simplificada
+    function syncTheme() {
+      try {
+        if (parent && parent.document) {
+          const theme = parent.document.body.getAttribute('data-theme');
+          if (theme === 'light') {
+            document.body.setAttribute('data-theme', 'light');
+          } else {
+            document.body.removeAttribute('data-theme');
+          }
+        }
+      } catch (e) {
+        // Ignora erros de acesso cross-origin
       }
-    } catch (e) {
-      // Fallback
-    }
-  }
-  
-  syncTheme();
-  setInterval(syncTheme, 1000);
-})();
-
-// JavaScript simples
-function $(id) { return document.getElementById(id); }
-
-function calc() {
-  try {
-    const o1 = parseFloat($("o1").value) || 0;
-    const F = parseFloat($("F").value) || 0;
-    
-    if (o1 <= 1) {
-      $("status").style.display = 'block';
-      $("status").textContent = 'Informe uma odd válida';
-      return;
     }
     
-    if (F <= 0) {
-      $("status").style.display = 'block';
-      $("status").textContent = 'Informe o valor da freebet';
-      return;
+    // Elementos
+    const elements = {
+      odd: document.getElementById('odd'),
+      stake: document.getElementById('stake'),
+      freebet: document.getElementById('freebet'),
+      rate: document.getElementById('rate'),
+      result: document.getElementById('result'),
+      alert: document.getElementById('alert'),
+      calc: document.getElementById('calc'),
+      clear: document.getElementById('clear')
+    };
+    
+    // Função para converter números brasileiros
+    function parseNumber(str) {
+      if (!str) return 0;
+      return parseFloat(str.replace(',', '.')) || 0;
     }
     
-    $("status").style.display = 'none';
+    // Função para formatar moeda
+    function formatMoney(value) {
+      return 'R$ ' + value.toFixed(2).replace('.', ',');
+    }
     
-    const total = F * o1;
-    $("k_S").textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+    // Mostrar alerta
+    function showAlert(msg) {
+      elements.alert.textContent = msg;
+      elements.alert.style.display = 'block';
+      setTimeout(() => elements.alert.style.display = 'none', 3000);
+    }
     
-  } catch (error) {
-    console.error('Erro no cálculo:', error);
-    $("status").style.display = 'block';
-    $("status").textContent = 'Erro no cálculo';
-  }
-}
-
-function clear() {
-  $("o1").value = '';
-  $("F").value = '';
-  $("k_S").textContent = 'R$ 0,00';
-  $("status").style.display = 'none';
-}
-
-// Event listeners
-$("calcBtn").addEventListener('click', calc);
-$("clearBtn").addEventListener('click', clear);
-
-console.log('FreePro carregado com sucesso');
-</script>
+    // Cálculo principal
+    function calculate() {
+      try {
+        const odd = parseNumber(elements.odd.value);
+        const stake = parseNumber(elements.stake.value);
+        const freebet = parseNumber(elements.freebet.value);
+        const rate = parseNumber(elements.rate.value) || 70;
+        
+        // Validações básicas
+        if (odd <= 1) {
+          showAlert('Odd deve ser maior que 1.00');
+          return;
+        }
+        
+        if (stake <= 0) {
+          showAlert('Stake deve ser maior que zero');
+          return;
+        }
+        
+        if (freebet <= 0) {
+          showAlert('Valor da freebet deve ser maior que zero');
+          return;
+        }
+        
+        // Cálculo simplificado FreePro
+        const extractionRate = rate / 100;
+        const extractedValue = freebet * extractionRate;
+        const qualificationLoss = stake - (stake * odd * 0.7); // Aproximação
+        const totalStake = stake + Math.abs(qualificationLoss);
+        
+        elements.result.textContent = formatMoney(totalStake);
+        elements.alert.style.display = 'none';
+        
+        console.log('✅ Cálculo realizado:', { odd, stake, freebet, rate, totalStake });
+        
+      } catch (error) {
+        console.error('❌ Erro no cálculo:', error);
+        showAlert('Erro no cálculo: ' + error.message);
+      }
+    }
+    
+    // Limpar campos
+    function clearFields() {
+      elements.odd.value = '';
+      elements.stake.value = '';
+      elements.freebet.value = '';
+      elements.rate.value = '70';
+      elements.result.textContent = 'R$ 0,00';
+      elements.alert.style.display = 'none';
+      console.log('🧹 Campos limpos');
+    }
+    
+    // Event listeners
+    if (elements.calc) {
+      elements.calc.addEventListener('click', calculate);
+      console.log('✅ Botão calcular conectado');
+    }
+    
+    if (elements.clear) {
+      elements.clear.addEventListener('click', clearFields);
+      console.log('✅ Botão limpar conectado');
+    }
+    
+    // Inicialização
+    syncTheme();
+    setInterval(syncTheme, 2000);
+    
+    console.log('✅ FreePro carregado com sucesso!');
+    
+    // Debug info
+    setTimeout(() => {
+      console.log('📊 FreePro Debug:', {
+        elementos: Object.keys(elements).length,
+        temParent: !!parent,
+        temDocument: !!document,
+        bodyTheme: document.body.getAttribute('data-theme')
+      });
+    }, 1000);
+  </script>
 </body>
 </html>`;
