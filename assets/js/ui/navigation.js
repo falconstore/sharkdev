@@ -137,7 +137,7 @@ export class Navigation {
                 <div class="stat-label">Calculadoras Avançadas</div>
               </div>
               <div class="stat-item">
-                <div class="stat-number">5000+</div>
+                <div class="stat-number">2000+</div>
                 <div class="stat-label">Usuários Ativos</div>
               </div>
             </div>
