@@ -1,4 +1,4 @@
-// assets/js/calculators/freepro-content.js - VERSÃO CORRIGIDA
+// assets/js/calculators/freepro-content.js - VERSÃO COM CÁLCULO AUTOMÁTICO
 // HTML completo da calculadora FreePro que roda no iframe
 
 export function getFreeProfHTML() {
@@ -114,6 +114,16 @@ export function getFreeProfHTML() {
       text-transform: uppercase;
       background: linear-gradient(135deg, var(--primary), var(--secondary));
       color: white;
+    }
+
+    .badge-auto {
+      background: linear-gradient(135deg, var(--success), var(--accent));
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
     }
 
     .form-grid {
@@ -237,7 +247,7 @@ export function getFreeProfHTML() {
       font-family: ui-monospace, monospace;
     }
 
-    /* BOTÕES CORRIGIDOS - MESMO TAMANHO E ALINHAMENTO */
+    /* BOTÕES CORRIGIDOS */
     .actions {
       display: flex;
       gap: 0.75rem;
@@ -428,10 +438,14 @@ export function getFreeProfHTML() {
 <body>
   <div class="calc-header">
     <h1 class="calc-title">Calculadora Shark FreePro</h1>
-    <p class="calc-subtitle">Otimize seus lucros com freebets de apostas seguras - estratégias para perder a qualificação e ganhar a freebet</p>
+    <p class="calc-subtitle">Otimize seus lucros com freebets de apostas seguras - cálculo automático em tempo real</p>
   </div>
 
   <div class="card">
+    <div class="card-header">
+      <div class="card-title">Configurações</div>
+      <div class="badge badge-auto">⚡ Auto</div>
+    </div>
     <div class="form-group">
       <label class="form-label" for="numEntradas">Número de Entradas</label>
       <select id="numEntradas" class="form-control">
@@ -452,29 +466,29 @@ export function getFreeProfHTML() {
     <div class="form-grid form-grid-3">
       <div class="form-group">
         <label class="form-label" for="o1">Odd da Casa</label>
-        <input id="o1" class="form-control" placeholder="ex: 3.00" inputmode="decimal" />
+        <input id="o1" class="form-control auto-calc" placeholder="ex: 3.00" inputmode="decimal" />
       </div>
       <div class="form-group">
         <label class="form-label" for="c1">Comissão (%)</label>
-        <input id="c1" class="form-control" placeholder="ex: 0" inputmode="decimal" />
+        <input id="c1" class="form-control auto-calc" placeholder="ex: 0" inputmode="decimal" />
       </div>
       <div class="form-group">
         <label class="form-label" for="s1">Stake Qualificação</label>
-        <input id="s1" class="form-control" placeholder="ex: 50" inputmode="decimal" />
+        <input id="s1" class="form-control auto-calc" placeholder="ex: 50" inputmode="decimal" />
       </div>
     </div>
     <div class="form-grid form-grid-3">
       <div class="form-group">
         <label class="form-label" for="F">Valor da Freebet</label>
-        <input id="F" class="form-control" placeholder="ex: 50" inputmode="decimal" />
+        <input id="F" class="form-control auto-calc" placeholder="ex: 50" inputmode="decimal" />
       </div>
       <div class="form-group">
         <label class="form-label" for="r">Taxa de Extração (%)</label>
-        <input id="r" class="form-control" placeholder="ex: 70" inputmode="decimal" />
+        <input id="r" class="form-control auto-calc" placeholder="ex: 70" inputmode="decimal" />
       </div>
       <div class="form-group">
         <label class="form-label" for="round_step">Arredondamento</label>
-        <select id="round_step" class="form-control">
+        <select id="round_step" class="form-control auto-calc">
           <option value="0.01">R$ 0,01</option>
           <option value="0.10">R$ 0,10</option>
           <option value="0.50">R$ 0,50</option>
@@ -497,7 +511,7 @@ export function getFreeProfHTML() {
   </div>
 
   <div class="actions">
-    <button class="btn btn-primary" id="calcBtn">Calcular Estratégia</button>
+    <button class="btn btn-primary" id="calcBtn">Recalcular Agora</button>
     <button class="btn btn-secondary" id="clearBtn">Limpar Dados</button>
     <button class="btn btn-share" id="shareBtn">🔗 Compartilhar</button>
   </div>
@@ -557,6 +571,10 @@ export function getFreeProfHTML() {
 })();
 
 (function(){
+  // SISTEMA DE CÁLCULO AUTOMÁTICO
+  let autoCalcTimeout = null;
+  let isCalculating = false;
+  
   function $(id){ return document.getElementById(id); }
   function nf(v){ return Number.isFinite(v) ? new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:2}).format(v) : '—'; }
   function toNum(s){ 
@@ -578,6 +596,26 @@ export function getFreeProfHTML() {
     var cc=(Number.isFinite(c)&&c>0)?c/100:0; 
     return 1+(o-1)*(1-cc); 
   }
+
+  // Debounce para otimizar performance
+  function debounce(func, wait) {
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(autoCalcTimeout);
+        autoCalcTimeout = null;
+        func(...args);
+      };
+      clearTimeout(autoCalcTimeout);
+      autoCalcTimeout = setTimeout(later, wait);
+    };
+  }
+
+  // Cálculo automático com debounce
+  const scheduleAutoCalc = debounce(() => {
+    if (!isCalculating) {
+      autoCalc();
+    }
+  }, 300);
 
   function captureCoverageValues(){ 
     var nodes=document.querySelectorAll('#oddsContainer > div'); 
@@ -616,7 +654,7 @@ export function getFreeProfHTML() {
       lOdd.className='form-label';
       lOdd.textContent='Odd'; 
       var iOdd=document.createElement('input'); 
-      iOdd.className='form-control';
+      iOdd.className='form-control auto-calc';
       iOdd.setAttribute('inputmode','decimal'); 
       iOdd.placeholder='ex: 2,50'; 
       iOdd.setAttribute('data-type','odd');
@@ -628,7 +666,7 @@ export function getFreeProfHTML() {
       lCom.className='form-label';
       lCom.textContent='Comissão (%)'; 
       var iCom=document.createElement('input'); 
-      iCom.className='form-control';
+      iCom.className='form-control auto-calc';
       iCom.setAttribute('inputmode','decimal'); 
       iCom.placeholder='ex: 0'; 
       iCom.setAttribute('data-type','comm');
@@ -637,6 +675,7 @@ export function getFreeProfHTML() {
       fLay.className='checkbox-wrapper'; 
       var iLay=document.createElement('input'); 
       iLay.type='checkbox'; 
+      iLay.className='auto-calc';
       iLay.setAttribute('data-type','lay'); 
       var tLay=document.createElement('span'); 
       tLay.textContent='Lay';
@@ -662,6 +701,10 @@ export function getFreeProfHTML() {
       card.appendChild(fieldsDiv);
       c.appendChild(card);
     }
+    
+    // Aplica listeners nos novos elementos
+    bindAutoCalcEvents();
+    scheduleAutoCalc();
   }
 
   function readCoverage(){ 
@@ -677,7 +720,127 @@ export function getFreeProfHTML() {
     return {odds:odds,comm:comm,isLay:isLay}; 
   }
 
-  function calc(){
+  // Cálculo automático (silencioso)
+  function autoCalc() {
+    isCalculating = true;
+    
+    try {
+      hideStatus();
+      var o1=toNum($("o1").value), c1=toNum($("c1").value), n=parseInt($("numEntradas").value||'3',10), 
+          cov=readCoverage(), F=toNum($("F").value), rPerc=toNum($("r").value), s1=toNum($("s1").value);
+      
+      // Se dados insuficientes, limpa resultados sem mostrar erro
+      if(!Number.isFinite(o1)||o1<=1||
+         cov.odds.length!==(n-1)||cov.odds.some(v=>!Number.isFinite(v)||v<=1)||
+         !Number.isFinite(F)||F<0||
+         !Number.isFinite(rPerc)||rPerc<0||rPerc>100||
+         !Number.isFinite(s1)||s1<=0) {
+        
+        $("k_S").textContent='—';
+        $("results").style.display='none';
+        isCalculating = false;
+        return;
+      }
+
+      var o1e=effOdd(o1,c1), r=rPerc/100, rF=r*F;
+      var A=s1*o1e - rF;
+
+      var stakes=[],eBack=[],commFrac=[],oddsOrig=cov.odds.slice();
+      
+      for(var i=0;i<cov.odds.length;i++){
+        var L=cov.odds[i], cfrac=(Number.isFinite(cov.comm[i])&&cov.comm[i]>0)?cov.comm[i]/100:0; 
+        commFrac[i]=cfrac;
+        
+        if(cov.isLay[i]){ 
+          var denom=L-1; 
+          if(!(denom>0)){
+            $("k_S").textContent='—';
+            $("results").style.display='none';
+            isCalculating = false;
+            return;
+          }
+          var eLay=1+(1-cfrac)/denom; 
+          var equivStake=A/eLay; 
+          stakes[i]=equivStake/denom; 
+          eBack[i]=eLay; 
+        } else { 
+          var e=effOdd(L,cov.comm[i]); 
+          eBack[i]=e; 
+          stakes[i]=A/e; 
+        }
+      }
+
+      var step=parseFloat($("round_step").value)||1; 
+      function roundStep(v){return Math.round(v/step)*step;} 
+      stakes=stakes.map(roundStep);
+      
+      // APLICA VALOR MÍNIMO DE R$ 0,50
+      const MIN_STAKE = 0.50;
+      stakes = stakes.map(stake => Math.max(stake, MIN_STAKE));
+      
+      var liabilities=stakes.map((s,i)=>cov.isLay[i]?(cov.odds[i]-1)*s:0);
+      var S=s1+stakes.reduce((a,s,idx)=>a+(cov.isLay[idx]?(cov.odds[idx]-1)*s:s),0);
+
+      var net1=s1*o1e-S;
+
+      var defs=[], nets=[];
+      for(var win=0;win<stakes.length;win++){
+        var deficit;
+        if(cov.isLay[win]){ 
+          var ganhoLay=stakes[win]*(1-commFrac[win]); 
+          var liab=liabilities[win]; 
+          deficit=ganhoLay-(S-liab); 
+        } else { 
+          deficit=(stakes[win]*eBack[win]) - S; 
+        }
+        defs[win]=deficit;
+        nets[win]=deficit + rF;
+      }
+
+      $("k_S").textContent=nf(S);
+
+      var tb=$("tbody"); 
+      tb.innerHTML='';
+      
+      function oddf(v){return Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v):'—';}
+      function pf(v){return Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+'%':'—';}
+
+      var rows=[[ '1 vence (Casa Promo)', o1, c1, s1, net1, net1, false, 0, '' ]];
+      for(var k=0;k<stakes.length;k++){
+        var isLay=cov.isLay[k]; 
+        var liab=liabilities[k];
+        rows.push([ (k+2)+' vence', oddsOrig[k], cov.comm[k], stakes[k], defs[k], nets[k], isLay, liab, '' ]);
+      }
+
+      for(var rix=0; rix<rows.length; rix++){
+        var nome=rows[rix][0], odd=rows[rix][1], comm=rows[rix][2], stake=rows[rix][3], 
+            deficit=rows[rix][4], final=rows[rix][5], isLayRow=rows[rix][6], liabRow=rows[rix][7];
+        var apostarCell = '<strong>'+nf(stake)+'</strong>' + (isLayRow ? (' <span class="text-small">(resp. '+nf(liabRow)+')</span>') : '');
+        var deficitClass = deficit >= 0 ? 'profit-positive' : 'profit-negative';
+        var finalClass = final >= 0 ? 'profit-positive' : 'profit-negative';
+        
+        var tr=document.createElement('tr');
+        tr.innerHTML = '<td><strong>'+nome+'</strong></td>'+
+                       '<td>'+oddf(odd)+'</td>'+
+                       '<td>'+pf(comm)+'</td>'+
+                       '<td>'+apostarCell+'</td>'+
+                       '<td class="'+deficitClass+'"><strong>'+nf(deficit)+'</strong></td>'+
+                       '<td class="'+finalClass+'"><strong>'+nf(final)+'</strong></td>';
+        tb.appendChild(tr);
+      }
+      $("results").style.display='block';
+      
+    } catch (error) {
+      console.warn('Erro no cálculo automático:', error);
+      $("k_S").textContent='—';
+      $("results").style.display='none';
+    }
+    
+    isCalculating = false;
+  }
+
+  // Cálculo manual (com validação e erros)
+  function manualCalc(){
     hideStatus();
     var o1=toNum($("o1").value), c1=toNum($("c1").value), n=parseInt($("numEntradas").value||'3',10), 
         cov=readCoverage(), F=toNum($("F").value), rPerc=toNum($("r").value), s1=toNum($("s1").value);
@@ -688,100 +851,42 @@ export function getFreeProfHTML() {
     if(!Number.isFinite(rPerc)||rPerc<0||rPerc>100){ showStatus('warning','Taxa de extração deve estar entre 0-100%'); return }
     if(!Number.isFinite(s1)||s1<=0){ showStatus('warning','Stake de qualificação inválido'); return }
 
-    var o1e=effOdd(o1,c1), r=rPerc/100, rF=r*F;
-    var A=s1*o1e - rF;
-
-    var stakes=[],eBack=[],commFrac=[],oddsOrig=cov.odds.slice();
-    
-    for(var i=0;i<cov.odds.length;i++){
-      var L=cov.odds[i], cfrac=(Number.isFinite(cov.comm[i])&&cov.comm[i]>0)?cov.comm[i]/100:0; 
-      commFrac[i]=cfrac;
-      
-      if(cov.isLay[i]){ 
-        var denom=L-1; 
-        if(!(denom>0)){showStatus('warning','Odd LAY inválida'); return} 
-        var eLay=1+(1-cfrac)/denom; 
-        var equivStake=A/eLay; 
-        stakes[i]=equivStake/denom; 
-        eBack[i]=eLay; 
-      } else { 
-        var e=effOdd(L,cov.comm[i]); 
-        eBack[i]=e; 
-        stakes[i]=A/e; 
-      }
-    }
-
-    var step=parseFloat($("round_step").value)||1; 
-    function roundStep(v){return Math.round(v/step)*step;} 
-    stakes=stakes.map(roundStep);
-    
-    // APLICA VALOR MÍNIMO DE R$ 0,50
-    const MIN_STAKE = 0.50;
-    stakes = stakes.map(stake => Math.max(stake, MIN_STAKE));
-    
-    var liabilities=stakes.map((s,i)=>cov.isLay[i]?(cov.odds[i]-1)*s:0);
-    var S=s1+stakes.reduce((a,s,idx)=>a+(cov.isLay[idx]?(cov.odds[idx]-1)*s:s),0);
-
-    var net1=s1*o1e-S;
-
-    var defs=[], nets=[];
-    for(var win=0;win<stakes.length;win++){
-      var deficit;
-      if(cov.isLay[win]){ 
-        var ganhoLay=stakes[win]*(1-commFrac[win]); 
-        var liab=liabilities[win]; 
-        deficit=ganhoLay-(S-liab); 
-      } else { 
-        deficit=(stakes[win]*eBack[win]) - S; 
-      }
-      defs[win]=deficit;
-      nets[win]=deficit + rF;
-    }
-
-    $("k_S").textContent=nf(S);
-
-    var tb=$("tbody"); 
-    tb.innerHTML='';
-    
-    function oddf(v){return Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v):'—';}
-    function pf(v){return Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+'%':'—';}
-
-    var rows=[[ '1 vence (Casa Promo)', o1, c1, s1, net1, net1, false, 0, '' ]];
-    for(var k=0;k<stakes.length;k++){
-      var isLay=cov.isLay[k]; 
-      var liab=liabilities[k];
-      rows.push([ (k+2)+' vence', oddsOrig[k], cov.comm[k], stakes[k], defs[k], nets[k], isLay, liab, '' ]);
-    }
-
-    for(var rix=0; rix<rows.length; rix++){
-      var nome=rows[rix][0], odd=rows[rix][1], comm=rows[rix][2], stake=rows[rix][3], 
-          deficit=rows[rix][4], final=rows[rix][5], isLayRow=rows[rix][6], liabRow=rows[rix][7];
-      var apostarCell = '<strong>'+nf(stake)+'</strong>' + (isLayRow ? (' <span class="text-small">(resp. '+nf(liabRow)+')</span>') : '');
-      var deficitClass = deficit >= 0 ? 'profit-positive' : 'profit-negative';
-      var finalClass = final >= 0 ? 'profit-positive' : 'profit-negative';
-      
-      var tr=document.createElement('tr');
-      tr.innerHTML = '<td><strong>'+nome+'</strong></td>'+
-                     '<td>'+oddf(odd)+'</td>'+
-                     '<td>'+pf(comm)+'</td>'+
-                     '<td>'+apostarCell+'</td>'+
-                     '<td class="'+deficitClass+'"><strong>'+nf(deficit)+'</strong></td>'+
-                     '<td class="'+finalClass+'"><strong>'+nf(final)+'</strong></td>';
-      tb.appendChild(tr);
-    }
-    $("results").style.display='block';
+    // Chama o cálculo automático se validação passou
+    autoCalc();
   }
 
-  $("numEntradas").addEventListener('change', renderOddsInputs);
-  $("calcBtn").addEventListener('click', calc);
-  $("clearBtn").addEventListener('click', function(){ 
+  function clearAll() {
     ["o1","c1","F","r","s1"].forEach(id=>$(id).value=''); 
     $("tbody").innerHTML=''; 
     $("results").style.display='none'; 
     $("k_S").textContent='—'; 
     hideStatus(); 
     renderOddsInputs(); 
-  });
+  }
+
+  // Aplica listeners de cálculo automático
+  function bindAutoCalcEvents() {
+    // Remove listeners antigos
+    document.querySelectorAll('.auto-calc').forEach(el => {
+      el.removeEventListener('input', scheduleAutoCalc);
+      el.removeEventListener('change', scheduleAutoCalc);
+    });
+    
+    // Aplica novos listeners
+    document.querySelectorAll('.auto-calc').forEach(el => {
+      if (el.type === 'checkbox') {
+        el.addEventListener('change', scheduleAutoCalc);
+      } else {
+        el.addEventListener('input', scheduleAutoCalc);
+        el.addEventListener('change', scheduleAutoCalc);
+      }
+    });
+  }
+
+  // Event listeners principais
+  $("numEntradas").addEventListener('change', renderOddsInputs);
+  $("calcBtn").addEventListener('click', manualCalc);
+  $("clearBtn").addEventListener('click', clearAll);
 
   // Botão de compartilhamento
   $("shareBtn").addEventListener('click', function(){
@@ -796,8 +901,13 @@ export function getFreeProfHTML() {
     }
   });
 
+  // Inicialização
   window.addEventListener('DOMContentLoaded', function(){
     renderOddsInputs();
+    bindAutoCalcEvents();
+    
+    // Cálculo inicial se houver dados
+    setTimeout(scheduleAutoCalc, 500);
   });
 })();
 </script>
