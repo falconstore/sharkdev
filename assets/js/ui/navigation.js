@@ -1,5 +1,5 @@
 // assets/js/ui/navigation.js
-// Sistema de navegação completo - VERSÃO CORRIGIDA COMPLETA
+// Sistema de navegação completo - VERSÃO COM ÍCONES REAIS
 
 export class Navigation {
   constructor() {
@@ -137,7 +137,7 @@ export class Navigation {
                 <div class="stat-label">Calculadoras Avançadas</div>
               </div>
               <div class="stat-item">
-                <div class="stat-number">2000+</div>
+                <div class="stat-number">5000+</div>
                 <div class="stat-label">Usuários Ativos</div>
               </div>
             </div>
@@ -294,12 +294,14 @@ export class Navigation {
             
             <!-- Telegram -->
             <div class="channel-card telegram">
-              <div class="channel-icon">💬</div>
+              <div class="channel-icon">
+                <img src="assets/images/telegrama.png" alt="Telegram" width="48" height="48">
+              </div>
               <div class="channel-content">
                 <h3>Grupo Telegram FREE</h3>
-                <p>Comunidade ativa com +2000 membros</p>
+                <p>Comunidade ativa com +5000 membros</p>
                 <div class="channel-benefits">
-                  <span>✅ Procedimentos gratuitos</span>
+                  <span>✅ Estratégias gratuitas</span>
                   <span>✅ Comunidade ativa</span>
                   <span>✅ Suporte da equipe</span>
                 </div>
@@ -311,7 +313,9 @@ export class Navigation {
 
             <!-- Instagram -->
             <div class="channel-card instagram">
-              <div class="channel-icon">📱</div>
+              <div class="channel-icon">
+                <img src="assets/images/instagram.png" alt="Instagram" width="48" height="48">
+              </div>
               <div class="channel-content">
                 <h3>Instagram Oficial</h3>
                 <p>Conteúdo exclusivo e novidades</p>
@@ -328,7 +332,9 @@ export class Navigation {
 
             <!-- YouTube -->
             <div class="channel-card youtube">
-              <div class="channel-icon">📺</div>
+              <div class="channel-icon">
+                <img src="assets/images/youtube.png" alt="YouTube" width="48" height="48">
+              </div>
               <div class="channel-content">
                 <h3>Canal YouTube</h3>
                 <p>Tutoriais em vídeo e conteúdo exclusivo</p>
@@ -337,7 +343,7 @@ export class Navigation {
                   <span>✅ Estratégias visuais</span>
                   <span>✅ Lives exclusivas</span>
                 </div>
-                <a href="https://www.youtube.com/@sharkuniverse" target="_blank" class="channel-btn">
+                <a href="https://youtube.com/@sharkgreen" target="_blank" class="channel-btn">
                   Assistir Canal
                 </a>
               </div>
@@ -357,7 +363,7 @@ export class Navigation {
                 <h3>Suporte Procedimentos</h3>
                 <p>Dúvidas sobre estratégias e procedimentos</p>
                 <div class="support-features">
-                  <span>⏱️ Resposta em até 5 minutos, o mais rápido e eficiente do Brasil</span>
+                  <span>⏱️ Resposta em 2-4h</span>
                   <span>🎯 Especialistas em arbitragem</span>
                   <span>📚 Tutoriais personalizados</span>
                 </div>
@@ -373,9 +379,9 @@ export class Navigation {
                 <h3>Suporte Financeiro</h3>
                 <p>Questões sobre pagamentos e assinaturas</p>
                 <div class="support-features">
-                  <span>💳 Pagamentos </span>
+                  <span>💳 Pagamentos e reembolsos</span>
                   <span>🔄 Renovações e upgrades</span>
-                  <span>📊 Planos e Preços</span>
+                  <span>📊 Planos e pricing</span>
                 </div>
                 <a href="https://t.me/SuporteSharkGreen_financeiro" target="_blank" class="support-btn">
                   Abrir Suporte
