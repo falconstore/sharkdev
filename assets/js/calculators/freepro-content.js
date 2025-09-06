@@ -1,5 +1,5 @@
-// assets/js/calculators/freepro-content.js - CÓDIGO FINAL CORRIGIDO
-// Substitua todo o conteúdo do seu arquivo por este código
+// assets/js/calculators/freepro-content.js - VERSÃO LIMPA SEM ERROS
+// HTML completo da calculadora FreePro que roda no iframe
 
 export function getFreeProfHTML() {
   return `<!DOCTYPE html>
@@ -534,7 +534,7 @@ export function getFreeProfHTML() {
 'use strict';
 
 // Sincronização de tema com parent
-(() => {
+(function() {
   function syncTheme() {
     try {
       const parentTheme = parent.document.body.getAttribute('data-theme');
@@ -563,8 +563,8 @@ export function getFreeProfHTML() {
 
 (function(){
   // SISTEMA DE CÁLCULO AUTOMÁTICO
-  let autoCalcTimeout = null;
-  let isCalculating = false;
+  var autoCalcTimeout = null;
+  var isCalculating = false;
   
   function $(id){ return document.getElementById(id); }
   function nf(v){ return Number.isFinite(v) ? new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:2}).format(v) : '—'; }
@@ -572,7 +572,7 @@ export function getFreeProfHTML() {
     if(s===undefined||s===null) return NaN; 
     var str=String(s).trim(); 
     if(!str) return NaN; 
-    if(str.indexOf(',')!==-1 && str.indexOf('.')!==-1) return parseFloat(str.replace(/\\./g,'').replace(',','.')); 
+    if(str.indexOf(',')!==-1 && str.indexOf('.')!==-1) return parseFloat(str.replace(/\\.|\,/g, function(match) { return match === ',' ? '.' : ''; })); 
     if(str.indexOf(',')!==-1) return parseFloat(str.replace(',','.')); 
     return parseFloat(str); 
   }
@@ -590,11 +590,12 @@ export function getFreeProfHTML() {
 
   // Debounce para otimizar performance
   function debounce(func, wait) {
-    return function executedFunction(...args) {
-      const later = () => {
+    return function executedFunction() {
+      var args = Array.prototype.slice.call(arguments);
+      var later = function() {
         clearTimeout(autoCalcTimeout);
         autoCalcTimeout = null;
-        func(...args);
+        func.apply(null, args);
       };
       clearTimeout(autoCalcTimeout);
       autoCalcTimeout = setTimeout(later, wait);
@@ -602,7 +603,7 @@ export function getFreeProfHTML() {
   }
 
   // Cálculo automático com debounce
-  const scheduleAutoCalc = debounce(() => {
+  var scheduleAutoCalc = debounce(function() {
     if (!isCalculating) {
       autoCalc();
     }
@@ -722,7 +723,7 @@ export function getFreeProfHTML() {
       
       // Se dados insuficientes, limpa resultados sem mostrar erro
       if(!Number.isFinite(o1)||o1<=1||
-         cov.odds.length!==(n-1)||cov.odds.some(v=>!Number.isFinite(v)||v<=1)||
+         cov.odds.length!==(n-1)||cov.odds.some(function(v){return !Number.isFinite(v)||v<=1;})||
          !Number.isFinite(F)||F<0||
          !Number.isFinite(rPerc)||rPerc<0||rPerc>100||
          !Number.isFinite(s1)||s1<=0) {
@@ -766,11 +767,11 @@ export function getFreeProfHTML() {
       stakes=stakes.map(roundStep);
       
       // APLICA VALOR MÍNIMO DE R$ 0,50
-      const MIN_STAKE = 0.50;
-      stakes = stakes.map(stake => Math.max(stake, MIN_STAKE));
+      var MIN_STAKE = 0.50;
+      stakes = stakes.map(function(stake) { return Math.max(stake, MIN_STAKE); });
       
-      var liabilities=stakes.map((s,i)=>cov.isLay[i]?(cov.odds[i]-1)*s:0);
-      var S=s1+stakes.reduce((a,s,idx)=>a+(cov.isLay[idx]?(cov.odds[idx]-1)*s:s),0);
+      var liabilities=stakes.map(function(s,i){return cov.isLay[i]?(cov.odds[i]-1)*s:0;});
+      var S=s1+stakes.reduce(function(a,s,idx){return a+(cov.isLay[idx]?(cov.odds[idx]-1)*s:s);},0);
 
       var net1=s1*o1e-S;
 
@@ -792,34 +793,15 @@ export function getFreeProfHTML() {
 
       // CÓDIGO CORRIGIDO PARA TABELA COM RESPONSABILIDADE
       // Verifica se há apostas LAY para mostrar coluna de responsabilidade
-      var hasLayBets = cov.isLay.some(lay => lay);
+      var hasLayBets = cov.isLay.some(function(lay) { return lay; });
       
       // Atualiza cabeçalho da tabela dinamicamente
       var thead = document.querySelector('.results-table thead');
       var headerHTML = '';
       if (hasLayBets) {
-        headerHTML = \`
-          <tr>
-            <th>Cenário</th>
-            <th>Odd</th>
-            <th>Comissão</th>
-            <th>Apostar</th>
-            <th>Responsabilidade</th>
-            <th>Déficit</th>
-            <th>Lucro Final</th>
-          </tr>
-        \`;
+        headerHTML = '<tr><th>Cenário</th><th>Odd</th><th>Comissão</th><th>Apostar</th><th>Responsabilidade</th><th>Déficit</th><th>Lucro Final</th></tr>';
       } else {
-        headerHTML = \`
-          <tr>
-            <th>Cenário</th>
-            <th>Odd</th>
-            <th>Comissão</th>
-            <th>Apostar</th>
-            <th>Déficit</th>
-            <th>Lucro Final</th>
-          </tr>
-        \`;
+        headerHTML = '<tr><th>Cenário</th><th>Odd</th><th>Comissão</th><th>Apostar</th><th>Déficit</th><th>Lucro Final</th></tr>';
       }
       thead.innerHTML = headerHTML;
 
@@ -880,7 +862,7 @@ export function getFreeProfHTML() {
         cov=readCoverage(), F=toNum($("F").value), rPerc=toNum($("r").value), s1=toNum($("s1").value);
     
     if(!Number.isFinite(o1)||o1<=1){ showStatus('warning','Odd inválida para Casa Promo'); return }
-    if(cov.odds.length!==(n-1)||cov.odds.some(v=>!Number.isFinite(v)||v<=1)){ showStatus('warning','Informe '+(n-1)+' odds válidas para coberturas'); return }
+    if(cov.odds.length!==(n-1)||cov.odds.some(function(v){return !Number.isFinite(v)||v<=1;})){ showStatus('warning','Informe '+(n-1)+' odds válidas para coberturas'); return }
     if(!Number.isFinite(F)||F<0){ showStatus('warning','Valor da Freebet inválido'); return }
     if(!Number.isFinite(rPerc)||rPerc<0||rPerc>100){ showStatus('warning','Taxa de extração deve estar entre 0-100%'); return }
     if(!Number.isFinite(s1)||s1<=0){ showStatus('warning','Stake de qualificação inválido'); return }
@@ -891,7 +873,7 @@ export function getFreeProfHTML() {
   }
 
   function clearAll() {
-    ["o1","c1","F","r","s1"].forEach(id=>$(id).value=''); 
+    ["o1","c1","F","r","s1"].forEach(function(id){ $(id).value=''; }); 
     $("tbody").innerHTML=''; 
     $("results").style.display='none'; 
     $("k_S").textContent='—'; 
@@ -902,20 +884,21 @@ export function getFreeProfHTML() {
   // Aplica listeners de cálculo automático
   function bindAutoCalcEvents() {
     // Remove listeners antigos
-    document.querySelectorAll('.auto-calc').forEach(el => {
-      el.removeEventListener('input', scheduleAutoCalc);
-      el.removeEventListener('change', scheduleAutoCalc);
-    });
+    var elements = document.querySelectorAll('.auto-calc');
+    for(var i = 0; i < elements.length; i++) {
+      elements[i].removeEventListener('input', scheduleAutoCalc);
+      elements[i].removeEventListener('change', scheduleAutoCalc);
+    }
     
     // Aplica novos listeners
-    document.querySelectorAll('.auto-calc').forEach(el => {
-      if (el.type === 'checkbox') {
-        el.addEventListener('change', scheduleAutoCalc);
+    for(var j = 0; j < elements.length; j++) {
+      if (elements[j].type === 'checkbox') {
+        elements[j].addEventListener('change', scheduleAutoCalc);
       } else {
-        el.addEventListener('input', scheduleAutoCalc);
-        el.addEventListener('change', scheduleAutoCalc);
+        elements[j].addEventListener('input', scheduleAutoCalc);
+        elements[j].addEventListener('change', scheduleAutoCalc);
       }
-    });
+    }
   }
 
   // Event listeners principais
@@ -947,6 +930,5 @@ export function getFreeProfHTML() {
 })();
 </script>
 </body>
-</html>\`;
+</html>`;
 }
-  }
