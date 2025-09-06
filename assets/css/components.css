@@ -82,9 +82,12 @@
   letter-spacing: 0.05em;
 }
 
-/* === NAVEGAÇÃO === */
+/* === NAVEGAÇÃO CENTRALIZADA === */
 .main-navigation {
-  margin-right: 2rem;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 1.5rem 0;
 }
 
 .nav-tabs {
@@ -94,6 +97,7 @@
   border-radius: 12px;
   padding: 0.25rem;
   border: 1px solid var(--border);
+  margin: 0;
 }
 
 [data-theme="light"] .nav-tabs {
@@ -111,12 +115,18 @@
   transition: all 0.2s ease;
   font-size: 0.875rem;
   white-space: nowrap;
+  min-width: auto;
 }
 
 .nav-tab.active {
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
   box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.nav-tab:hover:not(.active) {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--text-primary);
 }
 
 /* === BOTÕES === */
@@ -1172,12 +1182,19 @@
 /* === RESPONSIVIDADE === */
 @media (max-width: 768px) {
   .main-navigation {
-    margin-right: 0;
-    margin-bottom: 1rem;
+    margin: 1rem 0;
   }
-
+  
   .nav-tabs {
     width: 100%;
+    max-width: 100%;
+  }
+  
+  .nav-tab {
+    flex: 1;
+    text-align: center;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8125rem;
   }
 
   .tabs-container {
@@ -1259,6 +1276,11 @@
 }
 
 @media (max-width: 480px) {
+  .nav-tab {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
   .stats-grid {
     grid-template-columns: 1fr;
     gap: 0.5rem;
@@ -1287,11 +1309,6 @@
 
   .house-card {
     padding: 0.75rem;
-  }
-
-  .nav-tab {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.8125rem;
   }
 
   .hero-title {
