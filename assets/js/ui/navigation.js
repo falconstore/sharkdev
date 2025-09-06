@@ -357,7 +357,7 @@ export class Navigation {
                 <h3>Suporte Procedimentos</h3>
                 <p>Dúvidas sobre estratégias e procedimentos</p>
                 <div class="support-features">
-                  <span>⏱️ Resposta em 2-4h</span>
+                  <span>⏱️ Resposta em até 5 minutos, o mais rápido e eficiente do Brasil</span>
                   <span>🎯 Especialistas em arbitragem</span>
                   <span>📚 Tutoriais personalizados</span>
                 </div>
