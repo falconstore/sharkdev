@@ -299,7 +299,7 @@ export class Navigation {
                 <h3>Grupo Telegram FREE</h3>
                 <p>Comunidade ativa com +5000 membros</p>
                 <div class="channel-benefits">
-                  <span>✅ Estratégias gratuitas</span>
+                  <span>✅ Procedimentos gratuitos</span>
                   <span>✅ Comunidade ativa</span>
                   <span>✅ Suporte da equipe</span>
                 </div>
@@ -373,9 +373,9 @@ export class Navigation {
                 <h3>Suporte Financeiro</h3>
                 <p>Questões sobre pagamentos e assinaturas</p>
                 <div class="support-features">
-                  <span>💳 Pagamentos e reembolsos</span>
+                  <span>💳 Pagamentos </span>
                   <span>🔄 Renovações e upgrades</span>
-                  <span>📊 Planos e pricing</span>
+                  <span>📊 Planos e Preços</span>
                 </div>
                 <a href="https://t.me/SuporteSharkGreen_financeiro" target="_blank" class="support-btn">
                   Abrir Suporte
