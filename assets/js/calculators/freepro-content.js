@@ -509,8 +509,7 @@ export function getFreeProfHTML() {
   </div>
 
   <div class="actions">
-    <button class="btn btn-primary" id="calcBtn">Recalcular Agora</button>
-    <button class="btn btn-secondary" id="clearBtn">Limpar Dados</button>
+      <button class="btn btn-secondary" id="clearBtn">Limpar Dados</button>
     <button class="btn btn-share" id="shareBtn">🔗 Compartilhar</button>
   </div>
 
@@ -888,7 +887,6 @@ export function getFreeProfHTML() {
 
   // Event listeners principais
   $("numEntradas").addEventListener('change', renderOddsInputs);
-  $("calcBtn").addEventListener('click', manualCalc);
   $("clearBtn").addEventListener('click', clearAll);
 
   // Botão de compartilhamento
