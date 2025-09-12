@@ -1,3 +1,6 @@
+// assets/js/calculators/casas-regulamentadas.js
+// Controlador da página Casas Regulamentadas
+
 export class CasasRegulamentadas {
   constructor() {
     this.dados = [];
@@ -12,18 +15,11 @@ export class CasasRegulamentadas {
     this.carregarDados();
     this.initialized = true;
     
-    // Escuta eventos de mudança de aba
-    document.addEventListener('tabChanged', (e) => {
-      if (e.detail.tabName === 'casas-regulamentadas') {
-        this.onTabActivated();
-      }
-    });
-
     console.log('CasasRegulamentadas controller inicializado');
   }
 
-  onTabActivated() {
-    const container = document.querySelector('#panel-3 #casas-content');
+  onPageActivated() {
+    const container = document.querySelector('#casas-content');
     if (container && !container.innerHTML.trim()) {
       this.render();
       this.bindEvents();
@@ -33,7 +29,7 @@ export class CasasRegulamentadas {
   }
 
   carregarDados() {
-    // Dados das empresas autorizadas
+    // Dados das empresas autorizadas pelo Ministério da Fazenda
     const dadosManuais = [
        {req:"0001/2024",portaria:"SPA/MF nº 246, de 07/02/2025",empresa:"KAIZEN GAMING BRASIL LTDA",cnpj:"46.786.961/0001-74",marca:"BETANO",dominio:"betano.bet.br"},
     {req:"0002/2024",portaria:"SPA/MF nº 2.090, de 30/12/2024",empresa:"SPRBT INTERACTIVE BRASIL LTDA",cnpj:"54.071.596/0001-40",marca:"SUPERBET",dominio:"superbet.bet.br"},
@@ -295,7 +291,7 @@ export class CasasRegulamentadas {
     {req:"0118/2024",portaria:"SPA/MF nº 265, de 07/02/2025",empresa:"NEXUS INTERNATIONAL LTDA",cnpj:"55.078.134/0001-17",marca:"MEGAPOSTA",dominio:"megaposta.bet.br"},
   ];
 
-    this.dados = this.consolidarDados(dadosManuais);
+      this.dados = this.consolidarDados(dadosManuais);
     this.dadosFiltrados = [...this.dados];
   }
 
@@ -332,14 +328,14 @@ export class CasasRegulamentadas {
   }
 
   render() {
-    const container = document.querySelector('#panel-3 #casas-content');
+    const container = document.querySelector('#casas-content');
     if (!container) return;
 
     container.innerHTML = `
       <div class="calc-header">
         <h1 style="font-size: 1.75rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; text-align: center;">Casas Regulamentadas</h1>
-        <p style="color: var(--text-secondary); font-size: 0.875rem; text-align: center;">
-          Empresas autorizadas a explorar a modalidade lotérica de aposta de quota fixa a partir de 1º de janeiro de 2025 em âmbito nacional
+        <p style="color: var(--text-secondary); font-size: 0.875rem; text-align: center; max-width: 800px; margin: 0 auto;">
+          Empresas autorizadas a explorar a modalidade lotérica de aposta de quota fixa a partir de 1º de janeiro de 2025 em âmbito nacional, conforme as Leis nº 13.756/2018 e nº 14.790/2023 e regulamentação do Ministério da Fazenda.
         </p>
       </div>
 
