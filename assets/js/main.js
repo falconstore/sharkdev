@@ -5,6 +5,7 @@ import { Theme } from './ui/theme.js';
 import { TabSystem } from './ui/tabs.js';
 import { ArbiPro } from './calculators/arbipro.js';
 import { FreePro } from './calculators/freepro.js';
+import { CasasRegulamentadas } from './calculators/casas-regulamentadas.js';
 
 class App {
   constructor() {
@@ -14,6 +15,8 @@ class App {
     this.freePro = null;
     this.navigation = null;
     this.shareUI = null;
+    this.casasRegulamentadas = null;
+
   }
 
   async init() {
@@ -135,9 +138,11 @@ class App {
       // Inicializa calculadoras
       this.arbiPro = new ArbiPro();
       this.freePro = new FreePro();
+      this.casasRegulamentadas = new CasasRegulamentadas(); // ← NOVA LINHA
 
       await this.arbiPro.init();
       this.freePro.init();
+      this.casasRegulamentadas.init(); // ← NOVA LINHA
       
       // Carrega configuração compartilhada se disponível
       if (this.shareUI && this.shareUI.loadSharedConfig) {
