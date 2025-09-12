@@ -84,38 +84,47 @@ class App {
         </div>
       ` : '';
 
-      const html = `
-        ${navigationTabs}
-        
-        <div id="calculadoras-content">
-          <div role="tablist" aria-label="Calculadoras" class="tabs-container">
-            <button id="tabBtn1" role="tab" aria-selected="true" aria-controls="panel-1" class="tab" tabindex="0">
-              Calculadora ArbiPro
-            </button>
-            <button id="tabBtn2" role="tab" aria-selected="false" aria-controls="panel-2" class="tab" tabindex="-1">
-              Calculadora FreePro
-            </button>
-          </div>
+     const html = `
+  ${navigationTabs}
+  
+  <div id="calculadoras-content">
+    <div role="tablist" aria-label="Calculadoras" class="tabs-container">
+      <button id="tabBtn1" role="tab" aria-selected="true" aria-controls="panel-1" class="tab" tabindex="0">
+        Calculadora ArbiPro
+      </button>
+      <button id="tabBtn2" role="tab" aria-selected="false" aria-controls="panel-2" class="tab" tabindex="-1">
+        Calculadora FreePro
+      </button>
+      <button id="tabBtn3" role="tab" aria-selected="false" aria-controls="panel-3" class="tab" tabindex="-1">
+        Casas Regulamentadas
+      </button>
+    </div>
 
-          <section id="panel-1" role="tabpanel" aria-labelledby="tabBtn1">
-            <div class="panel">
-              <div id="app"></div>
-            </div>
-          </section>
+    <section id="panel-1" role="tabpanel" aria-labelledby="tabBtn1">
+      <div class="panel">
+        <div id="app"></div>
+      </div>
+    </section>
 
-          <section id="panel-2" role="tabpanel" aria-labelledby="tabBtn2" hidden>
-            <div class="panel">
-              <iframe id="calc2frame" title="Calculadora FreePro" 
-                style="width: 100%; height: auto; border: none; border-radius: 16px; background: transparent; display: block; overflow: hidden;" 
-                scrolling="no">
-              </iframe>
-            </div>
-          </section>
-        </div>
-        
-        <div id="sobre-content" class="page-content hidden"></div>
-        <div id="contato-content" class="page-content hidden"></div>
-      `;
+    <section id="panel-2" role="tabpanel" aria-labelledby="tabBtn2" hidden>
+      <div class="panel">
+        <iframe id="calc2frame" title="Calculadora FreePro" 
+          style="width: 100%; height: auto; border: none; border-radius: 16px; background: transparent; display: block; overflow: hidden;" 
+          scrolling="no">
+        </iframe>
+      </div>
+    </section>
+
+    <section id="panel-3" role="tabpanel" aria-labelledby="tabBtn3" hidden>
+      <div class="panel">
+        <div id="casas-content"></div>
+      </div>
+    </section>
+  </div>
+  
+  <div id="sobre-content" class="page-content hidden"></div>
+  <div id="contato-content" class="page-content hidden"></div>
+`;
       
       container.innerHTML = html;
 
