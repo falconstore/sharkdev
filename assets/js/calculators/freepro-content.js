@@ -525,8 +525,8 @@ export function getFreeProfHTML() {
       
       <!-- Toggle Freebet/Cashback -->
       <div class="toggle-container">
-        <button id="modeFreebetBtn" class="toggle-option active">🎁 Freebet</button>
-        <button id="modeCashbackBtn" class="toggle-option">💰 Cashback</button>
+        <button id="modeFreebetBtn" type="button" class="toggle-option active">🎁 Freebet</button>
+        <button id="modeCashbackBtn" type="button" class="toggle-option">💰 Cashback</button>
       </div>
       
       <div class="form-group">
@@ -688,12 +688,21 @@ export function getFreeProfHTML() {
 
   // Alterna modo
   function setMode(mode) {
-    currentMode = mode;
-    document.body.className = currentMode === 'cashback' ? 'mode-cashback' : '';
-    $('modeFreebetBtn').classList.toggle('active', mode === 'freebet');
-    $('modeCashbackBtn').classList.toggle('active', mode === 'cashback');
-    clearAll();
-  }
+  currentMode = mode;
+
+  // só liga/desliga a classe, sem apagar outras
+  document.body.classList.toggle('mode-cashback', mode === 'cashback');
+
+  // estado visual dos botões
+  $('modeFreebetBtn').classList.toggle('active', mode === 'freebet');
+  $('modeCashbackBtn').classList.toggle('active', mode === 'cashback');
+
+  // limpa e re-renderiza campos do modo escolhido
+  clearAll();
+
+  // dispara um recálculo (se já houver dados)
+  setTimeout(scheduleAutoCalc, 0);
+}
 
   // Debounce para otimizar performance
   function debounce(func, wait) {
@@ -1192,10 +1201,16 @@ function autoCalcCashback() {
   });
 
   window.addEventListener('DOMContentLoaded', function(){
-    renderOddsInputs();
-    bindAutoCalcEvents();
-    setTimeout(scheduleAutoCalc, 500);
-  });
+  renderOddsInputs();
+  bindAutoCalcEvents();
+
+  // LIGAR AQUI ↓
+  $('modeFreebetBtn') && $('modeFreebetBtn').addEventListener('click', function(){ setMode('freebet'); });
+  $('modeCashbackBtn') && $('modeCashbackBtn').addEventListener('click', function(){ setMode('cashback'); });
+
+  // cálculo inicial, se houver dados
+  setTimeout(scheduleAutoCalc, 500);
+});
 })();
 </script>
 </body>
