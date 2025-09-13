@@ -1043,17 +1043,18 @@ function autoCalcCashback() {
 }
 
       // Extrai stakes e N (N não é exibido diretamente)
-      var stakes = sol.slice(0, n - 1);
+      // Extrai stakes e N (N não é exibido diretamente)
+var stakes = sol.slice(0, n - 1);
 
-      // Arredonda/aplica mínimo e renderiza
-      var step = parseFloat($("round_step").value) || 1;
-      function roundStep(v){ return Math.round(v / step) * step; }
-      var MIN_STAKE = 0.50;
-      stakes = stakes.map(function(v){ return Math.max(roundStep(v), MIN_STAKE); });
+// Arredonda/aplica mínimo e renderiza
+var step = parseFloat($("round_step").value) || 1;
+function roundStep(v){ return Math.round(v / step) * step; }
+var MIN_STAKE = 0.50;
+stakes = stakes.map(function(v){ return Math.max(roundStep(v), MIN_STAKE); });
 
-      applyAndRender(stakes);
+applyAndRender(stakes);
 
-      function applyAndRender(stks) {
+function applyAndRender(stks) {
         var liabilities = stks.map(function(s, i){ return cov.isLay[i] ? (cov.odds[i] - 1) * s : 0; });
 
         var S = stake + stks.reduce(function(a, s, idx){
@@ -1176,8 +1177,8 @@ function autoCalcCashback() {
 
   $("numEntradas").addEventListener('change', renderOddsInputs);
   $("clearBtn").addEventListener('click', clearAll);
-  $("modeFreebetBtn").addEventListener('click', function() { setMode('freebet'); });
-  $("modeCashbackBtn").addEventListener('click', function() { setMode('cashback'); });
+  $('modeFreebetBtn') && $('modeFreebetBtn').addEventListener('click', function(){ setMode('freebet'); });
+  $('modeCashbackBtn') && $('modeCashbackBtn').addEventListener('click', function(){ setMode('cashback'); });
 
   $("shareBtn").addEventListener('click', function(){
     try {
