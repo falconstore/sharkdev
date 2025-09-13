@@ -1027,7 +1027,7 @@ export function getFreeProfHTML() {
     function oddf(v){return Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v):'—';}
     function pf(v){return Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+'%':'—';}
 
-    var mainLabel = currentMode === 'cashback' ? '1 vence (Casa + Cashback)' : '1 vence (Casa Promo)';
+          var mainLabel = currentMode === 'cashback' ? '1 vence (Ganhou)' : '1 vence (Casa Promo)';
     var rows=[[ mainLabel, mainOdd, mainComm, mainStake, net1, net1, false, 0, '' ]];
     for(var k=0;k<stakes.length;k++){
       var isLay=cov.isLay[k]; 
