@@ -688,12 +688,17 @@ export function getFreeProfHTML() {
 
   // Alterna modo
   function setMode(mode) {
-    currentMode = mode;
-    document.body.className = currentMode === 'cashback' ? 'mode-cashback' : '';
-    $('modeFreebetBtn').classList.toggle('active', mode === 'freebet');
-    $('modeCashbackBtn').classList.toggle('active', mode === 'cashback');
-    clearAll();
-  }
+  currentMode = mode;
+
+  // alterna sem sobrescrever outras classes
+  document.body.classList.toggle('mode-cashback', mode === 'cashback');
+
+  $('modeFreebetBtn').classList.toggle('active', mode === 'freebet');
+  $('modeCashbackBtn').classList.toggle('active', mode === 'cashback');
+
+  clearAll();
+  setTimeout(scheduleAutoCalc, 0);
+}
 
   // Debounce para otimizar performance
   function debounce(func, wait) {
