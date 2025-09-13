@@ -525,8 +525,8 @@ export function getFreeProfHTML() {
       
       <!-- Toggle Freebet/Cashback -->
       <div class="toggle-container">
-        <button id="modeFreebetBtn" type="button" class="toggle-option active">🎁 Freebet</button>
-        <button id="modeCashbackBtn" type="button" class="toggle-option">💰 Cashback</button>
+        <button id="modeFreebetBtn" class="toggle-option active">🎁 Freebet</button>
+        <button id="modeCashbackBtn" class="toggle-option">💰 Cashback</button>
       </div>
       
       <div class="form-group">
@@ -688,21 +688,12 @@ export function getFreeProfHTML() {
 
   // Alterna modo
   function setMode(mode) {
-  currentMode = mode;
-
-  // só liga/desliga a classe, sem apagar outras
-  document.body.classList.toggle('mode-cashback', mode === 'cashback');
-
-  // estado visual dos botões
-  $('modeFreebetBtn').classList.toggle('active', mode === 'freebet');
-  $('modeCashbackBtn').classList.toggle('active', mode === 'cashback');
-
-  // limpa e re-renderiza campos do modo escolhido
-  clearAll();
-
-  // dispara um recálculo (se já houver dados)
-  setTimeout(scheduleAutoCalc, 0);
-}
+    currentMode = mode;
+    document.body.className = currentMode === 'cashback' ? 'mode-cashback' : '';
+    $('modeFreebetBtn').classList.toggle('active', mode === 'freebet');
+    $('modeCashbackBtn').classList.toggle('active', mode === 'cashback');
+    clearAll();
+  }
 
   // Debounce para otimizar performance
   function debounce(func, wait) {
@@ -916,140 +907,148 @@ export function getFreeProfHTML() {
     isCalculating = false;
   }
 
-  // CASHBACK com nivelamento (BACK-only) + fallback se houver LAY
-function autoCalcCashback() {
-  isCalculating = true;
+  // CASHBACK — Nivelamento geral (BACK + LAY + comissão) com fallback
+  function autoCalcCashback() {
+    isCalculating = true;
+    try {
+      hideStatus();
+      var odd = toNum($("cashback_odd").value),
+          stake = toNum($("cashback_stake").value),
+          cashbackRate = toNum($("cashback_rate").value),
+          n = parseInt($("numEntradas").value || '3', 10),
+          cov = readCoverage();
 
-  try {
-    hideStatus();
-    var odd = toNum($("cashback_odd").value),
-        stake = toNum($("cashback_stake").value),
-        cashbackRate = toNum($("cashback_rate").value),
-        n = parseInt($("numEntradas").value || '3', 10),
-        cov = readCoverage();
-
-    if (!Number.isFinite(odd) || odd <= 1 ||
-        !Number.isFinite(stake) || stake <= 0 ||
-        !Number.isFinite(cashbackRate) || cashbackRate < 0 || cashbackRate > 100 ||
-        cov.odds.length !== (n - 1) ||
-        cov.odds.some(function(v){ return !Number.isFinite(v) || v <= 1; })) {
-      $("k_S").textContent = '—';
-      $("results").style.display = 'none';
-      isCalculating = false;
-      return;
-    }
-
-    var cashbackAmount = stake * (cashbackRate / 100);
-    var oddsOrig = cov.odds.slice();
-    var commFrac = cov.comm.map(function(c){ return (Number.isFinite(c) && c > 0) ? c/100 : 0; });
-    var onlyBack = !cov.isLay.some(Boolean);
-
-    var stakes = [], eBack = [];
-    var step = parseFloat($("round_step").value) || 1;
-    function roundStep(v){ return Math.round(v / step) * step; }
-    var MIN_STAKE = 0.50;
-
-    if (onlyBack) {
-      // -------- NIVELAMENTO ANALÍTICO (todas as coberturas BACK) --------
-      // e_i = odd efetiva com comissão (recebimento por 1 de stake)
-      for (var i = 0; i < cov.odds.length; i++) {
-        var e = effOdd(cov.odds[i], cov.comm[i]); // 1 + (L-1)*(1 - c%)
-        eBack[i] = e;
+      if (!Number.isFinite(odd) || odd <= 1 ||
+          !Number.isFinite(stake) || stake <= 0 ||
+          !Number.isFinite(cashbackRate) || cashbackRate < 0 || cashbackRate > 100 ||
+          cov.odds.length !== (n - 1) ||
+          cov.odds.some(function(v){ return !Number.isFinite(v) || v <= 1; })) {
+        $("k_S").textContent = '—';
+        $("results").style.display = 'none';
+        isCalculating = false;
+        return;
       }
 
-      // H = Σ (1/e_i)
-      var H = eBack.reduce(function(a, e){ return a + (1 / e); }, 0);
+      var cashbackAmount = stake * (cashbackRate / 100);
+      var oddsOrig = cov.odds.slice();
+      var commFrac = cov.comm.map(function(c){ return (Number.isFinite(c) && c > 0) ? c/100 : 0; });
+      var eBack = cov.odds.map(function(L, i){ return effOdd(L, cov.comm[i]); });
 
-      if (H >= 1) {
-        // Impossível nivelar (matematicamente), faz fallback
-        showStatus('warning', 'Impossível nivelar (Σ 1/e ≥ 1). Usando modo de cobertura.');
-        // Fallback para cobertura “baseLoss” (sem nivelar)
-        var baseLoss = stake;
+      // Monta sistema linear para nivelar todos cenários: A*x = b
+      var m = n;                 // número de cenários
+      var vars = (n - 1) + 1;    // stakes das coberturas + N (lucro nivelado)
+      var A = new Array(m);
+      var b = new Array(m);
+
+      function zeroRow() { return new Array(vars).fill(0); }
+
+      // Cenário 1: principal vence (sem cashback)
+      (function buildScenario1(){
+        var row = zeroRow();
         for (var j = 0; j < cov.odds.length; j++) {
-          var e2 = effOdd(cov.odds[j], cov.comm[j]);
-          eBack[j] = e2;
-          var util = (e2 - 1);
-          if (!(util > 0)) { $("k_S").textContent='—'; $("results").style.display='none'; isCalculating=false; return; }
-          stakes[j] = baseLoss / util;
+          if (cov.isLay[j]) {
+            row[j] = (1 - commFrac[j]);    // + s_j*(1 - com)
+          } else {
+            row[j] = -1;                    // - s_j
+          }
         }
-      } else {
-        // N = lucro nivelado em todos cenários
-        // Fórmula: N = -P * (1 - O + H*O) + H * C
-        var P = stake, O = odd, C = cashbackAmount;
-        var N = -P * (1 - O + H*O) + H * C;
+        row[vars - 1] = -1;                 // -N
+        A[0] = row;
+        b[0] = stake * (odd - 1);
+      })();
 
-        // S_total = P*O - N
-        var S_total = P * O - N;
+      // Cenários i>=2: cobertura i-1 vence (main perde + cashback)
+      for (var i = 1; i < m; i++) {
+        var row = zeroRow();
+        var winnerIdx = i - 1;
 
-        // s_i = (N + S_total - C) / e_i
-        var numer = (N + S_total - C);
-        for (var k = 0; k < eBack.length; k++) {
-          stakes[k] = numer / eBack[k];
+        for (var j = 0; j < cov.odds.length; j++) {
+          if (cov.isLay[j]) {
+            if (j === winnerIdx) {
+              row[j] = - (cov.odds[j] - 1);      // - s_j*(L - 1)
+            } else {
+              row[j] = (1 - commFrac[j]);        // + s_j*(1 - com)
+            }
+          } else {
+            if (j === winnerIdx) {
+              row[j] = eBack[j];                 // + s_j*eBack
+            } else {
+              row[j] = -1;                        // - s_j
+            }
+          }
         }
+        row[vars - 1] = -1;                       // -N
+        A[i] = row;
+        b[i] = -stake + cashbackAmount;           // main perde + cashback
       }
-    } else {
-      // -------- FALLBACK (há LAY): cobre perda base, com correções A/B/C --------
-      var baseLossLay = stake;
-      for (var m = 0; m < cov.odds.length; m++) {
-        var L = cov.odds[m], cfrac = commFrac[m];
-        if (cov.isLay[m]) {
-          // ganho quando a seleção perde = stakeLay * (1 - comissão)
-          stakes[m] = baseLossLay / (1 - cfrac); // (C) dimensionamento correto para LAY
-          var denom = L - 1;
-          eBack[m] = 1 + (1 - cfrac) / denom; // apenas p/ exibição coerente
-        } else {
-          var e3 = effOdd(L, cov.comm[m]);
-          eBack[m] = e3;
-          var util3 = (e3 - 1);
-          if (!(util3 > 0)) { $("k_S").textContent='—'; $("results").style.display='none'; isCalculating=false; return; }
-          stakes[m] = baseLossLay / util3;
+
+      // Resolver sistema (eliminação gaussiana simples)
+      function solveLinear(Ain, bin) {
+        var M = Ain.map(function(r){ return r.slice(); });
+        var v = bin.slice();
+        var rows = M.length, cols = M[0].length;
+
+        var r = 0;
+        for (var c = 0; c < cols && r < rows; c++) {
+          var piv = r, maxAbs = Math.abs(M[r][c]);
+          for (var i2 = r + 1; i2 < rows; i2++) {
+            var val = Math.abs(M[i2][c]);
+            if (val > maxAbs) { maxAbs = val; piv = i2; }
+          }
+          if (maxAbs < 1e-12) continue;
+
+          if (piv !== r) { var tmp = M[r]; M[r] = M[piv]; M[piv] = tmp; var tv = v[r]; v[r] = v[piv]; v[piv] = tv; }
+
+          var div = M[r][c];
+          for (var c2 = c; c2 < cols; c2++) M[r][c2] /= div;
+          v[r] /= div;
+
+          for (var i3 = 0; i3 < rows; i3++) {
+            if (i3 === r) continue;
+            var factor = M[i3][c];
+            if (Math.abs(factor) > 1e-12) {
+              for (var c3 = c; c3 < cols; c3++) M[i3][c3] -= factor * M[r][c3];
+              v[i3] -= factor * v[r];
+            }
+          }
+          r++;
         }
+
+        var x = new Array(cols).fill(0);
+        var rowPivots = new Array(rows).fill(-1);
+        for (var i4 = 0; i4 < rows; i4++) {
+          for (var j4 = 0; j4 < cols; j4++) {
+            if (Math.abs(M[i4][j4] - 1) < 1e-9) { rowPivots[i4] = j4; break; }
+          }
+        }
+        for (var i5 = 0; i5 < rows; i5++) {
+          var pc = rowPivots[i5];
+          if (pc >= 0 && pc < cols) x[pc] = v[i5];
+        }
+        return x;
       }
-    }
 
-    // Arredonda e aplica mínimo
-    stakes = stakes.map(roundStep).map(function(v){ return Math.max(v, MIN_STAKE); });
+      var sol = solveLinear(A, b);
+      var bad = sol.some(function(z){ return !Number.isFinite(z); });
 
-    // Responsabilidades LAY
-    var liabilities = stakes.map(function(s, i){
-      return cov.isLay[i] ? (cov.odds[i] - 1) * s : 0;
-    });
-
-    // Stake total S (para LAY soma a responsabilidade)
-    var S = stake + stakes.reduce(function(a, s, idx){
-      return a + (cov.isLay[idx] ? (cov.odds[idx]-1)*s : s);
-    }, 0);
-
-    // (A) Principal vence: NÃO há cashback — usa odd principal
-    var net1 = (stake * (odd - 1)) - (S - stake);
-
-    // (B) Coberturas vencem: principal perde — SOMA cashback
-    var defs = [], nets = [];
-    for (var win = 0; win < stakes.length; win++) {
-      var deficit;
-      if (cov.isLay[win]) {
-        var ganhoLay = stakes[win] * (1 - commFrac[win]);
-        var liab = liabilities[win];
-        deficit = ganhoLay - (S - liab);
-      } else {
-        deficit = (stakes[win] * eBack[win]) - S;
+      // Fallback (modo cobertura simples) se sistema singular
+      if (bad) {
+        showStatus('warning', 'Não foi possível nivelar (sistema singular). Usando modo de cobertura.');
+        var stakesFB = [];
+        for (var t = 0; t < cov.odds.length; t++) {
+          if (cov.isLay[t]) {
+            stakesFB[t] = stake / (1 - commFrac[t]); // cobre perda base = stake
+          } else {
+            var eTmp = eBack[t];
+            var util = eTmp - 1;
+            if (!(util > 0)) { $("k_S").textContent='—'; $("results").style.display='none'; isCalculating=false; return; }
+            stakesFB[t] = stake / util;
+          }
+        }
+        applyAndRender(stakesFB);
+        isCalculating = false;
+        return;
       }
-      defs[win] = deficit;
-      nets[win] = deficit + cashbackAmount; // (B)
-    }
-
-    $("k_S").textContent = nf(S);
-    updateResultsTable(stakes, defs, nets, net1, odd, 0, stake, oddsOrig, cov, liabilities);
-    $("results").style.display = 'block';
-
-  } catch (error) {
-    console.warn('Erro no cálculo automático cashback (nivelamento):', error);
-    $("k_S").textContent = '—';
-    $("results").style.display = 'none';
-  }
-
-  isCalculating = false;
-}
 
       // Extrai stakes e N (N não é exibido diretamente)
       var stakes = sol.slice(0, n - 1);
@@ -1201,16 +1200,10 @@ function autoCalcCashback() {
   });
 
   window.addEventListener('DOMContentLoaded', function(){
-  renderOddsInputs();
-  bindAutoCalcEvents();
-
-  // LIGAR AQUI ↓
-  $('modeFreebetBtn') && $('modeFreebetBtn').addEventListener('click', function(){ setMode('freebet'); });
-  $('modeCashbackBtn') && $('modeCashbackBtn').addEventListener('click', function(){ setMode('cashback'); });
-
-  // cálculo inicial, se houver dados
-  setTimeout(scheduleAutoCalc, 500);
-});
+    renderOddsInputs();
+    bindAutoCalcEvents();
+    setTimeout(scheduleAutoCalc, 500);
+  });
 })();
 </script>
 </body>
