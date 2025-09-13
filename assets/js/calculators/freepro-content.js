@@ -1,4 +1,4 @@
-// assets/js/calculators/freepro-content.js - VERSÃO LIMPA SEM ERROS
+// assets/js/calculators/freepro-content.js - VERSÃO ATUALIZADA COM FREEBET/CASHBACK
 // HTML completo da calculadora FreePro que roda no iframe
 
 export function getFreeProfHTML() {
@@ -126,6 +126,51 @@ export function getFreeProfHTML() {
       50% { opacity: 0.7; }
     }
 
+    /* NOVO: Container para duas colunas de configuração */
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    /* NOVO: Toggle para Freebet/Cashback */
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      padding: 0.5rem;
+      background: rgba(17, 24, 39, 0.6);
+      border-radius: 25px;
+      border: 2px solid var(--border);
+    }
+
+    [data-theme="light"] .toggle-container {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .toggle-option {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+
+    .toggle-option.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
     .form-grid {
       display: grid;
       gap: 1rem;
@@ -133,6 +178,7 @@ export function getFreeProfHTML() {
     }
 
     .form-grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .form-grid-2 { grid-template-columns: repeat(2, 1fr); }
     .form-grid-auto { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
 
     .form-group {
@@ -400,8 +446,19 @@ export function getFreeProfHTML() {
     .profit-highlight { color: #3b82f6 !important; font-weight: 800 !important; }
     .text-small { font-size: 0.75rem; color: var(--text-muted); }
 
+    /* NOVO: Ocultar elementos condicionalmente */
+    .freebet-only { display: block; }
+    .cashback-only { display: none; }
+
+    .mode-cashback .freebet-only { display: none; }
+    .mode-cashback .cashback-only { display: block; }
+
     @media (max-width: 768px) {
-      .form-grid-3, .form-grid-auto { 
+      .config-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .form-grid-3, .form-grid-2, .form-grid-auto { 
         grid-template-columns: 1fr; 
       }
       .coverage-fields { 
@@ -436,54 +493,42 @@ export function getFreeProfHTML() {
 <body>
   <div class="calc-header">
     <h1 class="calc-title">Calculadora Shark FreePro</h1>
-    <p class="calc-subtitle">Otimize seus lucros com freebets de apostas seguras - cálculo automático em tempo real</p>
+    <p class="calc-subtitle">Otimize seus lucros com freebets e cashbacks - cálculo automático em tempo real</p>
   </div>
 
-  <div class="card">
-    <div class="card-header">
-      <div class="card-title">Configurações</div>
-      <div class="badge badge-auto">⚡ Auto</div>
+  <!-- NOVA: Grade de configurações com duas colunas -->
+  <div class="config-grid">
+    <!-- Coluna 1: Configurações básicas -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Configurações</div>
+        <div class="badge badge-auto">⚡ Auto</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="numEntradas">Número de Entradas</label>
+        <select id="numEntradas" class="form-control">
+          <option value="2">2 Mercados</option>
+          <option value="3" selected>3 Mercados</option>
+          <option value="4">4 Mercados</option>
+          <option value="5">5 Mercados</option>
+          <option value="6">6 Mercados</option>
+        </select>
+      </div>
     </div>
-    <div class="form-group">
-      <label class="form-label" for="numEntradas">Número de Entradas</label>
-      <select id="numEntradas" class="form-control">
-        <option value="2">2 Mercados</option>
-        <option value="3" selected>3 Mercados</option>
-        <option value="4">4 Mercados</option>
-        <option value="5">5 Mercados</option>
-        <option value="6">6 Mercados</option>
-      </select>
-    </div>
-  </div>
 
-  <div class="card card-promo">
-    <div class="card-header">
-      <div class="card-title">Casa Promoção</div>
-      <div class="badge">Shark Green</div>
-    </div>
-    <div class="form-grid form-grid-3">
-      <div class="form-group">
-        <label class="form-label" for="o1">Odd da Casa</label>
-        <input id="o1" class="form-control auto-calc" placeholder="ex: 3.00" inputmode="decimal" />
+    <!-- NOVA: Coluna 2: Seleção de modo -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Modo de Cálculo</div>
+        <div class="badge">Shark Green</div>
       </div>
-      <div class="form-group">
-        <label class="form-label" for="c1">Comissão (%)</label>
-        <input id="c1" class="form-control auto-calc" placeholder="ex: 0" inputmode="decimal" />
+      
+      <!-- Toggle Freebet/Cashback -->
+      <div class="toggle-container">
+        <button id="modeFreebetBtn" class="toggle-option active">🎁 Freebet</button>
+        <button id="modeCashbackBtn" class="toggle-option">💰 Cashback</button>
       </div>
-      <div class="form-group">
-        <label class="form-label" for="s1">Stake Qualificação</label>
-        <input id="s1" class="form-control auto-calc" placeholder="ex: 50" inputmode="decimal" />
-      </div>
-    </div>
-    <div class="form-grid form-grid-3">
-      <div class="form-group">
-        <label class="form-label" for="F">Valor da Freebet</label>
-        <input id="F" class="form-control auto-calc" placeholder="ex: 50" inputmode="decimal" />
-      </div>
-      <div class="form-group">
-        <label class="form-label" for="r">Taxa de Extração (%)</label>
-        <input id="r" class="form-control auto-calc" placeholder="ex: 70" inputmode="decimal" />
-      </div>
+      
       <div class="form-group">
         <label class="form-label" for="round_step">Arredondamento</label>
         <select id="round_step" class="form-control auto-calc">
@@ -492,6 +537,59 @@ export function getFreeProfHTML() {
           <option value="0.50">R$ 0,50</option>
           <option value="1.00" selected>R$ 1,00</option>
         </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="card card-promo">
+    <div class="card-header">
+      <div class="card-title">Casa Promoção</div>
+      <div class="badge">Shark Green</div>
+    </div>
+    
+    <!-- CAMPOS PARA FREEBET (modo padrão) -->
+    <div class="freebet-only">
+      <div class="form-grid form-grid-3">
+        <div class="form-group">
+          <label class="form-label" for="o1">Odd da Casa</label>
+          <input id="o1" class="form-control auto-calc" placeholder="ex: 3.00" inputmode="decimal" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="c1">Comissão (%)</label>
+          <input id="c1" class="form-control auto-calc" placeholder="ex: 0" inputmode="decimal" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="s1">Stake Qualificação</label>
+          <input id="s1" class="form-control auto-calc" placeholder="ex: 50" inputmode="decimal" />
+        </div>
+      </div>
+      <div class="form-grid form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="F">Valor da Freebet</label>
+          <input id="F" class="form-control auto-calc" placeholder="ex: 50" inputmode="decimal" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="r">Taxa de Extração (%)</label>
+          <input id="r" class="form-control auto-calc" placeholder="ex: 70" inputmode="decimal" />
+        </div>
+      </div>
+    </div>
+
+    <!-- NOVOS CAMPOS PARA CASHBACK -->
+    <div class="cashback-only">
+      <div class="form-grid form-grid-2">
+        <div class="form-group">
+          <label class="form-label" for="cashback_odd">Odd da Casa</label>
+          <input id="cashback_odd" class="form-control auto-calc" placeholder="ex: 3.00" inputmode="decimal" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cashback_stake">Stake Qualificação</label>
+          <input id="cashback_stake" class="form-control auto-calc" placeholder="ex: 50" inputmode="decimal" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="cashback_rate">Taxa do Cashback (%)</label>
+        <input id="cashback_rate" class="form-control auto-calc" placeholder="ex: 10" inputmode="decimal" />
       </div>
     </div>
   </div>
@@ -509,7 +607,7 @@ export function getFreeProfHTML() {
   </div>
 
   <div class="actions">
-      <button class="btn btn-secondary" id="clearBtn">Limpar Dados</button>
+    <button class="btn btn-secondary" id="clearBtn">Limpar Dados</button>
     <button class="btn btn-share" id="shareBtn">🔗 Compartilhar</button>
   </div>
 
@@ -564,6 +662,7 @@ export function getFreeProfHTML() {
   // SISTEMA DE CÁLCULO AUTOMÁTICO
   var autoCalcTimeout = null;
   var isCalculating = false;
+  var currentMode = 'freebet'; // 'freebet' ou 'cashback'
   
   function $(id){ return document.getElementById(id); }
   function nf(v){ return Number.isFinite(v) ? new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:2}).format(v) : '—'; }
@@ -587,6 +686,19 @@ export function getFreeProfHTML() {
     return 1+(o-1)*(1-cc); 
   }
 
+  // NOVA: Função para alternar modo
+  function setMode(mode) {
+    currentMode = mode;
+    document.body.className = currentMode === 'cashback' ? 'mode-cashback' : '';
+    
+    // Atualiza botões
+    $('modeFreebetBtn').classList.toggle('active', mode === 'freebet');
+    $('modeCashbackBtn').classList.toggle('active', mode === 'cashback');
+    
+    // Limpa campos e resultados
+    clearAll();
+  }
+
   // Debounce para otimizar performance
   function debounce(func, wait) {
     return function executedFunction() {
@@ -604,7 +716,11 @@ export function getFreeProfHTML() {
   // Cálculo automático com debounce
   var scheduleAutoCalc = debounce(function() {
     if (!isCalculating) {
-      autoCalc();
+      if (currentMode === 'freebet') {
+        autoCalcFreebet();
+      } else {
+        autoCalcCashback();
+      }
     }
   }, 300);
 
@@ -711,8 +827,8 @@ export function getFreeProfHTML() {
     return {odds:odds,comm:comm,isLay:isLay}; 
   }
 
-  // Cálculo automático (silencioso)
-  function autoCalc() {
+  // CÁLCULO FREEBET (original)
+  function autoCalcFreebet() {
     isCalculating = true;
     
     try {
@@ -789,64 +905,11 @@ export function getFreeProfHTML() {
       }
 
       $("k_S").textContent=nf(S);
-
-      // CÓDIGO CORRIGIDO PARA TABELA COM RESPONSABILIDADE
-      // Verifica se há apostas LAY para mostrar coluna de responsabilidade
-      var hasLayBets = cov.isLay.some(function(lay) { return lay; });
-      
-      // Atualiza cabeçalho da tabela dinamicamente
-      var thead = document.querySelector('.results-table thead');
-      var headerHTML = '';
-      if (hasLayBets) {
-        headerHTML = '<tr><th>Cenário</th><th>Odd</th><th>Comissão</th><th>Apostar</th><th>Responsabilidade</th><th>Déficit</th><th>Lucro Final</th></tr>';
-      } else {
-        headerHTML = '<tr><th>Cenário</th><th>Odd</th><th>Comissão</th><th>Apostar</th><th>Déficit</th><th>Lucro Final</th></tr>';
-      }
-      thead.innerHTML = headerHTML;
-
-      var tb=$("tbody"); 
-      tb.innerHTML='';
-      
-      function oddf(v){return Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v):'—';}
-      function pf(v){return Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+'%':'—';}
-
-      var rows=[[ '1 vence (Casa Promo)', o1, c1, s1, net1, net1, false, 0, '' ]];
-      for(var k=0;k<stakes.length;k++){
-        var isLay=cov.isLay[k]; 
-        var liab=liabilities[k];
-        rows.push([ (k+2)+' vence', oddsOrig[k], cov.comm[k], stakes[k], defs[k], nets[k], isLay, liab, '' ]);
-      }
-
-      for(var rix=0; rix<rows.length; rix++){
-        var nome=rows[rix][0], odd=rows[rix][1], comm=rows[rix][2], stake=rows[rix][3], 
-            deficit=rows[rix][4], final=rows[rix][5], isLayRow=rows[rix][6], liabRow=rows[rix][7];
-        
-        // Célula de Apostar (APENAS o valor da aposta, sem responsabilidade)
-        var apostarCell = '<strong>'+nf(stake)+'</strong>' + (isLayRow ? '<br><span class="text-small">(LAY)</span>' : '');
-        
-        // Célula de Responsabilidade (só aparece se houver LAY em qualquer linha)
-        var responsabilidadeCell = '';
-        if (hasLayBets) {
-          responsabilidadeCell = '<td>' + (isLayRow ? '<strong>'+nf(liabRow)+'</strong>' : '—') + '</td>';
-        }
-        
-        var deficitClass = deficit >= 0 ? 'profit-positive' : 'profit-negative';
-        var finalClass = final >= 0 ? 'profit-positive' : 'profit-negative';
-        
-        var tr=document.createElement('tr');
-        tr.innerHTML = '<td><strong>'+nome+'</strong></td>'+
-                       '<td>'+oddf(odd)+'</td>'+
-                       '<td>'+pf(comm)+'</td>'+
-                       '<td>'+apostarCell+'</td>'+
-                       responsabilidadeCell +
-                       '<td class="'+deficitClass+'"><strong>'+nf(deficit)+'</strong></td>'+
-                       '<td class="'+finalClass+'"><strong>'+nf(final)+'</strong></td>';
-        tb.appendChild(tr);
-      }
+      updateResultsTable(stakes, defs, nets, net1, o1, c1, s1, oddsOrig, cov, liabilities);
       $("results").style.display='block';
       
     } catch (error) {
-      console.warn('Erro no cálculo automático:', error);
+      console.warn('Erro no cálculo automático freebet:', error);
       $("k_S").textContent='—';
       $("results").style.display='none';
     }
@@ -854,10 +917,165 @@ export function getFreeProfHTML() {
     isCalculating = false;
   }
 
-  // Função manual removida - só automático agora
+  // NOVO: CÁLCULO CASHBACK
+  function autoCalcCashback() {
+    isCalculating = true;
+    
+    try {
+      hideStatus();
+      var odd=toNum($("cashback_odd").value), stake=toNum($("cashback_stake").value), 
+          cashbackRate=toNum($("cashback_rate").value), n=parseInt($("numEntradas").value||'3',10), 
+          cov=readCoverage();
+      
+      // Se dados insuficientes, limpa resultados sem mostrar erro
+      if(!Number.isFinite(odd)||odd<=1||
+         !Number.isFinite(stake)||stake<=0||
+         !Number.isFinite(cashbackRate)||cashbackRate<0||cashbackRate>100||
+         cov.odds.length!==(n-1)||cov.odds.some(function(v){return !Number.isFinite(v)||v<=1;})) {
+        
+        $("k_S").textContent='—';
+        $("results").style.display='none';
+        isCalculating = false;
+        return;
+      }
+
+      var cashbackAmount = stake * (cashbackRate / 100);
+      
+      var stakes=[],eBack=[],commFrac=[],oddsOrig=cov.odds.slice();
+      var baseLoss = stake; // Valor perdido se a casa principal não ganhar
+      
+      for(var i=0;i<cov.odds.length;i++){
+        var L=cov.odds[i], cfrac=(Number.isFinite(cov.comm[i])&&cov.comm[i]>0)?cov.comm[i]/100:0; 
+        commFrac[i]=cfrac;
+        
+        if(cov.isLay[i]){ 
+          var denom=L-1; 
+          if(!(denom>0)){
+            $("k_S").textContent='—';
+            $("results").style.display='none';
+            isCalculating = false;
+            return;
+          }
+          var eLay=1+(1-cfrac)/denom; 
+          stakes[i] = baseLoss / denom; // Stake para cobrir a perda
+          eBack[i]=eLay; 
+        } else { 
+          var e=effOdd(L,cov.comm[i]); 
+          eBack[i]=e; 
+          stakes[i] = baseLoss / (e - 1); // Stake para cobrir a perda
+        }
+      }
+
+      var step=parseFloat($("round_step").value)||1; 
+      function roundStep(v){return Math.round(v/step)*step;} 
+      stakes=stakes.map(roundStep);
+      
+      // APLICA VALOR MÍNIMO DE R$ 0,50
+      var MIN_STAKE = 0.50;
+      stakes = stakes.map(function(stake) { return Math.max(stake, MIN_STAKE); });
+      
+      var liabilities=stakes.map(function(s,i){return cov.isLay[i]?(cov.odds[i]-1)*s:0;});
+      var S=stake+stakes.reduce(function(a,s,idx){return a+(cov.isLay[idx]?(cov.odds[idx]-1)*s:s);},0);
+
+      // Lucro se a casa principal ganhar (recebe cashback)
+      var net1 = cashbackAmount - (S - stake);
+
+      var defs=[], nets=[];
+      for(var win=0;win<stakes.length;win++){
+        var deficit;
+        if(cov.isLay[win]){ 
+          var ganhoLay=stakes[win]*(1-commFrac[win]); 
+          var liab=liabilities[win]; 
+          deficit=ganhoLay-(S-liab); 
+        } else { 
+          deficit=(stakes[win]*eBack[win]) - S; 
+        }
+        defs[win]=deficit;
+        nets[win]=deficit; // No cashback, nets = defs
+      }
+
+      $("k_S").textContent=nf(S);
+      updateResultsTable(stakes, defs, nets, net1, odd, 0, stake, oddsOrig, cov, liabilities);
+      $("results").style.display='block';
+      
+    } catch (error) {
+      console.warn('Erro no cálculo automático cashback:', error);
+      $("k_S").textContent='—';
+      $("results").style.display='none';
+    }
+    
+    isCalculating = false;
+  }
+
+  function updateResultsTable(stakes, defs, nets, net1, mainOdd, mainComm, mainStake, oddsOrig, cov, liabilities) {
+    // Verifica se há apostas LAY para mostrar coluna de responsabilidade
+    var hasLayBets = cov.isLay.some(function(lay) { return lay; });
+    
+    // Atualiza cabeçalho da tabela dinamicamente
+    var thead = document.querySelector('.results-table thead');
+    var headerHTML = '';
+    if (hasLayBets) {
+      headerHTML = '<tr><th>Cenário</th><th>Odd</th><th>Comissão</th><th>Apostar</th><th>Responsabilidade</th><th>Déficit</th><th>Lucro Final</th></tr>';
+    } else {
+      headerHTML = '<tr><th>Cenário</th><th>Odd</th><th>Comissão</th><th>Apostar</th><th>Déficit</th><th>Lucro Final</th></tr>';
+    }
+    thead.innerHTML = headerHTML;
+
+    var tb=$("tbody"); 
+    tb.innerHTML='';
+    
+    function oddf(v){return Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v):'—';}
+    function pf(v){return Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+'%':'—';}
+
+    var mainLabel = currentMode === 'cashback' ? '1 vence (Casa + Cashback)' : '1 vence (Casa Promo)';
+    var rows=[[ mainLabel, mainOdd, mainComm, mainStake, net1, net1, false, 0, '' ]];
+    for(var k=0;k<stakes.length;k++){
+      var isLay=cov.isLay[k]; 
+      var liab=liabilities[k];
+      rows.push([ (k+2)+' vence', oddsOrig[k], cov.comm[k], stakes[k], defs[k], nets[k], isLay, liab, '' ]);
+    }
+
+    for(var rix=0; rix<rows.length; rix++){
+      var nome=rows[rix][0], odd=rows[rix][1], comm=rows[rix][2], stake=rows[rix][3], 
+          deficit=rows[rix][4], final=rows[rix][5], isLayRow=rows[rix][6], liabRow=rows[rix][7];
+      
+      // Célula de Apostar (APENAS o valor da aposta, sem responsabilidade)
+      var apostarCell = '<strong>'+nf(stake)+'</strong>' + (isLayRow ? '<br><span class="text-small">(LAY)</span>' : '');
+      
+      // Célula de Responsabilidade (só aparece se houver LAY em qualquer linha)
+      var responsabilidadeCell = '';
+      if (hasLayBets) {
+        responsabilidadeCell = '<td>' + (isLayRow ? '<strong>'+nf(liabRow)+'</strong>' : '—') + '</td>';
+      }
+      
+      var deficitClass = deficit >= 0 ? 'profit-positive' : 'profit-negative';
+      var finalClass = final >= 0 ? 'profit-positive' : 'profit-negative';
+      
+      var tr=document.createElement('tr');
+      tr.innerHTML = '<td><strong>'+nome+'</strong></td>'+
+                     '<td>'+oddf(odd)+'</td>'+
+                     '<td>'+pf(comm)+'</td>'+
+                     '<td>'+apostarCell+'</td>'+
+                     responsabilidadeCell +
+                     '<td class="'+deficitClass+'"><strong>'+nf(deficit)+'</strong></td>'+
+                     '<td class="'+finalClass+'"><strong>'+nf(final)+'</strong></td>';
+      tb.appendChild(tr);
+    }
+  }
 
   function clearAll() {
-    ["o1","c1","F","r","s1"].forEach(function(id){ $(id).value=''; }); 
+    // Limpa campos do modo freebet
+    ["o1","c1","F","r","s1"].forEach(function(id){ 
+      var el = $(id);
+      if(el) el.value=''; 
+    }); 
+    
+    // Limpa campos do modo cashback
+    ["cashback_odd","cashback_stake","cashback_rate"].forEach(function(id){ 
+      var el = $(id);
+      if(el) el.value=''; 
+    }); 
+    
     $("tbody").innerHTML=''; 
     $("results").style.display='none'; 
     $("k_S").textContent='—'; 
@@ -888,6 +1106,10 @@ export function getFreeProfHTML() {
   // Event listeners principais
   $("numEntradas").addEventListener('change', renderOddsInputs);
   $("clearBtn").addEventListener('click', clearAll);
+
+  // NOVOS: Event listeners para alternar modo
+  $("modeFreebetBtn").addEventListener('click', function() { setMode('freebet'); });
+  $("modeCashbackBtn").addEventListener('click', function() { setMode('cashback'); });
 
   // Botão de compartilhamento
   $("shareBtn").addEventListener('click', function(){
