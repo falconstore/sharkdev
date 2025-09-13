@@ -907,7 +907,7 @@ export function getFreeProfHTML() {
     isCalculating = false;
   }
 
-  // CASHBACK — BACK-only com nivelamento analítico + fallback quando houver LAY
+  // CASHBACK com nivelamento (BACK-only) + fallback se houver LAY
 function autoCalcCashback() {
   isCalculating = true;
 
@@ -919,7 +919,6 @@ function autoCalcCashback() {
         n = parseInt($("numEntradas").value || '3', 10),
         cov = readCoverage();
 
-    // validação
     if (!Number.isFinite(odd) || odd <= 1 ||
         !Number.isFinite(stake) || stake <= 0 ||
         !Number.isFinite(cashbackRate) || cashbackRate < 0 || cashbackRate > 100 ||
@@ -943,7 +942,7 @@ function autoCalcCashback() {
 
     if (onlyBack) {
       // -------- NIVELAMENTO ANALÍTICO (todas as coberturas BACK) --------
-      // e_i = odd efetiva com comissão (retorno total por 1 de stake)
+      // e_i = odd efetiva com comissão (recebimento por 1 de stake)
       for (var i = 0; i < cov.odds.length; i++) {
         var e = effOdd(cov.odds[i], cov.comm[i]); // 1 + (L-1)*(1 - c%)
         eBack[i] = e;
@@ -953,19 +952,20 @@ function autoCalcCashback() {
       var H = eBack.reduce(function(a, e){ return a + (1 / e); }, 0);
 
       if (H >= 1) {
-        // Impossível nivelar — fallback simples
+        // Impossível nivelar (matematicamente), faz fallback
         showStatus('warning', 'Impossível nivelar (Σ 1/e ≥ 1). Usando modo de cobertura.');
+        // Fallback para cobertura “baseLoss” (sem nivelar)
         var baseLoss = stake;
         for (var j = 0; j < cov.odds.length; j++) {
-          var e2 = eBack[j];
+          var e2 = effOdd(cov.odds[j], cov.comm[j]);
+          eBack[j] = e2;
           var util = (e2 - 1);
           if (!(util > 0)) { $("k_S").textContent='—'; $("results").style.display='none'; isCalculating=false; return; }
           stakes[j] = baseLoss / util;
         }
       } else {
-        // Fórmulas que batem com seus exemplos:
         // N = lucro nivelado em todos cenários
-        // N = -P * (1 - O + H*O) + H * C
+        // Fórmula: N = -P * (1 - O + H*O) + H * C
         var P = stake, O = odd, C = cashbackAmount;
         var N = -P * (1 - O + H*O) + H * C;
 
@@ -979,15 +979,15 @@ function autoCalcCashback() {
         }
       }
     } else {
-      // -------- FALLBACK (há LAY): cobre perda base respeitando comissão --------
+      // -------- FALLBACK (há LAY): cobre perda base, com correções A/B/C --------
       var baseLossLay = stake;
       for (var m = 0; m < cov.odds.length; m++) {
         var L = cov.odds[m], cfrac = commFrac[m];
         if (cov.isLay[m]) {
           // ganho quando a seleção perde = stakeLay * (1 - comissão)
-          stakes[m] = baseLossLay / (1 - cfrac);
+          stakes[m] = baseLossLay / (1 - cfrac); // (C) dimensionamento correto para LAY
           var denom = L - 1;
-          eBack[m] = 1 + (1 - cfrac) / denom; // apenas para exibição coerente
+          eBack[m] = 1 + (1 - cfrac) / denom; // apenas p/ exibição coerente
         } else {
           var e3 = effOdd(L, cov.comm[m]);
           eBack[m] = e3;
@@ -1001,20 +1001,20 @@ function autoCalcCashback() {
     // Arredonda e aplica mínimo
     stakes = stakes.map(roundStep).map(function(v){ return Math.max(v, MIN_STAKE); });
 
-    // Responsabilidade LAY
+    // Responsabilidades LAY
     var liabilities = stakes.map(function(s, i){
       return cov.isLay[i] ? (cov.odds[i] - 1) * s : 0;
     });
 
-    // Stake total S (para LAY soma responsabilidade)
+    // Stake total S (para LAY soma a responsabilidade)
     var S = stake + stakes.reduce(function(a, s, idx){
       return a + (cov.isLay[idx] ? (cov.odds[idx]-1)*s : s);
     }, 0);
 
-    // Cenário 1 (principal ganha): sem cashback
+    // (A) Principal vence: NÃO há cashback — usa odd principal
     var net1 = (stake * (odd - 1)) - (S - stake);
 
-    // Demais cenários: principal perde -> soma cashback
+    // (B) Coberturas vencem: principal perde — SOMA cashback
     var defs = [], nets = [];
     for (var win = 0; win < stakes.length; win++) {
       var deficit;
@@ -1026,7 +1026,7 @@ function autoCalcCashback() {
         deficit = (stakes[win] * eBack[win]) - S;
       }
       defs[win] = deficit;
-      nets[win] = deficit + cashbackAmount;
+      nets[win] = deficit + cashbackAmount; // (B)
     }
 
     $("k_S").textContent = nf(S);
@@ -1034,14 +1034,13 @@ function autoCalcCashback() {
     $("results").style.display = 'block';
 
   } catch (error) {
-    console.warn('Erro no cálculo automático cashback:', error);
+    console.warn('Erro no cálculo automático cashback (nivelamento):', error);
     $("k_S").textContent = '—';
     $("results").style.display = 'none';
   }
 
   isCalculating = false;
 }
-
 
       // Extrai stakes e N (N não é exibido diretamente)
       var stakes = sol.slice(0, n - 1);
