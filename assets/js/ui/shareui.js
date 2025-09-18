@@ -1,10 +1,13 @@
 // assets/js/ui/shareui.js
-// Sistema de Interface para Compartilhamento — robusto para ArbiPro e FreePro (normal/cashback)
+// Share UI — compatível com main.js (expondo handleShareClick), robusto para ArbiPro e FreePro.
 
 import { ShareSystem } from '../utils/share.js';
 
 function $(root, sel) {
-  try { return root.querySelector(sel) || null; } catch { return null; }
+  try { return (root || document).querySelector(sel) || null; } catch { return null; }
+}
+function qsa(root, sel) {
+  try { return Array.from((root || document).querySelectorAll(sel)); } catch { return []; }
 }
 function val(input) {
   if (!input) return '';
@@ -23,63 +26,50 @@ function bool(el) {
   return !!el.value;
 }
 function any(...xs) {
-  // tenta diversos seletores/ids; retorna o primeiro elemento existente
   for (const x of xs) {
     if (!x) continue;
     if (typeof x === 'string') {
       const el = document.querySelector(x);
       if (el) return el;
-    } else {
-      // [root, selector]
-      if (Array.isArray(x) && x.length === 2 && x[0] && x[1]) {
-        try {
-          const el = x[0].querySelector(x[1]);
-          if (el) return el;
-        } catch { /* ignore */ }
-      }
+    } else if (Array.isArray(x) && x.length === 2 && x[0] && x[1]) {
+      try {
+        const el = x[0].querySelector(x[1]);
+        if (el) return el;
+      } catch {}
     }
   }
   return null;
 }
-function qsa(root, sel) {
-  try { return Array.from(root.querySelectorAll(sel)); } catch { return []; }
-}
 
-// Seletores tolerantes por padrão — ajuste aqui se mudar HTML
 const SEL = {
-  // ArbiPro (fora de iframe)
   arbipro: {
-    card: '#calc1', // container principal (se existir)
     rounding: '#roundStep, #rounding, [data-field="rounding"]',
     houseRow: (i) => `#house-${i}, [data-house-index="${i}"]`,
-    odd: (i) => `#odd-${i}, [data-input="odd"][data-idx="${i}"], input[name="odd-${i}"]`,
+    odd:   (i) => `#odd-${i},   [data-input="odd"][data-idx="${i}"],   input[name="odd-${i}"]`,
     stake: (i) => `#stake-${i}, [data-input="stake"][data-idx="${i}"], input[name="stake-${i}"]`,
-    comm: (i) => `#comm-${i}, [data-input="commission"][data-idx="${i}"], input[name="comm-${i}"]`,
-    freebet: (i) => `#freebet-${i}, [data-input="freebet"][data-idx="${i}"], input[name="freebet-${i}"]`,
-    increase: (i) => `#increase-${i}, [data-input="increase"][data-idx="${i}"], input[name="increase-${i}"]`,
-    lay: (i) => `#lay-${i}, [data-input="lay"][data-idx="${i}"], input[name="lay-${i}"]`,
+    comm:  (i) => `#comm-${i},  [data-input="commission"][data-idx="${i}"], input[name="comm-${i}"]`,
+    freebet:(i)=> `#freebet-${i},[data-input="freebet"][data-idx="${i}"], input[name="freebet-${i}"]`,
+    increase:(i)=>`#increase-${i},[data-input="increase"][data-idx="${i}"], input[name="increase-${i}"]`,
+    lay:   (i) => `#lay-${i},   [data-input="lay"][data-idx="${i}"],   input[name="lay-${i}"]`,
     fixed: (i) => `#fixedStake-${i}, [data-input="fixedStake"][data-idx="${i}"], input[name="fixedStake-${i}"]`,
   },
-  // FreePro (dentro do iframe)
   freepro: {
     iframe: '#calc2frame, #freepro-frame, iframe#calc-freepro',
-    // gerais
     numEntradas: '#numEntradas, [data-field="numEntradas"]',
-    roundStep: '#roundStep, #rounding, [data-field="roundStep"]',
-    // modo (usa classe no body; se não houver, detecta pela presença de campos de cashback)
-    modeCashbackFlag: (doc) => doc.body?.classList?.contains('mode-cashback'),
-    // casa promoção (p)
-    promoOdd: '#promoOdd, #oddPromo, [name="promoOdd"], [data-input="promoOdd"]',
-    promoComm: '#promoComm, #commPromo, [name="promoComm"], [data-input="promoComm"]',
-    promoStake: '#promoStake, #stakePromo, [name="promoStake"], [data-input="promoStake"]',
-    freebetValue: '#freebetValue, #valorFreebet, [name="freebetValue"], [data-input="freebetValue"]',
-    extractionRate: '#extractionRate, #taxaExtracao, [name="extractionRate"], [data-input="extractionRate"]',
-    // cashback (quando existir)
-    cashbackRate: '#cashbackRate, [data-input="cashbackRate"]',
-    // coberturas
-    covOdd: (i) => `#odd-${i}, [data-input="odd"][data-idx="${i}"], input[name="odd-${i}"]`,
+    roundStep:   '#roundStep, #rounding, [data-field="roundStep"]',
+    // modo cashback: por classe no body ou presença de campo cashbackRate
+    modeCashbackFlag: (doc) => doc?.body?.classList?.contains('mode-cashback'),
+    // casa promoção
+    promoOdd:      '#promoOdd, #oddPromo, [name="promoOdd"], [data-input="promoOdd"]',
+    promoComm:     '#promoComm, #commPromo, [name="promoComm"], [data-input="promoComm"]',
+    promoStake:    '#promoStake, #stakePromo, [name="promoStake"], [data-input="promoStake"]',
+    freebetValue:  '#freebetValue, #valorFreebet, [name="freebetValue"], [data-input="freebetValue"]',
+    extractionRate:'#extractionRate, #taxaExtracao, [name="extractionRate"], [data-input="extractionRate"]',
+    cashbackRate:  '#cashbackRate, [data-input="cashbackRate"]',
+    // coberturas i>=2
+    covOdd:  (i) => `#odd-${i},  [data-input="odd"][data-idx="${i}"],  input[name="odd-${i}"]`,
     covComm: (i) => `#comm-${i}, [data-input="comm"][data-idx="${i}"], input[name="comm-${i}"]`,
-    covLay:  (i) => `#lay-${i}, [data-input="lay"][data-idx="${i}"], input[name="lay-${i}"]`,
+    covLay:  (i) => `#lay-${i},  [data-input="lay"][data-idx="${i}"],  input[name="lay-${i}"]`,
   },
 };
 
@@ -87,6 +77,9 @@ export class ShareUI {
   constructor() {
     this.initialized = false;
     this.shareSystem = null;
+
+    // 🔧 Compat API esperada pelo main.js
+    this.handleShareClick = this.handleShareClick.bind(this);
   }
 
   async init() {
@@ -101,9 +94,59 @@ export class ShareUI {
   }
 
   /**
-   * Abre o modal, coleta os dados e gera o link
-   * @param {'arbipro'|'freepro'} calculator
+   * Compat com main.js — pode ser usado direto no addEventListener.
+   * Detecta automaticamente qual calculadora chamar.
    */
+  handleShareClick(ev) {
+    try {
+      if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
+
+      const el = ev?.currentTarget || ev?.target;
+      let calc = this._guessCalculatorFromElement(el);
+
+      if (!calc) {
+        // plano B: se não conseguir deduzir, mantém ArbiPro como default
+        calc = 'arbipro';
+      }
+
+      this.openShareModal(calc);
+    } catch (err) {
+      console.error('Erro em handleShareClick:', err);
+      alert('Não foi possível iniciar o compartilhamento. Veja o console.');
+    }
+  }
+
+  _guessCalculatorFromElement(el) {
+    if (!el) return null;
+
+    // Preferência por data-attributes
+    const ds = el.dataset || {};
+    const hinted =
+      ds.calc || ds.shareCalc || ds.calculator || ds.share || null;
+    if (hinted && /freepro/i.test(hinted)) return 'freepro';
+    if (hinted && /arbi/i.test(hinted))   return 'arbipro';
+
+    // Por id ou texto
+    const id = (el.id || '').toLowerCase();
+    if (id.includes('freepro')) return 'freepro';
+    if (id.includes('arbipro') || id.includes('arbi')) return 'arbipro';
+
+    const txt = (el.textContent || '').toLowerCase();
+    if (txt.includes('freepro')) return 'freepro';
+    if (txt.includes('arbipro') || txt.includes('arbi')) return 'arbipro';
+
+    // Checa ancestrais com data-calc
+    const withData = el.closest?.('[data-calc],[data-share],[data-calculator]');
+    if (withData) {
+      const ds2 = withData.dataset || {};
+      const hinted2 = ds2.calc || ds2.share || ds2.calculator || null;
+      if (hinted2 && /freepro/i.test(hinted2)) return 'freepro';
+      if (hinted2 && /arbi/i.test(hinted2))    return 'arbipro';
+    }
+
+    return null;
+  }
+
   async openShareModal(calculator = 'arbipro') {
     console.log('=== INICIANDO COMPARTILHAMENTO ===');
     console.log('Calculadora:', calculator);
@@ -142,7 +185,6 @@ export class ShareUI {
     }
   }
 
-  // -------- validação de dados mínimos --------
   hasValidData(data, calculator) {
     if (!data) return false;
 
@@ -152,41 +194,35 @@ export class ShareUI {
 
     if (calculator === 'freepro') {
       if (!data.p) return false;
-      // normal: precisa pelo menos odd ou stake ou freebet
       if (data.mode !== 'cashback') {
         return !!(data.p.o || data.p.s || data.p.f);
       }
-      // cashback: aceita odd ou stake ou cashbackRate (r)
       return !!(data.p.o || data.p.s || data.p.r);
     }
 
     return false;
   }
 
-  // =======================
-  // Captura — ArbiPro
-  // =======================
+  // -------- Captura ArbiPro --------
   getArbiProData() {
     console.log('Capturando dados ArbiPro...');
     try {
       const data = { numHouses: 2, rounding: 0.01, houses: [] };
 
-      // rounding
       const roundingEl = any(SEL.arbipro.rounding);
       const rounding = num(roundingEl, 0.01);
       data.rounding = Number.isFinite(rounding) ? rounding : 0.01;
 
-      // detecta quantas casas existem olhando sequencialmente
       let i = 1;
       while (true) {
         const row = any(SEL.arbipro.houseRow(i));
-        if (!row && i > 4) break; // limite de segurança
+        if (!row && i > 4) break;
         if (row) {
           const o = num(any(row, SEL.arbipro.odd(i)), null);
           const s = num(any(row, SEL.arbipro.stake(i)), null);
           const c = num(any(row, SEL.arbipro.comm(i)), null);
           const f = bool(any(row, SEL.arbipro.freebet(i)));
-          const inc = num(any(row, SEL.arbipro.increase(i)), null);
+          const inc= num(any(row, SEL.arbipro.increase(i)), null);
           const l = bool(any(row, SEL.arbipro.lay(i)));
           const x = bool(any(row, SEL.arbipro.fixed(i)));
 
@@ -212,9 +248,7 @@ export class ShareUI {
     }
   }
 
-  // =======================
-  // Captura — FreePro
-  // =======================
+  // -------- Captura FreePro --------
   getFreeProData() {
     console.log('Capturando dados FreePro...');
     try {
@@ -227,44 +261,30 @@ export class ShareUI {
 
       const doc = frame.contentDocument;
       const isCashback =
-        SEL.freepro.modeCashbackFlag(doc) ||
-        !!$(doc, SEL.freepro.cashbackRate); // fallback
+        SEL.freepro.modeCashbackFlag(doc) || !!$(doc, SEL.freepro.cashbackRate);
 
-      // n e r
-      const n = Math.max(
-        2,
-        parseInt(val($(doc, SEL.freepro.numEntradas)) || '3', 10) || 3
-      );
-      const r =
-        num($(doc, SEL.freepro.roundStep), 1.0) ??
-        1.0;
+      const n = Math.max(2, parseInt(val($(doc, SEL.freepro.numEntradas)) || '3', 10) || 3);
+      const r = num($(doc, SEL.freepro.roundStep), 1.0) ?? 1.0;
 
-      // Casa Promo (p)
       const p = {
         o: num($(doc, SEL.freepro.promoOdd), '') ?? '',
         c: num($(doc, SEL.freepro.promoComm), '') ?? '',
         s: num($(doc, SEL.freepro.promoStake), '') ?? '',
         f: isCashback ? '' : (num($(doc, SEL.freepro.freebetValue), '') ?? ''),
         e: isCashback ? '' : (num($(doc, SEL.freepro.extractionRate), 70) ?? 70),
-        r: isCashback ? (num($(doc, SEL.freepro.cashbackRate), '') ?? '') : '', // cashbackRate
+        r: isCashback ? (num($(doc, SEL.freepro.cashbackRate), '') ?? '') : '',
       };
 
-      // Coberturas (2..n)
       const cov = [];
       for (let i = 2; i <= n; i++) {
-        const oddEl = $(doc, SEL.freepro.covOdd(i));
-        const commEl = $(doc, SEL.freepro.covComm(i));
-        const layEl = $(doc, SEL.freepro.covLay(i));
+        const cOdd  = num($(doc, SEL.freepro.covOdd(i)),  '');
+        const cComm = num($(doc, SEL.freepro.covComm(i)), '');
+        const cLay  = bool($(doc, SEL.freepro.covLay(i)));
 
-        const cOdd = num(oddEl, '');
-        const cComm = num(commEl, '');
-        const cLay = bool(layEl);
-
-        // inclui mesmo que esteja parcial — link serve para reidratar a UI
         cov.push({
-          odd: cOdd === '' ? '' : cOdd,
+          odd:  cOdd  === '' ? '' : cOdd,
           comm: cComm === '' ? '' : cComm,
-          lay: cLay,
+          lay:  cLay,
         });
       }
 
@@ -277,9 +297,7 @@ export class ShareUI {
     }
   }
 
-  // =======================
-  // Modal simples p/ link
-  // =======================
+  // -------- Modal simples --------
   showShareModal(url) {
     try {
       let overlay = document.getElementById('shareOverlay');
@@ -341,32 +359,27 @@ export class ShareUI {
             copyBtn.textContent = 'Copiado!';
             setTimeout(() => (copyBtn.textContent = 'Copiar Link'), 1600);
           } catch {
-            // fallback
             try {
               document.execCommand('copy');
               copyBtn.textContent = 'Copiado!';
               setTimeout(() => (copyBtn.textContent = 'Copiar Link'), 1600);
-            } catch (e) {
+            } catch {
               alert('Não foi possível copiar automaticamente. Copie manualmente.');
             }
           }
         };
       }
       if (closeBtn) {
-        closeBtn.onclick = () => {
-          overlay.remove();
-        };
+        closeBtn.onclick = () => overlay.remove();
       }
     } catch (e) {
       console.error('Erro ao exibir modal de compartilhamento:', e);
-      alert('Falha ao exibir o link. Ver console.');
+      alert('Falha ao exibir o link. Veja o console.');
     }
   }
 
   /**
-   * Helper opcional para configurar os botões externos (fora do iframe)
-   * — Útil quando o main.js falha em achar o botão FreePro no tempo certo.
-   * @param {{arbipro?: string, freepro?: string}} selectors
+   * Fallback opcional: ele mesmo faz o binding se você quiser.
    */
   bindButtons(selectors = { arbipro: '#btnShareArbiPro', freepro: '#btnShareFreePro' }) {
     const tryBind = (sel, fn) => {
@@ -388,14 +401,9 @@ export class ShareUI {
       }, 250);
     };
 
-    if (selectors.arbipro) {
-      tryBind(selectors.arbipro, () => this.openShareModal('arbipro'));
-    }
-    if (selectors.freepro) {
-      tryBind(selectors.freepro, () => this.openShareModal('freepro'));
-    }
+    if (selectors.arbipro) tryBind(selectors.arbipro, this.handleShareClick);
+    if (selectors.freepro) tryBind(selectors.freepro, this.handleShareClick);
   }
 }
 
-// Export default (compat)
 export default ShareUI;
