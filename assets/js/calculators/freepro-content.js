@@ -835,29 +835,84 @@ export function getFreeProfHTML() {
     var cInputs=document.querySelectorAll('#oddsContainer [data-type="comm"]'); 
     var lBtns=document.querySelectorAll('#oddsContainer [data-type="lay"]'); 
     
-    for(var i=0;i<oInputs.length;i++){odds.push(toNum(oInputs[i].value));} 
-    for(var j=0;j<cInputs.length;j++){comm.push(toNum(cInputs[j].value));} 
-    for(var k=0;k<lBtns.length;k++){isLay.push(lBtns[k].classList.contains('active'));} 
+    for(var i=0;i<oInputs.length;i++){
+      odds.push(toNum(oInputs[i].value));
+    } 
     
-    // Preenche arrays com NaN se necessário
-    while(comm.length < odds.length) comm.push(NaN);
+    for(var j=0;j<cInputs.length;j++){
+      var commValue = toNum(cInputs[j].value);
+      comm.push(Number.isFinite(commValue) ? commValue : 0); // Default 0 se vazio
+    } 
+    
+    for(var k=0;k<lBtns.length;k++){
+      isLay.push(lBtns[k].classList.contains('active'));
+    } 
+    
+    // Garante que arrays tenham mesmo tamanho
+    while(comm.length < odds.length) comm.push(0);
     while(isLay.length < odds.length) isLay.push(false);
     
     return {odds:odds,comm:comm,isLay:isLay}; 
   }
 
-  // MANTÉM LÓGICA DE CÁLCULO ORIGINAL
+  // CÁLCULO FREEBET CORRIGIDO
   function autoCalcFreebet() {
     isCalculating = true;
     try {
-      var o1=toNum($("o1").value), c1=toNum($("c1").value), n=parseInt($("numEntradas").value||'3',10), 
-          cov=readCoverage(), F=toNum($("F").value), rPerc=toNum($("r").value), s1=toNum($("s1").value);
+      var o1=toNum($("o1").value);
+      var c1_input = document.getElementById('c1');
+      var c1 = c1_input ? toNum(c1_input.value) : 0;
+      var n=parseInt($("numEntradas").value||'3',10);
+      var cov=readCoverage();
+      var F=toNum($("F").value);
+      var rPerc=toNum($("r").value);
+      var s1=toNum($("s1").value);
       
-      if(!Number.isFinite(o1)||o1<=1||
-         cov.odds.length!==(n-1)||cov.odds.some(function(v){return !Number.isFinite(v)||v<=1;})||
-         !Number.isFinite(F)||F<0||
-         !Number.isFinite(rPerc)||rPerc<0||rPerc>100||
-         !Number.isFinite(s1)||s1<=0) {
+      console.log('DEBUG Freebet:', {o1, c1, n, F, rPerc, s1, cov});
+      
+      // Validações básicas
+      if(!Number.isFinite(o1) || o1<=1) {
+        console.log('Odd principal inválida:', o1);
+        $("k_S").textContent='R$ 0,00';
+        $("results").style.display='none';
+        isCalculating = false;
+        return;
+      }
+      
+      if(cov.odds.length !== (n-1)) {
+        console.log('Número de coberturas incorreto:', cov.odds.length, 'esperado:', n-1);
+        $("k_S").textContent='R$ 0,00';
+        $("results").style.display='none';
+        isCalculating = false;
+        return;
+      }
+      
+      if(cov.odds.some(function(v){return !Number.isFinite(v)||v<=1;})) {
+        console.log('Odds de cobertura inválidas:', cov.odds);
+        $("k_S").textContent='R$ 0,00';
+        $("results").style.display='none';
+        isCalculating = false;
+        return;
+      }
+      
+      if(!Number.isFinite(F) || F<0) {
+        console.log('Freebet inválida:', F);
+        $("k_S").textContent='R$ 0,00';
+        $("results").style.display='none';
+        isCalculating = false;
+        return;
+      }
+      
+      if(!Number.isFinite(rPerc) || rPerc<0 || rPerc>100) {
+        console.log('Taxa extração inválida:', rPerc);
+        $("k_S").textContent='R$ 0,00';
+        $("results").style.display='none';
+        isCalculating = false;
+        return;
+      }
+      
+      if(!Number.isFinite(s1) || s1<=0) {
+        console.log('Stake principal inválido:', s1);
         $("k_S").textContent='R$ 0,00';
         $("results").style.display='none';
         isCalculating = false;
@@ -870,12 +925,13 @@ export function getFreeProfHTML() {
       var stakes=[],eBack=[],commFrac=[],oddsOrig=cov.odds.slice();
       
       for(var i=0;i<cov.odds.length;i++){
-        var L=cov.odds[i], cfrac=(Number.isFinite(cov.comm[i])&&cov.comm[i]>0)?cov.comm[i]/100:0; 
+        var L=cov.odds[i], cfrac=cov.comm[i]/100;
         commFrac[i]=cfrac;
         
         if(cov.isLay[i]){ 
           var denom=L-1; 
           if(!(denom>0)){
+            console.log('Denominador LAY inválido:', denom, 'para odd:', L);
             $("k_S").textContent='R$ 0,00';
             $("results").style.display='none';
             isCalculating = false;
@@ -918,6 +974,8 @@ export function getFreeProfHTML() {
         nets[win]=deficit + rF;
       }
 
+      console.log('Cálculo concluído:', {S, net1, defs, nets});
+
       $("k_S").textContent=nf(S);
       
       // Atualiza stakes nos inputs
@@ -932,7 +990,7 @@ export function getFreeProfHTML() {
       $("results").style.display='block';
       
     } catch (error) {
-      console.warn('Erro no cálculo automático freebet:', error);
+      console.error('Erro no cálculo automático freebet:', error);
       $("k_S").textContent='R$ 0,00';
       $("results").style.display='none';
     }
