@@ -966,25 +966,89 @@ export function getFreeProfHTML() {
             stakes[k] = numer / eBack[k];
           }
         }
-      } else {
-        // FALLBACK quando existe LAY
-        var baseLossLay = stake;
-        for (var m = 0; m < cov.odds.length; m++) {
-          var L = cov.odds[m], cfrac = commFrac[m];
-          if (cov.isLay[m]) {
-            // ganho quando a seleção perde = stakeLay * (1 - comissão)
-            stakes[m] = baseLossLay / (1 - cfrac);
-            var denom = L - 1;
-            eBack[m] = 1 + (1 - cfrac) / denom; // só para exibição coerente
-          } else {
-            var e3 = effOdd(L, cov.comm[m]);
-            eBack[m] = e3;
-            var util3 = (e3 - 1);
-            if (!(util3 > 0)) { $("k_S").textContent='—'; $("results").style.display='none'; isCalculating=false; return; }
-            stakes[m] = baseLossLay / util3;
-          }
-        }
+     } else {
+  // -------- MIX BACK+LAY: nivelamento geral com H' = Σ (a_i / b_i) --------
+  // Para cada cobertura:
+  //  - BACK: a_i = 1,          b_i = e_i = effOdd(L, com)
+  //  - LAY : a_i = (L-1),      b_i = L - cfrac    (ganho líquido + “desalocação” da liability)
+  var a = [], b = [];
+  for (var m = 0; m < cov.odds.length; m++) {
+    var L = cov.odds[m];
+    var cfrac = commFrac[m] || 0;
+
+    if (cov.isLay[m]) {
+      var denom = L - 1;
+      if (!(denom > 0)) {
+        $("k_S").textContent = '—';
+        $("results").style.display = 'none';
+        isCalculating = false;
+        return;
       }
+      // Parâmetros do sistema
+      a[m] = denom;
+      b[m] = L - cfrac;                 // conforme derivação: net = s*(L - cfrac) - S
+
+      // Apenas para exibição coerente (não entra no sistema)
+      eBack[m] = 1 + (1 - cfrac) / denom;
+    } else {
+      var e3 = effOdd(L, cov.comm[m]);  // e3 = 1 + (L-1)*(1 - com%)
+      if (!(e3 > 1)) {
+        $("k_S").textContent = '—';
+        $("results").style.display = 'none';
+        isCalculating = false;
+        return;
+      }
+      a[m] = 1;
+      b[m] = e3;
+
+      eBack[m] = e3;
+    }
+  }
+
+  // H' = Σ a_i / b_i
+  var Hprime = 0;
+  for (var q = 0; q < a.length; q++) Hprime += (a[q] / b[q]);
+
+  if (Hprime >= 1) {
+    // Impossível nivelar matematicamente → mantém teu fallback antigo (baseLoss)
+    showStatus('warning', 'Impossível nivelar (Σ a/b ≥ 1). Usando modo de cobertura.');
+    var baseLossLay = stake;
+    for (var j = 0; j < cov.odds.length; j++) {
+      var Lj = cov.odds[j], cfracj = commFrac[j] || 0;
+      if (cov.isLay[j]) {
+        stakes[j] = baseLossLay / (1 - cfracj);
+        var denomj = Lj - 1;
+        eBack[j] = 1 + (1 - cfracj) / denomj;
+      } else {
+        var ej = effOdd(Lj, cov.comm[j]);
+        eBack[j] = ej;
+        var utilj = (ej - 1);
+        if (!(utilj > 0)) {
+          $("k_S").textContent='—';
+          $("results").style.display='none';
+          isCalculating=false;
+          return;
+        }
+        stakes[j] = baseLossLay / utilj;
+      }
+    }
+  } else {
+    // Nivelamento analítico (inclui principal e todas coberturas com cashback)
+    var P = stake, O = odd, C = cashbackAmount;
+
+    // N = lucro nivelado em todos cenários (inclui principal)
+    // Fórmula geral: N = P*(O - 1 - O*H') + C*H'
+    var N = P * (O - 1 - O * Hprime) + C * Hprime;
+
+    // T é o termo comum T = b_i * s_i = (N + P - C) / (1 - H')
+    var T = (N + P - C) / (1 - Hprime);
+
+    // s_i = T / b_i
+    for (var k = 0; k < b.length; k++) {
+      stakes[k] = T / b[k];
+    }
+  }
+}
 
       // Arredonda e aplica mínimo
       stakes = stakes.map(roundStep).map(function(v){ return Math.max(v, MIN_STAKE); });
