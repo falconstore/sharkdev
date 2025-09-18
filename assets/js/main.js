@@ -1,4 +1,4 @@
-// assets/js/main.js - VERSÃO LIMPA SEM FIREBASE
+// assets/js/main.js - VERSÃO LIMPA SEM FIREBASE E SEM SISTEMA DE COMPARTILHAMENTO
 // Controlador principal da aplicação
 
 import { Theme } from './ui/theme.js';
@@ -6,7 +6,6 @@ import { TabSystem } from './ui/tabs.js';
 import { ArbiPro } from './calculators/arbipro.js';
 import { FreePro } from './calculators/freepro.js';
 import { CasasRegulamentadas } from './calculators/casas-regulamentadas.js';
-import { ShareUI } from './ui/shareui.js';
 
 class App {
   constructor() {
@@ -16,7 +15,6 @@ class App {
     this.freePro = null;
     this.casasRegulamentadas = null;
     this.navigation = null;
-    this.shareUI = null;
   }
 
   async init() {
@@ -31,14 +29,6 @@ class App {
       
       // Carrega aplicação principal DIRETO (sem login)
       await this.loadMainApp();
-      
-      // Inicializa ShareUI
-      this.shareUI = new ShareUI();
-      await this.shareUI.init();
-      console.log('✅ ShareUI inicializado');
-      
-      // Configura sistema de compartilhamento
-      this.setupShareSystem();
       
       console.log('Calculadoras Shark 100% Green inicializadas com sucesso');
     } catch (error) {
@@ -145,117 +135,6 @@ class App {
     }
   }
 
-  setupShareSystem() {
-    console.log('Configurando sistema de compartilhamento...');
-    
-    if (!this.shareUI) {
-      console.error('ShareUI não está inicializado');
-      return;
-    }
-
-    // Aguarda DOM estar pronto e configura botões
-    setTimeout(() => {
-      this.setupArbiProShareButton();
-      this.setupFreeProShareButton();
-    }, 1000);
-  }
-
-  setupArbiProShareButton() {
-    let attempts = 0;
-    const maxAttempts = 10;
-    
-    const trySetup = () => {
-      attempts++;
-      
-      const shareBtn = document.getElementById('shareBtn');
-      if (shareBtn) {
-        const newShareBtn = shareBtn.cloneNode(true);
-        shareBtn.parentNode.replaceChild(newShareBtn, shareBtn);
-        
-        newShareBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          console.log('Botão ArbiPro clicado');
-          
-          if (this.shareUI) {
-            this.shareUI.handleShareClick('arbipro');
-          } else {
-            console.error('ShareUI não disponível');
-          }
-        });
-        
-        console.log('✅ Botão ArbiPro configurado');
-        return true;
-      }
-      
-      if (attempts < maxAttempts) {
-        console.log(`Tentativa ${attempts} de configurar botão ArbiPro...`);
-        setTimeout(trySetup, 500);
-        return false;
-      }
-      
-      console.warn('❌ Não foi possível configurar botão ArbiPro após', maxAttempts, 'tentativas');
-      return false;
-    };
-    
-    trySetup();
-  }
-
-  setupFreeProShareButton() {
-    let attempts = 0;
-    const maxAttempts = 15;
-    
-    const trySetup = () => {
-      attempts++;
-      
-      try {
-        const iframe = document.getElementById('calc2frame');
-        if (iframe && iframe.contentDocument) {
-          const doc = iframe.contentDocument;
-          const shareBtn = doc.getElementById('shareBtn');
-          
-          if (shareBtn) {
-            const newShareBtn = shareBtn.cloneNode(true);
-            shareBtn.parentNode.replaceChild(newShareBtn, shareBtn);
-            
-            newShareBtn.addEventListener('click', (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log('Botão FreePro clicado');
-              
-              try {
-                if (window.SharkGreen && window.SharkGreen.shareUI) {
-                  window.SharkGreen.shareUI.handleShareClick('freepro');
-                } else {
-                  console.error('ShareUI não disponível no parent window');
-                }
-              } catch (error) {
-                console.error('Erro ao acessar ShareUI:', error);
-              }
-            });
-            
-            console.log('✅ Botão FreePro configurado');
-            return true;
-          }
-        }
-      } catch (e) {
-        // Erro normal durante carregamento do iframe
-      }
-      
-      if (attempts < maxAttempts) {
-        console.log(`Tentativa ${attempts} de configurar botão FreePro...`);
-        setTimeout(trySetup, 1000);
-        return false;
-      }
-      
-      console.warn('❌ Não foi possível configurar botão FreePro após', maxAttempts, 'tentativas');
-      return false;
-    };
-    
-    // Aguarda iframe carregar
-    setTimeout(trySetup, 2000);
-  }
-
   removeLoadingScreen() {
     const loadingContainers = [
       document.querySelector('.loading-container'),
@@ -292,8 +171,7 @@ class App {
       tabSystem: this.tabSystem,
       arbiPro: this.arbiPro,
       freePro: this.freePro,
-      casasRegulamentadas: this.casasRegulamentadas,
-      shareUI: this.shareUI
+      casasRegulamentadas: this.casasRegulamentadas
     };
   }
 }
@@ -302,7 +180,7 @@ class App {
 document.addEventListener('DOMContentLoaded', () => {
   try {
     const app = new App();
-    window.SharkGreen = app; // Para debug global e acesso do iframe
+    window.SharkGreen = app; // Para debug global
     app.init();
   } catch (error) {
     console.error('Erro crítico ao inicializar:', error);
