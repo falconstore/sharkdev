@@ -1,4 +1,4 @@
-// assets/js/main.js - VERSÃO ATUALIZADA
+// assets/js/main.js - VERSÃO COM COMPARTILHAMENTO FUNCIONANDO
 // Controlador principal da aplicação
 
 import { Theme } from './ui/theme.js';
@@ -6,6 +6,7 @@ import { TabSystem } from './ui/tabs.js';
 import { ArbiPro } from './calculators/arbipro.js';
 import { FreePro } from './calculators/freepro.js';
 import { CasasRegulamentadas } from './calculators/casas-regulamentadas.js';
+import { ShareUI } from './ui/shareui.js'; // IMPORTAÇÃO DIRETA
 
 class App {
   constructor() {
@@ -25,7 +26,12 @@ class App {
       // Inicializa tema
       this.theme.init();
       
-      // Carrega módulos opcionais de forma segura
+      // IMPORTANTE: Inicializa ShareUI primeiro
+      this.shareUI = new ShareUI();
+      await this.shareUI.init();
+      console.log('✅ ShareUI inicializado');
+      
+      // Carrega módulos opcionais
       await this.loadOptionalModules();
       
       // Carrega aplicação principal
@@ -48,16 +54,6 @@ class App {
     } catch (e) {
       console.warn('⚠️ Navigation não disponível:', e.message);
     }
-
-    // Carrega ShareUI de forma segura
-    try {
-      const { ShareUI } = await import('./ui/shareui.js');
-      this.shareUI = new ShareUI();
-      this.shareUI.init();
-      console.log('✅ ShareUI carregado');
-    } catch (e) {
-      console.warn('⚠️ ShareUI não disponível:', e.message);
-    }
   }
 
   async loadMainApp() {
@@ -75,7 +71,7 @@ class App {
         throw new Error('Container app-container não encontrado');
       }
 
-      // Template com navegação atualizada
+      // Template com navegação
       const navigationTabs = this.navigation ? `
         <div class="main-navigation">
           <div class="nav-tabs">
@@ -127,7 +123,7 @@ class App {
       this.tabSystem = new TabSystem();
       this.tabSystem.init();
 
-      // Inicializa calculadoras e novo módulo
+      // Inicializa calculadoras
       this.arbiPro = new ArbiPro();
       this.freePro = new FreePro();
       this.casasRegulamentadas = new CasasRegulamentadas();
@@ -141,19 +137,10 @@ class App {
         this.navigation.casasRegulamentadas = this.casasRegulamentadas;
       }
       
-      // Carrega configuração compartilhada se disponível
-      if (this.shareUI && this.shareUI.loadSharedConfig) {
-        setTimeout(() => {
-          this.shareUI.loadSharedConfig();
-        }, 1500);
-      }
-      
-      // Adiciona botões de compartilhamento se disponível
-      if (this.shareUI && this.shareUI.createShareButton) {
-        setTimeout(() => {
-          this.addShareButtons();
-        }, 2000);
-      }
+      // IMPORTANTE: Configura compartilhamento depois que as calculadoras estão prontas
+      setTimeout(() => {
+        this.setupShareSystem();
+      }, 1500);
       
       console.log('Calculadoras carregadas com sucesso');
       
@@ -163,26 +150,42 @@ class App {
     }
   }
 
-  addShareButtons() {
-    if (!this.shareUI || !this.shareUI.createShareButton) return;
+  // NOVO MÉTODO: Configura o sistema de compartilhamento
+  setupShareSystem() {
+    console.log('Configurando sistema de compartilhamento...');
     
-    try {
-      // Conecta o botão existente do ArbiPro ao sistema de compartilhamento
-      const shareBtn = document.getElementById('shareBtn');
-      if (shareBtn) {
-        shareBtn.addEventListener('click', () => {
-          if (this.shareUI.handleShareClick) {
-            this.shareUI.handleShareClick('arbipro');
-          }
-        });
-        console.log('✅ Botão ArbiPro conectado ao sistema de compartilhamento');
-      }
+    if (!this.shareUI) {
+      console.error('ShareUI não está inicializado');
+      return;
+    }
 
-      // Adiciona botão no FreePro (dentro do iframe)
-      this.setupFreeProShareButton();
+    // Conecta botão ArbiPro
+    const shareBtn = document.getElementById('shareBtn');
+    if (shareBtn) {
+      // Remove listeners antigos
+      const newShareBtn = shareBtn.cloneNode(true);
+      shareBtn.parentNode.replaceChild(newShareBtn, shareBtn);
+      
+      // Adiciona novo listener
+      newShareBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('Botão ArbiPro clicado');
+        this.shareUI.handleShareClick('arbipro');
+      });
+      console.log('✅ Botão ArbiPro configurado');
+    } else {
+      console.warn('Botão shareBtn não encontrado');
+    }
 
-    } catch (error) {
-      console.warn('Erro ao configurar botões de compartilhamento:', error);
+    // Configura botão FreePro (dentro do iframe)
+    this.setupFreeProShareButton();
+    
+    // Carrega configuração compartilhada se existir na URL
+    if (this.shareUI.loadSharedConfig) {
+      setTimeout(() => {
+        console.log('Verificando configuração compartilhada na URL...');
+        this.shareUI.loadSharedConfig();
+      }, 500);
     }
   }
 
@@ -192,53 +195,46 @@ class App {
     let attempts = 0;
     const maxAttempts = 10;
     
-    const tryAddButton = () => {
+    const trySetup = () => {
       attempts++;
       
       try {
         const iframe = document.getElementById('calc2frame');
         if (iframe && iframe.contentDocument) {
           const doc = iframe.contentDocument;
-          const actions = doc.querySelector('.actions');
+          const shareBtn = doc.getElementById('shareBtn');
           
-          if (actions && !doc.querySelector('.btn-share')) {
-            const shareBtn = doc.createElement('button');
-            shareBtn.className = 'btn btn-share';
-            shareBtn.innerHTML = '🔗 Compartilhar';
-            shareBtn.style.cssText = `
-              background: linear-gradient(135deg, #8b5cf6, #3b82f6) !important;
-              color: white !important;
-              margin-top: 0.75rem !important;
-              border: none !important;
-              border-radius: 8px !important;
-              padding: 0.75rem 1rem !important;
-              font-size: 0.875rem !important;
-              font-weight: 600 !important;
-              cursor: pointer !important;
-              transition: all 0.2s ease !important;
-            `;
+          if (shareBtn) {
+            // Remove listeners antigos
+            const newShareBtn = shareBtn.cloneNode(true);
+            shareBtn.parentNode.replaceChild(newShareBtn, shareBtn);
             
-            shareBtn.addEventListener('click', () => {
-              if (this.shareUI.handleShareClick) {
-                this.shareUI.handleShareClick('freepro');
+            // Adiciona novo listener
+            newShareBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              console.log('Botão FreePro clicado');
+              
+              // Chama o método do parent window
+              if (window.SharkGreen && window.SharkGreen.shareUI) {
+                window.SharkGreen.shareUI.handleShareClick('freepro');
               }
             });
             
-            actions.appendChild(shareBtn);
-            console.log('✅ Botão FreePro adicionado');
+            console.log('✅ Botão FreePro configurado');
             return;
           }
         }
       } catch (e) {
-        // Ignora erros de acesso ao iframe
+        console.warn('Tentativa', attempts, 'de configurar FreePro share:', e.message);
       }
       
       if (attempts < maxAttempts) {
-        setTimeout(tryAddButton, 500);
+        setTimeout(trySetup, 1000);
       }
     };
     
-    tryAddButton();
+    // Espera um pouco para o iframe carregar
+    setTimeout(trySetup, 2000);
   }
 
   showLoadingScreen() {
