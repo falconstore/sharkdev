@@ -1,310 +1,177 @@
 // assets/js/utils/share.js
-// Sistema de compartilhamento OTIMIZADO - Sem Firebase
+// Sistema de compartilhamento com DEBUG e decodificação corrigida
 
 export class ShareSystem {
   constructor() {
     this.baseUrl = window.location.origin + window.location.pathname;
-    this.compression = true; // Habilita compressão de dados
+    this.debugMode = true;
   }
 
-  // ===== COMPRESSÃO DE DADOS =====
-  compressData(data) {
-    if (!this.compression) return data;
-    
-    // Remove campos vazios/nulos para economia de espaço
-    const clean = (obj) => {
-      if (Array.isArray(obj)) {
-        return obj.map(clean).filter(item => 
-          item !== null && item !== undefined && item !== ''
-        );
-      }
-      
-      if (obj && typeof obj === 'object') {
-        const cleaned = {};
-        Object.keys(obj).forEach(key => {
-          const value = clean(obj[key]);
-          if (value !== null && value !== undefined && value !== '') {
-            cleaned[key] = value;
-          }
-        });
-        return Object.keys(cleaned).length > 0 ? cleaned : null;
-      }
-      
-      return obj;
+  log(...args) {
+    if (this.debugMode) {
+      console.log('🔗[ShareSystem]', ...args);
+    }
+  }
+
+  // Gera link compartilhável para ArbiPro
+  generateArbiProLink(data) {
+    const config = {
+      t: 'arbipro', // tipo
+      n: data.numHouses || 2, // número de casas
+      r: data.rounding || 0.01, // arredondamento
+      h: data.houses.slice(0, data.numHouses).map(house => ({
+        o: house.odd || '', // odd
+        s: house.stake || '', // stake
+        c: house.commission, // comissão (null se não tem)
+        f: house.freebet || false, // freebet
+        i: house.increase, // aumento de odd (null se não tem)
+        l: house.lay || false, // lay
+        x: house.fixedStake || false // stake fixada
+      }))
     };
-    
-    return clean(data);
+
+    this.log('Configuração ArbiPro a ser codificada:', config);
+    return this.createShareableLink(config);
   }
 
-  // ===== LINKS MAIS INTELIGENTES =====
+  // Gera link compartilhável para FreePro
+  generateFreeProLink(data) {
+    const config = {
+      t: 'freepro', // tipo
+      n: data.numEntradas || 3, // número de entradas
+      r: data.roundStep || 1.00, // arredondamento
+      mode: data.mode || 'freebet' // modo: freebet ou cashback
+    };
+
+    if (data.mode === 'cashback') {
+      // Dados específicos do cashback
+      config.cashbackOdd = data.cashbackOdd || '';
+      config.cashbackStake = data.cashbackStake || '';
+      config.cashbackRate = data.cashbackRate || '';
+    } else {
+      // Dados específicos do freebet (casa promoção)
+      config.promoOdd = data.promoOdd || '';
+      config.promoComm = data.promoComm || '';
+      config.promoStake = data.promoStake || '';
+      config.freebetValue = data.freebetValue || '';
+      config.extractionRate = data.extractionRate || '';
+    }
+
+    // Coberturas (comum para ambos os modos)
+    config.coverages = (data.coverages || []).map(cov => ({
+      odd: cov.odd || '',
+      commission: cov.commission || '',
+      lay: cov.lay || false
+    }));
+
+    this.log('Configuração FreePro a ser codificada:', config);
+    return this.createShareableLink(config);
+  }
+
+  // Cria link encurtado usando base64
   createShareableLink(config) {
     try {
-      // 1. Comprime dados
-      const compressed = this.compressData(config);
-      console.log('Dados originais:', JSON.stringify(config).length, 'chars');
-      console.log('Dados comprimidos:', JSON.stringify(compressed).length, 'chars');
+      const jsonStr = JSON.stringify(config);
+      this.log('JSON a ser codificado:', jsonStr);
       
-      // 2. Gera URLs
-      const jsonStr = JSON.stringify(compressed);
-      const base64 = btoa(encodeURIComponent(jsonStr));
+      // Codificação segura para URL
+      const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+      this.log('Base64 gerado:', base64);
       
-      // 3. Decide estratégia baseado no tamanho
-      const fullUrl = `${this.baseUrl}?share=${base64}`;
+      const shortId = this.generateShortId(base64);
       
-      if (fullUrl.length > 2000) {
-        // URL muito longa - força uso de localStorage
-        const shortId = this.generateShortId(base64);
-        const shareData = {
-          id: shortId,
-          config: compressed,
-          created: Date.now(),
-          expires: Date.now() + (7 * 24 * 60 * 60 * 1000), // 7 dias
-          hits: 0,
-          maxHits: 50 // Limite de acessos
-        };
-        
-        this.saveShareData(shortId, shareData);
-        
-        return {
-          fullUrl: fullUrl,
-          shortUrl: `${this.baseUrl}?s=${shortId}`,
-          shareId: shortId,
-          recommendation: 'short' // Recomenda usar link curto
-        };
-      } else {
-        // URL OK - pode usar ambos
-        const shortId = this.generateShortId(base64);
-        this.saveShareData(shortId, {
-          id: shortId,
-          config: compressed,
-          created: Date.now(),
-          expires: Date.now() + (7 * 24 * 60 * 60 * 1000),
-          hits: 0,
-          maxHits: 50
-        });
-        
-        return {
-          fullUrl: fullUrl,
-          shortUrl: `${this.baseUrl}?s=${shortId}`,
-          shareId: shortId,
-          recommendation: 'both' // Ambos funcionam bem
-        };
-      }
+      // Salva no localStorage para recuperação
+      const shareData = {
+        id: shortId,
+        config: config,
+        created: Date.now(),
+        expires: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 dias
+      };
+      
+      this.saveShareData(shortId, shareData);
+      
+      const result = {
+        fullUrl: `${this.baseUrl}?share=${base64}`,
+        shortUrl: `${this.baseUrl}?s=${shortId}`,
+        shareId: shortId
+      };
+      
+      this.log('Links gerados:', result);
+      
+      // Teste imediato de decodificação
+      this.testDecoding(base64, config);
+      
+      return result;
     } catch (error) {
-      console.error('Erro ao criar link:', error);
+      console.error('Erro ao criar link compartilhável:', error);
       return null;
     }
   }
 
-  // ===== FALLBACK INTELIGENTE =====
+  // Método para testar decodificação
+  testDecoding(base64, originalConfig) {
+    try {
+      this.log('Testando decodificação...');
+      const decoded = this.decodeConfig(base64);
+      this.log('Original:', originalConfig);
+      this.log('Decodificado:', decoded);
+      
+      if (JSON.stringify(originalConfig) === JSON.stringify(decoded)) {
+        this.log('✅ Teste de codificação/decodificação passou!');
+      } else {
+        console.error('❌ Teste de codificação/decodificação falhou!');
+      }
+    } catch (error) {
+      console.error('❌ Erro no teste de decodificação:', error);
+    }
+  }
+
+  // Método público para decodificar configuração
+  decodeConfig(base64) {
+    try {
+      const jsonStr = decodeURIComponent(escape(atob(base64)));
+      return JSON.parse(jsonStr);
+    } catch (error) {
+      console.error('Erro ao decodificar configuração:', error);
+      return null;
+    }
+  }
+
+  // Carrega configuração do URL
   loadFromUrl() {
     try {
+      this.log('Verificando URL atual:', window.location.href);
       const urlParams = new URLSearchParams(window.location.search);
       
-      // 1. Tenta link completo primeiro (mais confiável)
+      // Link completo (base64)
       const shareParam = urlParams.get('share');
       if (shareParam) {
-        try {
-          const jsonStr = decodeURIComponent(atob(shareParam));
-          const config = JSON.parse(jsonStr);
-          console.log('✅ Configuração carregada via URL completa');
-          return this.validateAndExpand(config);
-        } catch (e) {
-          console.warn('⚠️ URL completa corrompida, tentando link curto...');
-        }
+        this.log('Parâmetro share encontrado:', shareParam);
+        const config = this.decodeConfig(shareParam);
+        this.log('Configuração decodificada do URL completo:', config);
+        return config;
       }
       
-      // 2. Fallback para link curto
+      // Link curto
       const shortParam = urlParams.get('s');
       if (shortParam) {
+        this.log('Parâmetro s encontrado:', shortParam);
         const shareData = this.loadShareData(shortParam);
         if (shareData) {
-          console.log('✅ Configuração carregada via link curto');
-          this.incrementHitCount(shortParam);
-          return this.validateAndExpand(shareData.config);
-        } else {
-          console.warn('❌ Link curto expirado ou não encontrado');
-          this.showLinkExpiredMessage();
+          this.log('Configuração carregada do link curto:', shareData.config);
+          return shareData.config;
         }
       }
       
+      this.log('Nenhum parâmetro de compartilhamento encontrado');
       return null;
     } catch (error) {
-      console.error('Erro ao carregar configuração:', error);
+      console.error('Erro ao carregar configuração do URL:', error);
       return null;
     }
   }
 
-  // ===== VALIDAÇÃO E EXPANSÃO =====
-  validateAndExpand(config) {
-    if (!this.validateConfig(config)) {
-      console.error('Configuração inválida');
-      return null;
-    }
-    
-    // Expande dados comprimidos com valores padrão
-    if (config.t === 'arbipro') {
-      return {
-        ...config,
-        h: (config.h || []).map(house => ({
-          o: house.o || '',
-          s: house.s || '',
-          c: house.c !== undefined ? house.c : null,
-          f: house.f || false,
-          i: house.i !== undefined ? house.i : null,
-          l: house.l || false,
-          x: house.x || false
-        }))
-      };
-    }
-    
-    if (config.t === 'freepro') {
-      return {
-        ...config,
-        coverages: (config.coverages || []).map(cov => ({
-          odd: cov.odd || '',
-          commission: cov.commission || '',
-          lay: cov.lay || false
-        }))
-      };
-    }
-    
-    return config;
-  }
-
-  // ===== CONTROLE DE HITS =====
-  incrementHitCount(shortId) {
-    try {
-      const key = `share_${shortId}`;
-      const data = JSON.parse(localStorage.getItem(key) || '{}');
-      
-      if (data.config) {
-        data.hits = (data.hits || 0) + 1;
-        
-        if (data.hits >= (data.maxHits || 50)) {
-          console.log('Link atingiu limite de acessos, removendo...');
-          localStorage.removeItem(key);
-        } else {
-          localStorage.setItem(key, JSON.stringify(data));
-        }
-      }
-    } catch (e) {
-      console.warn('Erro ao incrementar hits:', e);
-    }
-  }
-
-  // ===== GESTÃO DE STORAGE =====
-  saveShareData(shortId, data) {
-    try {
-      const key = `share_${shortId}`;
-      localStorage.setItem(key, JSON.stringify(data));
-      
-      // Limpeza automática
-      this.cleanupOldShares();
-      
-      // Verifica limite de espaço
-      this.checkStorageLimit();
-    } catch (error) {
-      if (error.name === 'QuotaExceededError') {
-        console.warn('localStorage cheio, limpando dados antigos...');
-        this.aggressiveCleanup();
-        try {
-          localStorage.setItem(key, JSON.stringify(data));
-        } catch (e) {
-          console.error('Impossível salvar, storage totalmente cheio');
-        }
-      } else {
-        console.warn('Erro ao salvar:', error);
-      }
-    }
-  }
-
-  checkStorageLimit() {
-    try {
-      const used = new Blob(Object.values(localStorage)).size;
-      const limit = 5 * 1024 * 1024; // ~5MB
-      
-      if (used > limit * 0.8) {
-        console.warn('localStorage quase cheio, limpando...');
-        this.cleanupOldShares();
-      }
-    } catch (e) {
-      // Fallback se não conseguir calcular tamanho
-      if (Object.keys(localStorage).length > 100) {
-        this.cleanupOldShares();
-      }
-    }
-  }
-
-  aggressiveCleanup() {
-    try {
-      const keys = Object.keys(localStorage);
-      const shareKeys = keys.filter(k => k.startsWith('share_'));
-      
-      // Remove 50% dos mais antigos
-      const toRemove = shareKeys.slice(0, Math.ceil(shareKeys.length / 2));
-      toRemove.forEach(key => localStorage.removeItem(key));
-      
-      console.log(`Removidos ${toRemove.length} links antigos`);
-    } catch (e) {
-      console.error('Erro na limpeza agressiva:', e);
-    }
-  }
-
-  // ===== MELHOR UX =====
-  showLinkExpiredMessage() {
-    // Mostra mensagem amigável em vez de erro técnico
-    const message = `
-      🔗 Este link compartilhado expirou ou não foi encontrado.
-      
-      Links de compartilhamento são válidos por 7 dias e até 50 acessos.
-      Peça para a pessoa gerar um novo link.
-    `;
-    
-    if (window.showNotification) {
-      window.showNotification(message, 'warning');
-    } else {
-      alert(message);
-    }
-  }
-
-  // ===== ANALYTICS SIMPLES =====
-  getShareStats() {
-    try {
-      const keys = Object.keys(localStorage);
-      const shareKeys = keys.filter(k => k.startsWith('share_'));
-      
-      let totalShares = 0;
-      let totalHits = 0;
-      let activeShares = 0;
-      
-      shareKeys.forEach(key => {
-        try {
-          const data = JSON.parse(localStorage.getItem(key));
-          if (data.config) {
-            totalShares++;
-            totalHits += (data.hits || 0);
-            if (data.expires > Date.now()) {
-              activeShares++;
-            }
-          }
-        } catch (e) {
-          localStorage.removeItem(key); // Remove corrompidos
-        }
-      });
-      
-      return {
-        totalShares,
-        totalHits,
-        activeShares,
-        storageUsed: new Blob(Object.values(localStorage)).size
-      };
-    } catch (e) {
-      return { error: 'Não foi possível calcular estatísticas' };
-    }
-  }
-
-  // Resto dos métodos permanecem iguais...
+  // Gera ID curto para link encurtado
   generateShortId(base64) {
     const hash = this.simpleHash(base64);
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -319,16 +186,32 @@ export class ShareSystem {
     return result;
   }
 
+  // Hash simples para gerar ID
   simpleHash(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
       hash = ((hash << 5) - hash) + char;
-      hash = hash & hash;
+      hash = hash & hash; // Convert to 32-bit integer
     }
     return hash;
   }
 
+  // Salva dados de compartilhamento
+  saveShareData(shortId, data) {
+    try {
+      const key = `share_${shortId}`;
+      localStorage.setItem(key, JSON.stringify(data));
+      this.log('Dados salvos no localStorage com chave:', key);
+      
+      // Limpa dados antigos
+      this.cleanupOldShares();
+    } catch (error) {
+      console.warn('Não foi possível salvar dados de compartilhamento:', error);
+    }
+  }
+
+  // Limpa compartilhamentos expirados
   cleanupOldShares() {
     try {
       const now = Date.now();
@@ -344,63 +227,75 @@ export class ShareSystem {
               removed++;
             }
           } catch (e) {
-            localStorage.removeItem(key);
+            localStorage.removeItem(key); // Remove dados corrompidos
             removed++;
           }
         }
       });
       
       if (removed > 0) {
-        console.log(`Limpeza automática: ${removed} links expirados removidos`);
+        this.log(`Limpeza: ${removed} compartilhamentos expirados removidos`);
       }
     } catch (error) {
       console.warn('Erro na limpeza automática:', error);
     }
   }
 
+  // Carrega dados de compartilhamento
   loadShareData(shortId) {
     try {
       const key = `share_${shortId}`;
       const data = localStorage.getItem(key);
       
-      if (!data) return null;
+      if (!data) {
+        this.log('Dados não encontrados para ID:', shortId);
+        return null;
+      }
       
       const shareData = JSON.parse(data);
       
+      // Verifica se não expirou
       if (shareData.expires && shareData.expires < Date.now()) {
         localStorage.removeItem(key);
+        this.log('Dados expirados removidos para ID:', shortId);
         return null;
       }
       
-      if (shareData.hits >= (shareData.maxHits || 50)) {
-        localStorage.removeItem(key);
-        return null;
-      }
-      
+      this.log('Dados carregados para ID:', shortId);
       return shareData;
     } catch (error) {
-      console.error('Erro ao carregar dados:', error);
+      console.error('Erro ao carregar dados de compartilhamento:', error);
       return null;
     }
   }
 
+  // Remove parâmetros de compartilhamento da URL
   cleanUrl() {
     try {
       const url = new URL(window.location);
+      const hadParams = url.searchParams.has('share') || url.searchParams.has('s');
+      
       url.searchParams.delete('share');
       url.searchParams.delete('s');
-      window.history.replaceState({}, document.title, url.toString());
+      
+      if (hadParams) {
+        // Atualiza URL sem recarregar a página
+        window.history.replaceState({}, document.title, url.toString());
+        this.log('URL limpa:', url.toString());
+      }
     } catch (error) {
       console.warn('Não foi possível limpar URL:', error);
     }
   }
 
+  // Copia link para área de transferência
   async copyToClipboard(url) {
     try {
       if (navigator.clipboard && window.isSecureContext) {
         await navigator.clipboard.writeText(url);
         return true;
       } else {
+        // Fallback para navegadores mais antigos
         const textArea = document.createElement('textarea');
         textArea.value = url;
         textArea.style.position = 'fixed';
@@ -412,78 +307,136 @@ export class ShareSystem {
         return success;
       }
     } catch (error) {
-      console.error('Erro ao copiar:', error);
+      console.error('Erro ao copiar para área de transferência:', error);
       return false;
     }
   }
 
+  // Valida se uma configuração é válida
   validateConfig(config) {
-    if (!config || typeof config !== 'object') return false;
-    
-    const validTypes = ['arbipro', 'freepro'];
-    if (!validTypes.includes(config.t)) return false;
-    
-    if (config.t === 'arbipro') {
-      return typeof config.n === 'number' && config.n >= 2 && config.n <= 6;
+    if (!config || typeof config !== 'object') {
+      this.log('Configuração inválida: não é um objeto');
+      return false;
     }
     
-    if (config.t === 'freepro') {
-      return typeof config.n === 'number' && 
-             config.n >= 2 && config.n <= 6 &&
-             ['freebet', 'cashback'].includes(config.mode);
+    const validTypes = ['arbipro', 'freepro'];
+    if (!validTypes.includes(config.t)) {
+      this.log('Configuração inválida: tipo não reconhecido:', config.t);
+      return false;
+    }
+    
+    if (config.t === 'arbipro') {
+      return this.validateArbiProConfig(config);
+    } else if (config.t === 'freepro') {
+      return this.validateFreeProConfig(config);
     }
     
     return false;
   }
 
-  // Métodos de geração de links específicos permanecem iguais
-  generateArbiProLink(data) {
-    const config = {
-      t: 'arbipro',
-      n: data.numHouses || 2,
-      r: data.rounding || 0.01,
-      h: data.houses.slice(0, data.numHouses).map(house => ({
-        o: house.odd || '',
-        s: house.stake || '',
-        c: house.commission,
-        f: house.freebet || false,
-        i: house.increase,
-        l: house.lay || false,
-        x: house.fixedStake || false
-      }))
-    };
-
-    return this.createShareableLink(config);
+  validateArbiProConfig(config) {
+    const isValid = (
+      typeof config.n === 'number' &&
+      config.n >= 2 && config.n <= 6 &&
+      Array.isArray(config.h) &&
+      config.h.length <= config.n
+    );
+    
+    if (!isValid) {
+      this.log('Configuração ArbiPro inválida:', config);
+    } else {
+      this.log('Configuração ArbiPro válida');
+    }
+    
+    return isValid;
   }
 
-  generateFreeProLink(data) {
-    const config = {
-      t: 'freepro',
-      n: data.numEntradas || 3,
-      r: data.roundStep || 1.00,
-      mode: data.mode || 'freebet'
-    };
-
-    if (data.mode === 'cashback') {
-      config.cashbackOdd = data.cashbackOdd || '';
-      config.cashbackStake = data.cashbackStake || '';
-      config.cashbackRate = data.cashbackRate || '';
+  validateFreeProConfig(config) {
+    const isValid = (
+      typeof config.n === 'number' &&
+      config.n >= 2 && config.n <= 6 &&
+      (config.mode === 'freebet' || config.mode === 'cashback')
+    );
+    
+    if (!isValid) {
+      this.log('Configuração FreePro inválida:', config);
     } else {
-      config.promoOdd = data.promoOdd || '';
-      config.promoComm = data.promoComm || '';
-      config.promoStake = data.promoStake || '';
-      config.freebetValue = data.freebetValue || '';
-      config.extractionRate = data.extractionRate || '';
+      this.log('Configuração FreePro válida');
     }
+    
+    return isValid;
+  }
 
-    config.coverages = (data.coverages || []).map(cov => ({
-      odd: cov.odd || '',
-      commission: cov.commission || '',
-      lay: cov.lay || false
-    }));
-
-    return this.createShareableLink(config);
+  // Método de teste para debug
+  testEncodingDecoding() {
+    this.log('=== TESTE DE CODIFICAÇÃO/DECODIFICAÇÃO ===');
+    
+    // Teste 1: ArbiPro
+    const arbiTest = {
+      t: 'arbipro',
+      n: 2,
+      r: 0.01,
+      h: [
+        { o: '3.50', s: '100', c: null, f: false, i: null, l: false, x: true },
+        { o: '2.80', s: '125', c: 5, f: false, i: 10, l: true, x: false }
+      ]
+    };
+    
+    this.log('Teste ArbiPro original:', arbiTest);
+    const arbiJson = JSON.stringify(arbiTest);
+    const arbiB64 = btoa(unescape(encodeURIComponent(arbiJson)));
+    const arbiDecoded = this.decodeConfig(arbiB64);
+    this.log('Teste ArbiPro decodificado:', arbiDecoded);
+    this.log('ArbiPro match:', JSON.stringify(arbiTest) === JSON.stringify(arbiDecoded));
+    
+    // Teste 2: FreePro Freebet
+    const freeTest = {
+      t: 'freepro',
+      n: 3,
+      r: 1.00,
+      mode: 'freebet',
+      promoOdd: '4.00',
+      promoComm: '0',
+      promoStake: '50',
+      freebetValue: '25',
+      extractionRate: '70',
+      coverages: [
+        { odd: '2.50', commission: '0', lay: false },
+        { odd: '3.20', commission: '5', lay: true }
+      ]
+    };
+    
+    this.log('Teste FreePro original:', freeTest);
+    const freeJson = JSON.stringify(freeTest);
+    const freeB64 = btoa(unescape(encodeURIComponent(freeJson)));
+    const freeDecoded = this.decodeConfig(freeB64);
+    this.log('Teste FreePro decodificado:', freeDecoded);
+    this.log('FreePro match:', JSON.stringify(freeTest) === JSON.stringify(freeDecoded));
+    
+    // Teste 3: FreePro Cashback
+    const cashTest = {
+      t: 'freepro',
+      n: 2,
+      r: 0.50,
+      mode: 'cashback',
+      cashbackOdd: '2.00',
+      cashbackStake: '100',
+      cashbackRate: '10',
+      coverages: [
+        { odd: '1.90', commission: '0', lay: false }
+      ]
+    };
+    
+    this.log('Teste Cashback original:', cashTest);
+    const cashJson = JSON.stringify(cashTest);
+    const cashB64 = btoa(unescape(encodeURIComponent(cashJson)));
+    const cashDecoded = this.decodeConfig(cashB64);
+    this.log('Teste Cashback decodificado:', cashDecoded);
+    this.log('Cashback match:', JSON.stringify(cashTest) === JSON.stringify(cashDecoded));
+    
+    this.log('=== FIM DOS TESTES ===');
   }
 }
 
+// Export default também para flexibilidade
 export default ShareSystem;
