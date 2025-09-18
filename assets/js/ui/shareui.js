@@ -1,266 +1,305 @@
-// assets/js/utils/share.js
-// Sistema de compartilhamento de configurações
+// assets/js/main.js - VERSÃO LIMPA COM COMPARTILHAMENTO SIMPLES
 
-export class ShareSystem {
+import { Theme } from './ui/theme.js';
+import { TabSystem } from './ui/tabs.js';
+import { ArbiPro } from './calculators/arbipro.js';
+import { FreePro } from './calculators/freepro.js';
+import { CasasRegulamentadas } from './calculators/casas-regulamentadas.js';
+import { ShareUI } from './ui/shareui.js';
+
+class App {
   constructor() {
-    this.baseUrl = window.location.origin + window.location.pathname;
+    this.theme = new Theme();
+    this.tabSystem = null;
+    this.arbiPro = null;
+    this.freePro = null;
+    this.casasRegulamentadas = null;
+    this.navigation = null;
+    this.shareUI = null;
   }
 
-  // Gera link compartilhável para ArbiPro
-  generateArbiProLink(data) {
-    const config = {
-      t: 'arbipro', // tipo
-      n: data.numHouses || 2, // número de casas
-      r: data.rounding || 0.01, // arredondamento
-      h: data.houses.slice(0, data.numHouses).map(house => ({
-        o: house.odd || '', // odd
-        s: house.stake || '', // stake
-        c: house.commission, // comissão (null se não tem)
-        f: house.freebet || false, // freebet
-        i: house.increase, // aumento de odd (null se não tem)
-        l: house.lay || false, // lay
-        x: house.fixedStake || false // stake fixada
-      }))
-    };
-
-    return this.createShareableLink(config);
-  }
-
-  // Gera link compartilhável para FreePro
-  generateFreeProLink(data) {
-    const config = {
-      t: 'freepro', // tipo
-      n: data.numEntradas || 3, // número de entradas
-      r: data.roundStep || 1.00, // arredondamento
-      // Casa promoção
-      p: {
-        o: data.promoOdd || '', // odd da casa
-        c: data.promoComm || '', // comissão
-        s: data.promoStake || '', // stake qualificação
-        f: data.freebetValue || '', // valor freebet
-        e: data.extractionRate || 70 // taxa extração
-      },
-      // Coberturas
-      cov: data.coverages || []
-    };
-
-    return this.createShareableLink(config);
-  }
-
-  // Cria link encurtado usando base64
-  createShareableLink(config) {
+  async init() {
     try {
-      const jsonStr = JSON.stringify(config);
-      const base64 = btoa(encodeURIComponent(jsonStr));
-      const shortId = this.generateShortId(base64);
+      console.log('Iniciando Calculadoras Shark 100% Green...');
       
-      // Salva no localStorage para recuperação
-      const shareData = {
-        id: shortId,
-        config: config,
-        created: Date.now(),
-        expires: Date.now() + (30 * 24 * 60 * 60 * 1000) // 30 dias
-      };
+      // Inicializa tema
+      this.theme.init();
       
-      this.saveShareData(shortId, shareData);
+      // Carrega módulos opcionais
+      await this.loadOptionalModules();
       
-      return {
-        fullUrl: `${this.baseUrl}?share=${base64}`,
-        shortUrl: `${this.baseUrl}?s=${shortId}`,
-        shareId: shortId
-      };
+      // Carrega aplicação principal
+      await this.loadMainApp();
+      
+      // Inicializa ShareUI
+      this.shareUI = new ShareUI();
+      await this.shareUI.init();
+      
+      // Configura botões de compartilhamento
+      this.setupShareButtons();
+      
+      console.log('✅ App inicializado com sucesso');
     } catch (error) {
-      console.error('Erro ao criar link compartilhável:', error);
-      return null;
+      console.error('Erro ao inicializar app:', error);
+      this.showError('Erro ao inicializar aplicação: ' + error.message);
     }
   }
 
-  // Gera ID curto para link encurtado
-  generateShortId(base64) {
-    const hash = this.simpleHash(base64);
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    let num = Math.abs(hash);
-    
-    for (let i = 0; i < 8; i++) {
-      result += chars[num % chars.length];
-      num = Math.floor(num / chars.length);
-    }
-    
-    return result;
-  }
-
-  // Hash simples para gerar ID
-  simpleHash(str) {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    return hash;
-  }
-
-  // Salva dados de compartilhamento
-  saveShareData(shortId, data) {
+  async loadOptionalModules() {
     try {
-      const key = `share_${shortId}`;
-      localStorage.setItem(key, JSON.stringify(data));
+      const { Navigation } = await import('./ui/navigation.js');
+      this.navigation = new Navigation();
+      this.navigation.init();
+      console.log('✅ Navigation carregado');
+    } catch (e) {
+      console.warn('⚠️ Navigation não disponível:', e.message);
+    }
+  }
+
+  async loadMainApp() {
+    try {
+      console.log('Carregando calculadoras...');
       
-      // Limpa dados antigos
-      this.cleanupOldShares();
+      this.showLoadingScreen();
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const container = document.getElementById('app-container');
+      if (!container) {
+        throw new Error('Container app-container não encontrado');
+      }
+
+      const navigationTabs = this.navigation ? `
+        <div class="main-navigation">
+          <div class="nav-tabs">
+            <button id="navCalculadoras" class="nav-tab active">Calculadoras</button>
+            <button id="navCasasRegulamentadas" class="nav-tab">Casas Regulamentadas</button>
+            <button id="navSobre" class="nav-tab">Sobre</button>
+            <button id="navContato" class="nav-tab">Contato</button>
+          </div>
+        </div>
+      ` : '';
+
+      const html = `
+        ${navigationTabs}
+        
+        <div id="calculadoras-content">
+          <div role="tablist" aria-label="Calculadoras" class="tabs-container">
+            <button id="tabBtn1" role="tab" aria-selected="true" aria-controls="panel-1" class="tab" tabindex="0">
+              Calculadora ArbiPro
+            </button>
+            <button id="tabBtn2" role="tab" aria-selected="false" aria-controls="panel-2" class="tab" tabindex="-1">
+              Calculadora FreePro
+            </button>
+          </div>
+
+          <section id="panel-1" role="tabpanel" aria-labelledby="tabBtn1">
+            <div class="panel">
+              <div id="app"></div>
+            </div>
+          </section>
+
+          <section id="panel-2" role="tabpanel" aria-labelledby="tabBtn2" hidden>
+            <div class="panel">
+              <iframe id="calc2frame" title="Calculadora FreePro" 
+                style="width: 100%; height: auto; border: none; border-radius: 16px; background: transparent; display: block; overflow: hidden;" 
+                scrolling="no">
+              </iframe>
+            </div>
+          </section>
+        </div>
+        
+        <div id="casas-regulamentadas-content" class="page-content hidden"></div>
+        <div id="sobre-content" class="page-content hidden"></div>
+        <div id="contato-content" class="page-content hidden"></div>
+      `;
+      
+      container.innerHTML = html;
+
+      // Inicializa calculadoras
+      this.tabSystem = new TabSystem();
+      this.tabSystem.init();
+
+      this.arbiPro = new ArbiPro();
+      this.freePro = new FreePro();
+      this.casasRegulamentadas = new CasasRegulamentadas();
+
+      await this.arbiPro.init();
+      this.freePro.init();
+      this.casasRegulamentadas.init();
+
+      if (this.navigation && this.casasRegulamentadas) {
+        this.navigation.casasRegulamentadas = this.casasRegulamentadas;
+      }
+      
+      console.log('✅ Calculadoras carregadas');
+      
     } catch (error) {
-      console.warn('Não foi possível salvar dados de compartilhamento:', error);
+      console.error('Erro ao carregar calculadoras:', error);
+      this.showError('Erro ao carregar calculadoras: ' + error.message);
     }
   }
 
-  // Limpa compartilhamentos expirados
-  cleanupOldShares() {
-    try {
-      const now = Date.now();
-      const keys = Object.keys(localStorage);
+  // Configura botões de compartilhamento
+  setupShareButtons() {
+    console.log('Configurando botões de compartilhamento...');
+    
+    // ArbiPro
+    this.setupArbiProButton();
+    
+    // FreePro
+    this.setupFreeProButton();
+  }
+
+  setupArbiProButton() {
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    const setup = () => {
+      attempts++;
       
-      keys.forEach(key => {
-        if (key.startsWith('share_')) {
-          try {
-            const data = JSON.parse(localStorage.getItem(key));
-            if (data.expires && data.expires < now) {
-              localStorage.removeItem(key);
-            }
-          } catch (e) {
-            localStorage.removeItem(key); // Remove dados corrompidos
+      const btn = document.getElementById('shareBtn');
+      if (btn) {
+        // Remove listeners antigos
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        
+        // Adiciona novo listener
+        newBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          console.log('ArbiPro share clicado');
+          this.shareUI.share('arbipro');
+        });
+        
+        console.log('✅ Botão ArbiPro configurado');
+        return true;
+      }
+      
+      if (attempts < maxAttempts) {
+        setTimeout(setup, 500);
+        return false;
+      }
+      
+      console.warn('⚠️ Botão ArbiPro não encontrado');
+      return false;
+    };
+    
+    setup();
+  }
+
+  setupFreeProButton() {
+    let attempts = 0;
+    const maxAttempts = 15;
+    
+    const setup = () => {
+      attempts++;
+      
+      try {
+        const iframe = document.getElementById('calc2frame');
+        if (iframe?.contentDocument) {
+          const btn = iframe.contentDocument.getElementById('shareBtn');
+          
+          if (btn) {
+            // Remove listeners antigos
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+            
+            // Adiciona novo listener
+            newBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              console.log('FreePro share clicado');
+              
+              // Acessa via parent window
+              if (window.SharkGreen?.shareUI) {
+                window.SharkGreen.shareUI.share('freepro');
+              }
+            });
+            
+            console.log('✅ Botão FreePro configurado');
+            return true;
           }
         }
-      });
-    } catch (error) {
-      console.warn('Erro ao limpar compartilhamentos antigos:', error);
-    }
-  }
-
-  // Carrega configuração do URL
-  loadFromUrl() {
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-      
-      // Link completo (base64)
-      const shareParam = urlParams.get('share');
-      if (shareParam) {
-        const jsonStr = decodeURIComponent(atob(shareParam));
-        return JSON.parse(jsonStr);
+      } catch (e) {
+        // Normal durante carregamento
       }
       
-      // Link curto
-      const shortParam = urlParams.get('s');
-      if (shortParam) {
-        const shareData = this.loadShareData(shortParam);
-        return shareData ? shareData.config : null;
+      if (attempts < maxAttempts) {
+        setTimeout(setup, 1000);
+        return false;
       }
       
-      return null;
-    } catch (error) {
-      console.error('Erro ao carregar configuração do URL:', error);
-      return null;
-    }
-  }
-
-  // Carrega dados de compartilhamento
-  loadShareData(shortId) {
-    try {
-      const key = `share_${shortId}`;
-      const data = localStorage.getItem(key);
-      
-      if (!data) return null;
-      
-      const shareData = JSON.parse(data);
-      
-      // Verifica se não expirou
-      if (shareData.expires && shareData.expires < Date.now()) {
-        localStorage.removeItem(key);
-        return null;
-      }
-      
-      return shareData;
-    } catch (error) {
-      console.error('Erro ao carregar dados de compartilhamento:', error);
-      return null;
-    }
-  }
-
-  // Remove parâmetros de compartilhamento da URL
-  cleanUrl() {
-    try {
-      const url = new URL(window.location);
-      url.searchParams.delete('share');
-      url.searchParams.delete('s');
-      
-      // Atualiza URL sem recarregar a página
-      window.history.replaceState({}, document.title, url.toString());
-    } catch (error) {
-      console.warn('Não foi possível limpar URL:', error);
-    }
-  }
-
-  // Copia link para área de transferência
-  async copyToClipboard(url) {
-    try {
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(url);
-        return true;
-      } else {
-        // Fallback para navegadores mais antigos
-        const textArea = document.createElement('textarea');
-        textArea.value = url;
-        textArea.style.position = 'fixed';
-        textArea.style.left = '-9999px';
-        document.body.appendChild(textArea);
-        textArea.select();
-        const success = document.execCommand('copy');
-        document.body.removeChild(textArea);
-        return success;
-      }
-    } catch (error) {
-      console.error('Erro ao copiar para área de transferência:', error);
+      console.warn('⚠️ Botão FreePro não encontrado');
       return false;
+    };
+    
+    // Aguarda iframe carregar
+    setTimeout(setup, 2000);
+  }
+
+  showLoadingScreen() {
+    const container = document.getElementById('app-container');
+    if (container) {
+      container.innerHTML = `
+        <div class="post-login-loading">
+          <div class="post-login-content">
+            <div class="post-login-title">Carregando Shark 100% Green</div>
+            <div class="post-login-spinner"></div>
+            <div class="post-login-message">Inicializando calculadoras profissionais...</div>
+          </div>
+        </div>
+      `;
     }
   }
 
-  // Gera QR Code (opcional)
-  generateQRCodeUrl(url) {
-    // Usando serviço público para QR code
-    const encodedUrl = encodeURIComponent(url);
-    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodedUrl}`;
-  }
-
-  // Valida se uma configuração é válida
-  validateConfig(config) {
-    if (!config || typeof config !== 'object') return false;
-    
-    const validTypes = ['arbipro', 'freepro'];
-    if (!validTypes.includes(config.t)) return false;
-    
-    if (config.t === 'arbipro') {
-      return this.validateArbiProConfig(config);
-    } else if (config.t === 'freepro') {
-      return this.validateFreeProConfig(config);
+  showError(message) {
+    const container = document.getElementById('app-container');
+    if (container) {
+      container.innerHTML = `
+        <div class="container" style="text-align: center; margin-top: 2rem;">
+          <div class="card" style="max-width: 500px; margin: 0 auto; padding: 2rem;">
+            <h2 style="color: var(--danger); margin-bottom: 1rem;">⚠️ Erro</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">${message}</p>
+            <button onclick="location.reload()" class="btn btn-primary">Recarregar Página</button>
+          </div>
+        </div>
+      `;
     }
+  }
+
+  // Debug
+  test() {
+    console.log('=== TESTE SHARE SYSTEM ===');
+    console.log('ShareUI:', this.shareUI);
+    console.log('ArbiPro:', this.arbiPro);
     
-    return false;
-  }
-
-  validateArbiProConfig(config) {
-    return (
-      typeof config.n === 'number' &&
-      config.n >= 2 && config.n <= 6 &&
-      Array.isArray(config.h) &&
-      config.h.length <= config.n
-    );
-  }
-
-  validateFreeProConfig(config) {
-    return (
-      typeof config.n === 'number' &&
-      config.n >= 2 && config.n <= 6 &&
-      config.p && typeof config.p === 'object'
-    );
+    if (this.shareUI) {
+      try {
+        this.shareUI.share('arbipro');
+      } catch (error) {
+        console.error('Erro no teste:', error);
+      }
+    }
   }
 }
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    const app = new App();
+    window.SharkGreen = app;
+    app.init();
+  } catch (error) {
+    console.error('Erro crítico:', error);
+    document.body.innerHTML = `
+      <div style="text-align: center; padding: 2rem; color: #dc2626;">
+        <h1>Erro Crítico</h1>
+        <p>Não foi possível inicializar a aplicação.</p>
+        <p>Erro: ${error.message}</p>
+        <button onclick="location.reload()" style="padding: 1rem 2rem; margin-top: 1rem; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer;">
+          Recarregar
+        </button>
+      </div>
+    `;
+  }
+});
+
+export { App };
