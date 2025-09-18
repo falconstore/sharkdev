@@ -1,5 +1,7 @@
 // assets/js/ui/shareui.js
-// Sistema de Interface para Compartilhamento - VERSÃO CORRIGIDA
+// Sistema de Interface para Compartilhamento - VERSÃO SIMPLIFICADA E FUNCIONAL
+
+import { ShareSystem } from '../utils/share.js';
 
 export class ShareUI {
   constructor() {
@@ -7,52 +9,30 @@ export class ShareUI {
     this.shareSystem = null;
   }
 
-  init() {
-    this.initialized = true;
-    this.initShareSystem();
-    console.log('ShareUI inicializado');
-  }
-
-  async initShareSystem() {
+  async init() {
     try {
-      const { ShareSystem } = await import('../utils/share.js');
       this.shareSystem = new ShareSystem();
-      console.log('ShareSystem carregado com sucesso');
+      this.initialized = true;
+      console.log('✅ ShareUI inicializado com sucesso');
+      return true;
     } catch (error) {
-      console.warn('ShareSystem não disponível:', error.message);
+      console.error('❌ Erro ao inicializar ShareUI:', error);
+      return false;
     }
-  }
-
-  // Cria botão de compartilhamento
-  createShareButton(calculator) {
-    if (!this.shareSystem) {
-      console.warn('ShareSystem não disponível para criar botão');
-      return null;
-    }
-
-    const button = document.createElement('button');
-    button.className = 'btn btn-share';
-    button.innerHTML = '🔗 Compartilhar';
-    button.style.background = 'linear-gradient(135deg, #8b5cf6, #3b82f6)';
-    button.style.color = 'white';
-    
-    button.addEventListener('click', () => {
-      this.handleShareClick(calculator);
-    });
-    
-    return button;
   }
 
   // Manipula clique de compartilhamento
   async handleShareClick(calculator) {
+    console.log('=== INICIANDO COMPARTILHAMENTO ===');
+    console.log('Calculadora:', calculator);
+    
     if (!this.shareSystem) {
       alert('Sistema de compartilhamento não disponível');
       return;
     }
 
     try {
-      console.log('Capturando dados para compartilhar:', calculator);
-      let data;
+      let data = null;
       
       if (calculator === 'arbipro') {
         data = this.getArbiProData();
@@ -62,263 +42,252 @@ export class ShareUI {
       
       console.log('Dados capturados:', data);
       
-      if (data) {
-        const shareLink = calculator === 'arbipro' 
-          ? this.shareSystem.generateArbiProLink(data)
-          : this.shareSystem.generateFreeProLink(data);
-        
-        if (shareLink) {
-          await this.showShareModal(shareLink);
-        }
-      } else {
-        alert('Não há dados para compartilhar. Preencha as informações da calculadora primeiro.');
+      if (!data) {
+        alert('Preencha os dados da calculadora antes de compartilhar');
+        return;
       }
+
+      // Gera o link de compartilhamento
+      const shareLink = calculator === 'arbipro' 
+        ? this.shareSystem.generateArbiProLink(data)
+        : this.shareSystem.generateFreeProLink(data);
+      
+      console.log('Link gerado:', shareLink);
+      
+      if (shareLink) {
+        await this.showShareModal(shareLink);
+      }
+      
     } catch (error) {
-      console.error('Erro ao compartilhar:', error);
-      alert('Erro ao gerar link de compartilhamento');
+      console.error('❌ Erro ao compartilhar:', error);
+      alert('Erro ao gerar link de compartilhamento: ' + error.message);
     }
   }
 
-  // Obtém dados do ArbiPro - VERSÃO CORRIGIDA
+  // Obtém dados do ArbiPro
   getArbiProData() {
+    console.log('Capturando dados ArbiPro...');
+    
     try {
-      console.log('Capturando dados ArbiPro...');
-      
-      if (window.SharkGreen && window.SharkGreen.arbiPro) {
-        const arbiPro = window.SharkGreen.arbiPro;
-        
-        // Captura dados completos das casas
-        const housesData = [];
-        for (let i = 0; i < arbiPro.numHouses; i++) {
-          const house = arbiPro.houses[i];
-          
-          // Captura valores dos inputs diretamente do DOM se necessário
-          const oddInput = document.getElementById(`odd-${i}`);
-          const stakeInput = document.getElementById(`stake-${i}`);
-          const commInput = document.getElementById(`commission-${i}`);
-          const increaseInput = document.getElementById(`increase-${i}`);
-          const responsibilityInput = document.getElementById(`responsibility-${i}`);
-          
-          housesData.push({
-            odd: oddInput?.value || house.odd || '',
-            stake: stakeInput?.value || house.stake || '',
-            commission: commInput ? commInput.value : (house.commission !== null ? house.commission : null),
-            freebet: house.freebet || false,
-            increase: increaseInput ? increaseInput.value : (house.increase !== null ? house.increase : null),
-            lay: house.lay || false,
-            fixedStake: house.fixedStake || false,
-            responsibility: responsibilityInput?.value || house.responsibility || ''
-          });
-        }
-        
-        const data = {
-          numHouses: arbiPro.numHouses,
-          rounding: arbiPro.roundingValue,
-          houses: housesData
-        };
-        
-        console.log('Dados ArbiPro capturados:', data);
-        return data;
-      }
-      
-      console.warn('ArbiPro não encontrado');
-      return null;
-    } catch (error) {
-      console.error('Erro ao obter dados ArbiPro:', error);
-      return null;
-    }
-  }
-
-  // Obtém dados do FreePro - VERSÃO CORRIGIDA
-  getFreeProData() {
-    try {
-      console.log('Capturando dados FreePro...');
-      
-      const iframe = document.getElementById('calc2frame');
-      if (!iframe || !iframe.contentDocument) {
-        console.warn('Iframe FreePro não encontrado');
+      // Verifica se ArbiPro existe
+      if (!window.SharkGreen || !window.SharkGreen.arbiPro) {
+        console.error('ArbiPro não encontrado');
         return null;
       }
+
+      const arbiPro = window.SharkGreen.arbiPro;
+      const data = {
+        numHouses: arbiPro.numHouses,
+        rounding: arbiPro.roundingValue,
+        houses: []
+      };
+
+      // Captura dados de cada casa
+      for (let i = 0; i < arbiPro.numHouses; i++) {
+        const house = arbiPro.houses[i] || {};
+        
+        // Tenta pegar do DOM primeiro, depois do modelo
+        const oddInput = document.getElementById(`odd-${i}`);
+        const stakeInput = document.getElementById(`stake-${i}`);
+        const commInput = document.getElementById(`commission-${i}`);
+        const increaseInput = document.getElementById(`increase-${i}`);
+        const responsibilityInput = document.getElementById(`responsibility-${i}`);
+        
+        data.houses.push({
+          o: oddInput?.value || house.odd || '',
+          s: stakeInput?.value || house.stake || '0',
+          c: commInput ? parseFloat(commInput.value) || 0 : (house.commission || null),
+          f: house.freebet || false,
+          i: increaseInput ? parseFloat(increaseInput.value) || 0 : (house.increase || null),
+          l: house.lay || false,
+          x: house.fixedStake || false
+        });
+      }
+
+      // Verifica se há dados preenchidos
+      const hasData = data.houses.some(h => h.o || h.s !== '0');
       
+      console.log('Dados ArbiPro capturados:', data);
+      return hasData ? data : null;
+      
+    } catch (error) {
+      console.error('Erro ao capturar dados ArbiPro:', error);
+      return null;
+    }
+  }
+
+  // Obtém dados do FreePro
+  getFreeProData() {
+    console.log('Capturando dados FreePro...');
+    
+    try {
+      const iframe = document.getElementById('calc2frame');
+      if (!iframe || !iframe.contentDocument) {
+        console.error('Iframe FreePro não encontrado');
+        return null;
+      }
+
       const doc = iframe.contentDocument;
-      
-      // Detecta o modo atual (freebet ou cashback)
       const isCashback = doc.body.classList.contains('mode-cashback');
-      console.log('Modo detectado:', isCashback ? 'cashback' : 'freebet');
       
-      // Captura dados básicos
-      const numEntradas = parseInt(doc.getElementById('numEntradas')?.value || '3');
-      const roundStep = parseFloat(doc.getElementById('round_step')?.value || '1.00');
-      
-      // Captura dados específicos do modo
-      let modeData = {};
-      
+      const data = {
+        n: parseInt(doc.getElementById('numEntradas')?.value || '3'),
+        r: parseFloat(doc.getElementById('round_step')?.value || '1.00')
+      };
+
       if (isCashback) {
         // Modo Cashback
-        modeData = {
-          mode: 'cashback',
-          cashbackOdd: doc.getElementById('cashback_odd')?.value || '',
-          cashbackStake: doc.getElementById('cashback_stake')?.value || '',
-          cashbackRate: doc.getElementById('cashback_rate')?.value || ''
+        data.t = 'freepro';
+        data.mode = 'cashback';
+        data.p = {
+          o: doc.getElementById('cashback_odd')?.value || '',
+          s: doc.getElementById('cashback_stake')?.value || '',
+          r: doc.getElementById('cashback_rate')?.value || ''
         };
       } else {
         // Modo Freebet
-        modeData = {
-          mode: 'freebet',
-          promoOdd: doc.getElementById('o1')?.value || '',
-          promoComm: doc.getElementById('c1')?.value || '',
-          promoStake: doc.getElementById('s1')?.value || '',
-          freebetValue: doc.getElementById('F')?.value || '',
-          extractionRate: doc.getElementById('r')?.value || ''
+        data.t = 'freepro';
+        data.p = {
+          o: doc.getElementById('o1')?.value || '',
+          c: doc.getElementById('c1')?.value || '',
+          s: doc.getElementById('s1')?.value || '',
+          f: doc.getElementById('F')?.value || '',
+          e: doc.getElementById('r')?.value || ''
         };
       }
-      
-      // Captura dados das coberturas
-      const coverages = this.extractCoverageData(doc);
-      
-      const data = {
-        numEntradas: numEntradas,
-        roundStep: roundStep,
-        ...modeData,
-        coverages: coverages
-      };
-      
-      console.log('Dados FreePro capturados:', data);
-      
-      // Verifica se há dados preenchidos
-      const hasData = isCashback 
-        ? (modeData.cashbackOdd || modeData.cashbackStake || modeData.cashbackRate)
-        : (modeData.promoOdd || modeData.promoStake || modeData.freebetValue);
-      
-      return hasData ? data : null;
-    } catch (error) {
-      console.error('Erro ao obter dados FreePro:', error);
-      return null;
-    }
-  }
 
-  // Extrai dados de cobertura do FreePro - VERSÃO MELHORADA
-  extractCoverageData(doc) {
-    try {
-      const coverages = [];
-      
-      // Busca todos os cards de cobertura
+      // Captura coberturas
+      data.cov = [];
       const coverageCards = doc.querySelectorAll('.coverage-card');
-      
-      coverageCards.forEach((card, index) => {
+      coverageCards.forEach(card => {
         const oddInput = card.querySelector('input[data-type="odd"]');
         const commInput = card.querySelector('input[data-type="comm"]');
         const layInput = card.querySelector('input[data-type="lay"]');
         
-        if (oddInput || commInput || layInput) {
-          coverages.push({
-            odd: oddInput?.value || '',
-            comm: commInput?.value || '',
-            lay: layInput?.checked || false
-          });
-        }
+        data.cov.push({
+          odd: oddInput?.value || '',
+          comm: commInput?.value || '',
+          lay: layInput?.checked || false
+        });
       });
+
+      // Verifica se há dados
+      const hasPromoData = isCashback 
+        ? (data.p.o || data.p.s || data.p.r)
+        : (data.p.o || data.p.s || data.p.f);
       
-      console.log('Coberturas extraídas:', coverages);
-      return coverages;
+      console.log('Dados FreePro capturados:', data);
+      return hasPromoData ? data : null;
+      
     } catch (error) {
-      console.error('Erro ao extrair dados de cobertura:', error);
-      return [];
+      console.error('Erro ao capturar dados FreePro:', error);
+      return null;
     }
   }
 
-  // Mostra modal de compartilhamento - VERSÃO MELHORADA
+  // Mostra modal de compartilhamento
   async showShareModal(shareLink) {
+    // Remove modal anterior se existir
+    const existingModal = document.getElementById('shareModal');
+    if (existingModal) {
+      existingModal.remove();
+    }
+
     const modal = document.createElement('div');
+    modal.id = 'shareModal';
     modal.style.cssText = `
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
+      background: rgba(0, 0, 0, 0.85);
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 10000;
+      z-index: 99999;
       backdrop-filter: blur(5px);
     `;
     
+    const url = shareLink.shortUrl || shareLink.fullUrl;
+    
     modal.innerHTML = `
       <div style="
-        background: var(--bg-card);
+        background: #1f2937;
         border-radius: 16px;
         padding: 2rem;
         max-width: 500px;
         width: 90%;
         text-align: center;
-        border: 1px solid var(--border);
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        border: 2px solid #3b82f6;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
       ">
         <h3 style="
-          color: var(--text-primary);
+          color: white;
           margin-bottom: 1rem;
           font-size: 1.5rem;
           font-weight: 700;
         ">
           🔗 Link de Compartilhamento
         </h3>
+        
         <p style="
-          color: var(--text-secondary);
+          color: #9ca3af;
           margin-bottom: 1.5rem;
-          line-height: 1.5;
         ">
           Copie o link abaixo para compartilhar suas configurações
         </p>
         
         <div style="
-          background: rgba(17, 24, 39, 0.8);
-          border: 1px solid var(--border);
+          background: #111827;
+          border: 1px solid #4b5563;
           border-radius: 8px;
           padding: 1rem;
           margin-bottom: 1.5rem;
           word-break: break-all;
           font-family: monospace;
-          color: var(--text-primary);
+          color: #3b82f6;
           font-size: 0.875rem;
           user-select: all;
           cursor: text;
-        " id="shareUrl">
-          ${shareLink.shortUrl || shareLink.fullUrl}
+        " id="shareUrlText">
+          ${url}
         </div>
         
-        <div style="
-          display: flex;
-          gap: 1rem;
-          justify-content: center;
-          flex-wrap: wrap;
-        ">
-          <button id="copyBtn" style="
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        <div style="display: flex; gap: 1rem;">
+          <button onclick="
+            navigator.clipboard.writeText('${url}').then(() => {
+              document.getElementById('copySuccess').style.display = 'block';
+              setTimeout(() => {
+                document.getElementById('copySuccess').style.display = 'none';
+              }, 2000);
+            }).catch(() => {
+              alert('Selecione e copie o texto manualmente');
+            });
+          " style="
+            background: linear-gradient(135deg, #3b82f6, #22c55e);
             color: white;
             border: none;
             border-radius: 8px;
             padding: 0.75rem 2rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             flex: 1;
-            min-width: 120px;
           ">
             📋 Copiar Link
           </button>
           
-          <button id="closeBtn" style="
-            background: rgba(55, 65, 81, 0.8);
-            color: var(--text-primary);
-            border: 2px solid var(--border);
+          <button onclick="
+            document.getElementById('shareModal').remove();
+          " style="
+            background: #374151;
+            color: white;
+            border: 2px solid #4b5563;
             border-radius: 8px;
             padding: 0.75rem 2rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             flex: 1;
-            min-width: 120px;
           ">
             ❌ Fechar
           </button>
@@ -326,7 +295,7 @@ export class ShareUI {
         
         <div id="copySuccess" style="
           margin-top: 1rem;
-          color: var(--success);
+          color: #22c55e;
           font-weight: 600;
           display: none;
         ">
@@ -337,41 +306,9 @@ export class ShareUI {
     
     document.body.appendChild(modal);
     
-    // Event listeners
-    modal.querySelector('#copyBtn').addEventListener('click', async () => {
-      try {
-        const url = shareLink.shortUrl || shareLink.fullUrl;
-        await this.shareSystem.copyToClipboard(url);
-        
-        // Mostra mensagem de sucesso
-        const successMsg = modal.querySelector('#copySuccess');
-        successMsg.style.display = 'block';
-        
-        // Esconde mensagem após 2 segundos
-        setTimeout(() => {
-          successMsg.style.display = 'none';
-        }, 2000);
-        
-      } catch (error) {
-        console.error('Erro ao copiar:', error);
-        alert('Erro ao copiar link. Selecione o texto manualmente.');
-      }
-    });
-    
-    modal.querySelector('#closeBtn').addEventListener('click', () => {
-      document.body.removeChild(modal);
-    });
-    
-    // Fecha ao clicar fora
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        document.body.removeChild(modal);
-      }
-    });
-    
-    // Seleciona o texto automaticamente para facilitar cópia manual
-    const urlDiv = modal.querySelector('#shareUrl');
-    if (window.getSelection && document.createRange) {
+    // Seleciona o texto automaticamente
+    const urlDiv = document.getElementById('shareUrlText');
+    if (window.getSelection) {
       const range = document.createRange();
       range.selectNodeContents(urlDiv);
       const sel = window.getSelection();
@@ -380,31 +317,31 @@ export class ShareUI {
     }
   }
 
-  // Carrega configuração compartilhada na inicialização
+  // Carrega configuração compartilhada
   loadSharedConfig() {
     if (!this.shareSystem) return;
     
     try {
       const config = this.shareSystem.loadFromUrl();
-      if (config && this.shareSystem.validateConfig(config)) {
-        console.log('Configuração compartilhada encontrada:', config);
+      if (config) {
+        console.log('📥 Configuração compartilhada encontrada:', config);
         
-        // Aguarda as calculadoras carregarem antes de aplicar
+        // Aplica a configuração após um delay
         setTimeout(() => {
           this.applyConfig(config);
         }, 1000);
         
-        // Limpa URL após carregar
+        // Limpa URL
         this.shareSystem.cleanUrl();
       }
     } catch (error) {
-      console.error('Erro ao carregar configuração compartilhada:', error);
+      console.error('Erro ao carregar configuração:', error);
     }
   }
 
-  // Aplica configuração carregada
+  // Aplica configuração
   applyConfig(config) {
-    console.log('Aplicando configuração compartilhada:', config);
+    console.log('Aplicando configuração:', config);
     
     if (config.t === 'arbipro') {
       this.applyArbiProConfig(config);
@@ -413,222 +350,182 @@ export class ShareUI {
     }
   }
 
-  // Aplica configuração do ArbiPro - VERSÃO CORRIGIDA
+  // Aplica configuração ArbiPro
   applyArbiProConfig(config) {
+    console.log('Aplicando config ArbiPro...');
+    
+    if (!window.SharkGreen?.arbiPro) {
+      console.error('ArbiPro não disponível');
+      return;
+    }
+
+    const arbiPro = window.SharkGreen.arbiPro;
+    
+    // Define número de casas
+    if (config.n) {
+      arbiPro.numHouses = config.n;
+      const select = document.getElementById('numHouses');
+      if (select) select.value = config.n;
+    }
+    
+    // Define arredondamento
+    if (config.r) {
+      arbiPro.roundingValue = config.r;
+      const select = document.getElementById('rounding');
+      if (select) select.value = config.r;
+    }
+    
+    // Renderiza casas
+    arbiPro.renderHouses();
+    
+    // Aplica dados das casas
     setTimeout(() => {
-      if (window.SharkGreen?.arbiPro) {
-        const arbiPro = window.SharkGreen.arbiPro;
-        
-        console.log('Aplicando config ArbiPro:', config);
-        
-        // Aplica configurações básicas
-        if (config.n) {
-          arbiPro.numHouses = config.n;
-          const numHousesSelect = document.getElementById('numHouses');
-          if (numHousesSelect) {
-            numHousesSelect.value = config.n;
+      if (config.h) {
+        config.h.forEach((house, i) => {
+          if (i < arbiPro.numHouses) {
+            // Atualiza modelo
+            arbiPro.houses[i] = {
+              ...arbiPro.houses[i],
+              odd: house.o || '',
+              stake: house.s || '0',
+              commission: house.c,
+              freebet: house.f || false,
+              increase: house.i,
+              lay: house.l || false,
+              fixedStake: house.x || false
+            };
+            
+            // Atualiza DOM
+            const oddInput = document.getElementById(`odd-${i}`);
+            if (oddInput) oddInput.value = house.o || '';
+            
+            const stakeInput = document.getElementById(`stake-${i}`);
+            if (stakeInput) stakeInput.value = house.s || '0';
           }
-        }
-        
-        if (config.r) {
-          arbiPro.roundingValue = config.r;
-          const roundingSelect = document.getElementById('rounding');
-          if (roundingSelect) {
-            roundingSelect.value = config.r;
-          }
-        }
-        
-        // Renderiza as casas primeiro
-        arbiPro.renderHouses();
-        
-        // Aplica dados das casas após renderização
-        setTimeout(() => {
-          if (config.h && Array.isArray(config.h)) {
-            config.h.forEach((house, idx) => {
-              if (idx < arbiPro.numHouses) {
-                // Atualiza o modelo
-                if (arbiPro.houses[idx]) {
-                  arbiPro.houses[idx] = {
-                    ...arbiPro.houses[idx],
-                    odd: house.o || '',
-                    stake: house.s || '',
-                    commission: house.c,
-                    freebet: house.f || false,
-                    increase: house.i,
-                    lay: house.l || false,
-                    fixedStake: house.x || false,
-                    responsibility: house.responsibility || ''
-                  };
-                }
-                
-                // Atualiza os inputs no DOM
-                const oddInput = document.getElementById(`odd-${idx}`);
-                if (oddInput && house.o) oddInput.value = house.o;
-                
-                const stakeInput = document.getElementById(`stake-${idx}`);
-                if (stakeInput && house.s) stakeInput.value = house.s;
-                
-                // Marca checkboxes se necessário
-                if (house.c !== null && house.c !== undefined) {
-                  const commCheckbox = document.querySelector(`[data-action="toggleCommission"][data-idx="${idx}"]`);
-                  if (commCheckbox && !commCheckbox.checked) {
-                    commCheckbox.checked = true;
-                    commCheckbox.dispatchEvent(new Event('change'));
-                  }
-                }
-                
-                if (house.f) {
-                  const freebetCheckbox = document.querySelector(`[data-action="toggleFreebet"][data-idx="${idx}"]`);
-                  if (freebetCheckbox && !freebetCheckbox.checked) {
-                    freebetCheckbox.checked = true;
-                    freebetCheckbox.dispatchEvent(new Event('change'));
-                  }
-                }
-                
-                if (house.i !== null && house.i !== undefined) {
-                  const increaseCheckbox = document.querySelector(`[data-action="toggleIncrease"][data-idx="${idx}"]`);
-                  if (increaseCheckbox && !increaseCheckbox.checked) {
-                    increaseCheckbox.checked = true;
-                    increaseCheckbox.dispatchEvent(new Event('change'));
-                  }
-                }
-              }
-            });
-          }
-          
-          // Força recálculo
-          arbiPro.scheduleUpdate();
-          
-          console.log('Configuração ArbiPro aplicada com sucesso');
-        }, 500);
+        });
       }
-    }, 1000);
+      
+      // Força recálculo
+      arbiPro.scheduleUpdate();
+      console.log('✅ Config ArbiPro aplicada');
+    }, 500);
   }
 
-  // Aplica configuração do FreePro - VERSÃO CORRIGIDA
+  // Aplica configuração FreePro
   applyFreeProConfig(config) {
-    // Primeiro, ativa a aba FreePro se necessário
-    const tabBtn2 = document.getElementById('tabBtn2');
-    if (tabBtn2 && tabBtn2.getAttribute('aria-selected') !== 'true') {
-      tabBtn2.click();
-    }
+    console.log('Aplicando config FreePro...');
+    
+    // Ativa aba FreePro
+    const tab2 = document.getElementById('tabBtn2');
+    if (tab2) tab2.click();
     
     setTimeout(() => {
       const iframe = document.getElementById('calc2frame');
-      if (iframe && iframe.contentDocument) {
-        const doc = iframe.contentDocument;
-        
-        console.log('Aplicando config FreePro:', config);
-        
-        // Aplica configurações básicas
-        if (doc.getElementById('numEntradas')) {
-          doc.getElementById('numEntradas').value = config.n || 3;
-          doc.getElementById('numEntradas').dispatchEvent(new Event('change'));
-        }
-        
-        if (doc.getElementById('round_step')) {
-          doc.getElementById('round_step').value = config.r || 1.00;
-        }
-        
-        // Detecta o modo e aplica
-        if (config.mode === 'cashback') {
-          // Ativa modo cashback se necessário
-          const cashbackBtn = doc.getElementById('modeCashbackBtn');
-          if (cashbackBtn && !cashbackBtn.classList.contains('active')) {
-            cashbackBtn.click();
-          }
-          
-          // Aplica dados do cashback
-          setTimeout(() => {
-            if (doc.getElementById('cashback_odd')) {
-              doc.getElementById('cashback_odd').value = config.cashbackOdd || '';
-            }
-            if (doc.getElementById('cashback_stake')) {
-              doc.getElementById('cashback_stake').value = config.cashbackStake || '';
-            }
-            if (doc.getElementById('cashback_rate')) {
-              doc.getElementById('cashback_rate').value = config.cashbackRate || '';
-            }
-            
-            // Dispara eventos para recálculo
-            ['cashback_odd', 'cashback_stake', 'cashback_rate'].forEach(id => {
-              const el = doc.getElementById(id);
-              if (el) {
-                el.dispatchEvent(new Event('input'));
-                el.dispatchEvent(new Event('change'));
-              }
-            });
-          }, 500);
-          
-        } else {
-          // Modo freebet (padrão)
-          const freebetBtn = doc.getElementById('modeFreebetBtn');
-          if (freebetBtn && !freebetBtn.classList.contains('active')) {
-            freebetBtn.click();
-          }
-          
-          // Aplica dados da promoção freebet
-          setTimeout(() => {
-            if (config.promoOdd && doc.getElementById('o1')) {
-              doc.getElementById('o1').value = config.promoOdd;
-            }
-            if (config.promoComm && doc.getElementById('c1')) {
-              doc.getElementById('c1').value = config.promoComm;
-            }
-            if (config.promoStake && doc.getElementById('s1')) {
-              doc.getElementById('s1').value = config.promoStake;
-            }
-            if (config.freebetValue && doc.getElementById('F')) {
-              doc.getElementById('F').value = config.freebetValue;
-            }
-            if (config.extractionRate && doc.getElementById('r')) {
-              doc.getElementById('r').value = config.extractionRate;
-            }
-            
-            // Dispara eventos para recálculo
-            ['o1', 'c1', 's1', 'F', 'r'].forEach(id => {
-              const el = doc.getElementById(id);
-              if (el) {
-                el.dispatchEvent(new Event('input'));
-                el.dispatchEvent(new Event('change'));
-              }
-            });
-          }, 500);
-        }
-        
-        // Aplica dados das coberturas
-        if (config.coverages && Array.isArray(config.coverages)) {
-          setTimeout(() => {
-            const coverageCards = doc.querySelectorAll('.coverage-card');
-            
-            config.coverages.forEach((coverage, index) => {
-              if (coverageCards[index]) {
-                const card = coverageCards[index];
-                
-                const oddInput = card.querySelector('input[data-type="odd"]');
-                if (oddInput && coverage.odd) {
-                  oddInput.value = coverage.odd;
-                  oddInput.dispatchEvent(new Event('input'));
-                }
-                
-                const commInput = card.querySelector('input[data-type="comm"]');
-                if (commInput && coverage.comm) {
-                  commInput.value = coverage.comm;
-                  commInput.dispatchEvent(new Event('input'));
-                }
-                
-                const layInput = card.querySelector('input[data-type="lay"]');
-                if (layInput && coverage.lay !== undefined) {
-                  layInput.checked = coverage.lay;
-                  layInput.dispatchEvent(new Event('change'));
-                }
-              }
-            });
-          }, 1000);
-        }
-        
-        console.log('Configuração FreePro aplicada com sucesso');
+      if (!iframe?.contentDocument) {
+        console.error('Iframe FreePro não disponível');
+        return;
       }
+
+      const doc = iframe.contentDocument;
+      
+      // Número de entradas
+      if (config.n) {
+        const select = doc.getElementById('numEntradas');
+        if (select) {
+          select.value = config.n;
+          select.dispatchEvent(new Event('change'));
+        }
+      }
+      
+      // Arredondamento
+      if (config.r) {
+        const select = doc.getElementById('round_step');
+        if (select) select.value = config.r;
+      }
+      
+      // Modo e dados
+      if (config.mode === 'cashback') {
+        // Ativa cashback
+        const btn = doc.getElementById('modeCashbackBtn');
+        if (btn) btn.click();
+        
+        setTimeout(() => {
+          if (config.p) {
+            const oddInput = doc.getElementById('cashback_odd');
+            if (oddInput) oddInput.value = config.p.o || '';
+            
+            const stakeInput = doc.getElementById('cashback_stake');
+            if (stakeInput) stakeInput.value = config.p.s || '';
+            
+            const rateInput = doc.getElementById('cashback_rate');
+            if (rateInput) rateInput.value = config.p.r || '';
+            
+            // Dispara eventos
+            [oddInput, stakeInput, rateInput].forEach(el => {
+              if (el) {
+                el.dispatchEvent(new Event('input'));
+                el.dispatchEvent(new Event('change'));
+              }
+            });
+          }
+        }, 500);
+      } else {
+        // Modo freebet
+        if (config.p) {
+          const o1 = doc.getElementById('o1');
+          if (o1) o1.value = config.p.o || '';
+          
+          const c1 = doc.getElementById('c1');
+          if (c1) c1.value = config.p.c || '';
+          
+          const s1 = doc.getElementById('s1');
+          if (s1) s1.value = config.p.s || '';
+          
+          const F = doc.getElementById('F');
+          if (F) F.value = config.p.f || '';
+          
+          const r = doc.getElementById('r');
+          if (r) r.value = config.p.e || '';
+          
+          // Dispara eventos
+          [o1, c1, s1, F, r].forEach(el => {
+            if (el) {
+              el.dispatchEvent(new Event('input'));
+              el.dispatchEvent(new Event('change'));
+            }
+          });
+        }
+      }
+      
+      // Aplica coberturas
+      if (config.cov) {
+        setTimeout(() => {
+          const cards = doc.querySelectorAll('.coverage-card');
+          config.cov.forEach((cov, i) => {
+            if (cards[i]) {
+              const oddInput = cards[i].querySelector('input[data-type="odd"]');
+              if (oddInput) {
+                oddInput.value = cov.odd || '';
+                oddInput.dispatchEvent(new Event('input'));
+              }
+              
+              const commInput = cards[i].querySelector('input[data-type="comm"]');
+              if (commInput) {
+                commInput.value = cov.comm || '';
+                commInput.dispatchEvent(new Event('input'));
+              }
+              
+              const layInput = cards[i].querySelector('input[data-type="lay"]');
+              if (layInput) {
+                layInput.checked = cov.lay || false;
+                layInput.dispatchEvent(new Event('change'));
+              }
+            }
+          });
+        }, 1000);
+      }
+      
+      console.log('✅ Config FreePro aplicada');
     }, 2000);
   }
 }
