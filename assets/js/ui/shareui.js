@@ -219,6 +219,7 @@ export class ShareUI {
         
         shareUrl = this.shareSystem.generateArbiProLink(shareData);
         console.log('URL gerada:', shareUrl);
+        console.log('Tipo da URL:', typeof shareUrl);
       } else if (calculatorType === 'freepro') {
         console.log('Coletando dados do FreePro...');
         shareData = this.getFreeProData();
@@ -226,6 +227,7 @@ export class ShareUI {
         
         shareUrl = this.shareSystem.generateFreeProLink(shareData);
         console.log('URL gerada:', shareUrl);
+        console.log('Tipo da URL:', typeof shareUrl);
       } else {
         throw new Error('Tipo de calculadora inválido: ' + calculatorType);
       }
@@ -236,7 +238,17 @@ export class ShareUI {
       }
       
       if (typeof shareUrl !== 'string') {
-        throw new Error('generateLink retornou um tipo inválido: ' + typeof shareUrl);
+        console.error('Objeto retornado:', shareUrl);
+        console.error('Construtor:', shareUrl.constructor.name);
+        
+        // Se for URLSearchParams, converte para string
+        if (shareUrl && typeof shareUrl.toString === 'function') {
+          const urlString = shareUrl.toString();
+          shareUrl = `${this.shareSystem.baseUrl}?${urlString}`;
+          console.log('URL convertida:', shareUrl);
+        } else {
+          throw new Error('generateLink retornou um tipo inválido: ' + typeof shareUrl);
+        }
       }
       
       if (shareUrl.trim() === '') {
@@ -326,6 +338,14 @@ export class ShareUI {
       console.log('5. Testando geração de link...');
       const link = app.shareUI.shareSystem.generateArbiProLink(data);
       console.log('Link gerado:', link);
+      console.log('Tipo do link:', typeof link);
+      
+      // Teste direto do toString
+      console.log('6. Testando URLSearchParams diretamente...');
+      const params = new URLSearchParams();
+      params.set('test', 'value');
+      console.log('Params toString():', params.toString());
+      console.log('Tipo:', typeof params.toString());
       
       console.log('✅ Sistema funcionando corretamente!');
       return true;
@@ -333,6 +353,25 @@ export class ShareUI {
     } catch (error) {
       console.error('❌ Erro no debug:', error);
       return false;
+    }
+  }
+
+  // Teste rápido do sistema
+  testShareUrl() {
+    try {
+      const data = this.getArbiProData();
+      const url = this.shareSystem.generateArbiProLink(data);
+      
+      console.log('=== TESTE RÁPIDO ===');
+      console.log('Data:', data);
+      console.log('URL:', url);
+      console.log('Tipo:', typeof url);
+      console.log('É string?', typeof url === 'string');
+      
+      return url;
+    } catch (error) {
+      console.error('Erro no teste:', error);
+      return null;
     }
   }
 
