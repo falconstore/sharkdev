@@ -1,4 +1,4 @@
-// assets/js/ui/shareui.js - VERSÃO CORRIGIDA
+// assets/js/ui/shareui.js - VERSÃO LIMPA E CORRIGIDA
 // Sistema de UI para compartilhamento
 
 import { ShareSystem } from '../utils/share.js';
@@ -335,6 +335,8 @@ export class ShareUI {
       return false;
     }
   }
+
+  getFreeProData() {
     // Busca dados da calculadora FreePro via iframe
     try {
       const iframe = document.getElementById('calc2frame');
