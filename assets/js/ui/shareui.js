@@ -1,5 +1,5 @@
 // assets/js/ui/shareui.js
-// Sistema de interface de compartilhamento
+// Sistema de interface de compartilhamento CORRIGIDO
 // Integra com ShareSystem para criar links compartilháveis
 
 import { ShareSystem } from '../utils/share.js';
@@ -416,13 +416,14 @@ export class ShareUI {
       console.log('Configuração compartilhada encontrada:', config);
 
       // Aplica configuração na calculadora apropriada
+      // Aguarda as calculadoras estarem prontas
       setTimeout(() => {
         if (config.t === 'arbipro') {
           this.applyArbiProConfig(config);
         } else if (config.t === 'freepro') {
           this.applyFreeProConfig(config);
         }
-      }, 2000);
+      }, 3000); // Aumentei o tempo para garantir que tudo carregou
 
       // Limpa URL
       this.shareSystem.cleanUrl();
@@ -432,13 +433,263 @@ export class ShareUI {
   }
 
   applyArbiProConfig(config) {
-    // TODO: Implementar aplicação da configuração no ArbiPro
-    console.log('Aplicando configuração ArbiPro:', config);
+    try {
+      console.log('Aplicando configuração ArbiPro:', config);
+      
+      // Aguarda a interface estar pronta
+      const waitForInterface = () => {
+        const numHousesSelect = document.getElementById('numHouses');
+        const roundingSelect = document.getElementById('rounding');
+        
+        if (!numHousesSelect || !roundingSelect) {
+          setTimeout(waitForInterface, 500);
+          return;
+        }
+
+        // 1. Aplica número de casas
+        if (config.n) {
+          numHousesSelect.value = config.n.toString();
+          numHousesSelect.dispatchEvent(new Event('change'));
+        }
+
+        // 2. Aplica arredondamento
+        if (config.r) {
+          roundingSelect.value = config.r.toString();
+          roundingSelect.dispatchEvent(new Event('change'));
+        }
+
+        // 3. Aguarda as casas serem renderizadas e aplica os dados
+        setTimeout(() => {
+          this.fillArbiProHouses(config.h || []);
+        }, 500);
+      };
+
+      waitForInterface();
+
+    } catch (error) {
+      console.error('Erro ao aplicar configuração ArbiPro:', error);
+    }
+  }
+
+  fillArbiProHouses(houses) {
+    try {
+      houses.forEach((house, i) => {
+        // Odd
+        const oddInput = document.getElementById(`odd-${i}`);
+        if (oddInput && house.o) {
+          oddInput.value = house.o;
+          oddInput.dispatchEvent(new Event('input'));
+        }
+
+        // Stake
+        const stakeInput = document.getElementById(`stake-${i}`);
+        if (stakeInput && house.s) {
+          stakeInput.value = house.s;
+          stakeInput.dispatchEvent(new Event('input'));
+        }
+
+        // Comissão
+        if (house.c !== null && house.c !== undefined) {
+          const commCheckbox = document.querySelector(`[data-action="toggleCommission"][data-idx="${i}"]`);
+          if (commCheckbox) {
+            commCheckbox.checked = true;
+            commCheckbox.dispatchEvent(new Event('change'));
+            
+            setTimeout(() => {
+              const commInput = document.getElementById(`commission-${i}`);
+              if (commInput) {
+                commInput.value = house.c.toString();
+                commInput.dispatchEvent(new Event('input'));
+              }
+            }, 100);
+          }
+        }
+
+        // Freebet
+        if (house.f) {
+          const freebetCheckbox = document.querySelector(`[data-action="toggleFreebet"][data-idx="${i}"]`);
+          if (freebetCheckbox) {
+            freebetCheckbox.checked = true;
+            freebetCheckbox.dispatchEvent(new Event('change'));
+          }
+        }
+
+        // Aumento de odd
+        if (house.i !== null && house.i !== undefined) {
+          const increaseCheckbox = document.querySelector(`[data-action="toggleIncrease"][data-idx="${i}"]`);
+          if (increaseCheckbox) {
+            increaseCheckbox.checked = true;
+            increaseCheckbox.dispatchEvent(new Event('change'));
+            
+            setTimeout(() => {
+              const increaseInput = document.getElementById(`increase-${i}`);
+              if (increaseInput) {
+                increaseInput.value = house.i.toString();
+                increaseInput.dispatchEvent(new Event('input'));
+              }
+            }, 100);
+          }
+        }
+
+        // Lay
+        if (house.l) {
+          const layBtn = document.querySelector(`[data-action="toggleLay"][data-idx="${i}"]`);
+          if (layBtn) {
+            layBtn.click();
+          }
+        }
+
+        // Stake fixada
+        if (house.x) {
+          const fixBtn = document.querySelector(`[data-action="fixStake"][data-idx="${i}"]`);
+          if (fixBtn) {
+            fixBtn.click();
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao preencher casas ArbiPro:', error);
+    }
   }
 
   applyFreeProConfig(config) {
-    // TODO: Implementar aplicação da configuração no FreePro  
-    console.log('Aplicando configuração FreePro:', config);
+    try {
+      console.log('Aplicando configuração FreePro:', config);
+      
+      // Aguarda o iframe estar pronto
+      const waitForIframe = () => {
+        const iframe = document.getElementById('calc2frame');
+        if (!iframe || !iframe.contentDocument) {
+          setTimeout(waitForIframe, 500);
+          return;
+        }
+
+        const doc = iframe.contentDocument;
+        
+        // 1. Aplica modo (freebet/cashback)
+        if (config.mode === 'cashback') {
+          const cashbackBtn = doc.getElementById('modeCashbackBtn');
+          if (cashbackBtn) {
+            cashbackBtn.click();
+          }
+        }
+
+        // 2. Aplica número de entradas
+        if (config.n) {
+          const numEntradasSelect = doc.getElementById('numEntradas');
+          if (numEntradasSelect) {
+            numEntradasSelect.value = config.n.toString();
+            numEntradasSelect.dispatchEvent(new Event('change'));
+          }
+        }
+
+        // 3. Aplica arredondamento
+        if (config.r) {
+          const roundStepSelect = doc.getElementById('round_step');
+          if (roundStepSelect) {
+            roundStepSelect.value = config.r.toString();
+            roundStepSelect.dispatchEvent(new Event('change'));
+          }
+        }
+
+        // 4. Aguarda um pouco e aplica os dados específicos
+        setTimeout(() => {
+          this.fillFreeProData(config, doc);
+        }, 500);
+      };
+
+      // Força a aba FreePro ser ativada primeiro
+      const freeProTab = document.getElementById('tabBtn2');
+      if (freeProTab) {
+        freeProTab.click();
+        setTimeout(waitForIframe, 1000);
+      } else {
+        waitForIframe();
+      }
+
+    } catch (error) {
+      console.error('Erro ao aplicar configuração FreePro:', error);
+    }
+  }
+
+  fillFreeProData(config, doc) {
+    try {
+      if (config.mode === 'cashback') {
+        // Modo Cashback
+        const fields = [
+          { id: 'cashback_odd', value: config.cashbackOdd },
+          { id: 'cashback_stake', value: config.cashbackStake },
+          { id: 'cashback_rate', value: config.cashbackRate }
+        ];
+
+        fields.forEach(field => {
+          if (field.value) {
+            const input = doc.getElementById(field.id);
+            if (input) {
+              input.value = field.value;
+              input.dispatchEvent(new Event('input'));
+            }
+          }
+        });
+      } else {
+        // Modo Freebet
+        const fields = [
+          { id: 'o1', value: config.promoOdd },
+          { id: 'c1', value: config.promoComm },
+          { id: 's1', value: config.promoStake },
+          { id: 'F', value: config.freebetValue },
+          { id: 'r', value: config.extractionRate }
+        ];
+
+        fields.forEach(field => {
+          if (field.value) {
+            const input = doc.getElementById(field.id);
+            if (input) {
+              input.value = field.value;
+              input.dispatchEvent(new Event('input'));
+            }
+          }
+        });
+      }
+
+      // Aguarda um pouco e aplica as coberturas
+      setTimeout(() => {
+        this.fillFreeProCoverages(config.coverages || [], doc);
+      }, 300);
+
+    } catch (error) {
+      console.error('Erro ao preencher dados FreePro:', error);
+    }
+  }
+
+  fillFreeProCoverages(coverages, doc) {
+    try {
+      const oddInputs = doc.querySelectorAll('#oddsContainer input[data-type="odd"]');
+      const commInputs = doc.querySelectorAll('#oddsContainer input[data-type="comm"]');
+      const layInputs = doc.querySelectorAll('#oddsContainer input[data-type="lay"]');
+
+      coverages.forEach((coverage, i) => {
+        // Odd
+        if (oddInputs[i] && coverage.odd) {
+          oddInputs[i].value = coverage.odd;
+          oddInputs[i].dispatchEvent(new Event('input'));
+        }
+
+        // Comissão
+        if (commInputs[i] && coverage.commission) {
+          commInputs[i].value = coverage.commission;
+          commInputs[i].dispatchEvent(new Event('input'));
+        }
+
+        // Lay
+        if (layInputs[i] && coverage.lay) {
+          layInputs[i].checked = true;
+          layInputs[i].dispatchEvent(new Event('change'));
+        }
+      });
+    } catch (error) {
+      console.error('Erro ao preencher coberturas FreePro:', error);
+    }
   }
 }
 
