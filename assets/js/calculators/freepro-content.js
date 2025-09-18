@@ -1017,10 +1017,10 @@ export function getFreeProfHTML() {
       
       // Calcular ROI (lucro médio / stake total)
       var lucroMedio = (net1 + nets.reduce(function(a,b){ return a+b; }, 0)) / (nets.length + 1);
-      var roi = (S > 0 && lucroMedio > 0) ? (lucroMedio / S) * 100 : 0;
+      var roi = S > 0 ? (lucroMedio / S) * 100 : 0;
       var roiEl = document.getElementById("roi_display");
       if (roiEl) {
-        roiEl.textContent = roi > 0 ? "+" + roi.toFixed(2) + "%" : roi.toFixed(2) + "%";
+        roiEl.textContent = roi >= 0 ? "+" + roi.toFixed(2) + "%" : roi.toFixed(2) + "%";
         roiEl.className = "total-value " + (roi >= 0 ? "profit-highlight" : "profit-negative");
       }
       
