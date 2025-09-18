@@ -1,4 +1,4 @@
-// ui/shareui.js — ESM com retrocompatibilidade (init, getLink, copyToClipboard, etc.)
+// ui/shareui.js — ES Module completo com retrocompatibilidade
 
 export class ShareUI {
   /**
@@ -15,7 +15,12 @@ export class ShareUI {
     this.defaultTTL = options.defaultTTL || (1000 * 60 * 60 * 24 * 7);
     this.cleanUrlAfterLoad = options.cleanUrlAfterLoad !== false;
     this.onLoad = typeof options.onLoad === 'function' ? options.onLoad : null;
+
     this.baseUrl = this._computeBaseUrl();
+
+    // callbacks opcionais
+    this._getData = null;
+    this._notify = null;
   }
 
   /* ================= Base URL ================ */
@@ -71,8 +76,9 @@ export class ShareUI {
     }
     return url;
   }
-  // alias retrocompatível
+  // aliases
   getLink(data = {}, opts = {}) { return this.generateLink(data, opts); }
+  getShareLink(data = {}, opts = {}) { return this.generateLink(data, opts); }
 
   _attachParam(base, key, value) {
     try {
@@ -139,16 +145,19 @@ export class ShareUI {
 
   /* ========== Retrocompatibilidade ========== */
   /**
-   * Versões antigas chamavam shareUI.init(...).
+   * init(callbackOrOptions?) — alias para handleIncoming com configuração de onLoad.
    * - Se receber função: vira onLoad.
    * - Se receber objeto com onLoad: seta e chama.
-   * Sempre chama handleIncoming() no final.
    */
   init(arg) {
     if (typeof arg === 'function') this.onLoad = arg;
     else if (arg && typeof arg.onLoad === 'function') this.onLoad = arg.onLoad;
     return this.handleIncoming();
   }
+
+  /* ============= Callbacks (opcional) ============= */
+  setGetData(fn) { if (typeof fn === 'function') this._getData = fn; }
+  setNotify(fn) { if (typeof fn === 'function') this._notify = fn; }
 
   /* ============== Utilidades UI ============== */
   copyLinkToClipboard(text) {
@@ -168,22 +177,49 @@ export class ShareUI {
       } catch (e) { reject(e); }
     });
   }
-  // alias retrocompatível
-  copyToClipboard(text) { return this.copyLinkToClipboard(text); }
+  copyToClipboard(text) { return this.copyLinkToClipboard(text); } // alias
+
+  /**
+   * Handler retrocompatível para botão "Compartilhar".
+   * Pode ser usado com onclick HTML ou addEventListener.
+   * Aceita { data?, ttl?, notify? } como override.
+   */
+  async handleShareClick(eOrOptions) {
+    if (eOrOptions && typeof eOrOptions.preventDefault === 'function') {
+      eOrOptions.preventDefault();
+      eOrOptions.stopPropagation?.();
+    }
+    const opts = (eOrOptions && typeof eOrOptions === 'object' && !('preventDefault' in eOrOptions))
+      ? eOrOptions : {};
+
+    try {
+      const data = opts.data !== undefined
+        ? opts.data
+        : (typeof this._getData === 'function' ? this._getData() : {});
+
+      const link = this.generateLink(data, { ttl: opts.ttl });
+      await this.copyLinkToClipboard(link);
+
+      const notify = opts.notify || this._notify;
+      if (typeof notify === 'function') notify('Link copiado!', 'success');
+
+      try { window.dispatchEvent(new CustomEvent('share:created', { detail: { link, data } })); }
+      catch (_) {}
+      return link;
+    } catch (err) {
+      const notify = opts.notify || this._notify;
+      if (typeof notify === 'function') notify('Falha ao gerar/copiar link', 'error');
+      console.warn('[ShareUI] erro em handleShareClick:', err);
+      throw err;
+    }
+  }
+  onShareClick(eOrOptions) { return this.handleShareClick(eOrOptions); } // alias
 
   bindShareButton(button, getData, notify) {
     const btn = typeof button === 'string' ? document.querySelector(button) : button;
     if (!btn) return;
-    btn.addEventListener('click', async () => {
-      try {
-        const data = getData ? getData() : {};
-        const link = this.generateLink(data);
-        await this.copyLinkToClipboard(link);
-        notify?.('Link copiado!');
-      } catch (e) {
-        notify?.('Falha ao copiar link');
-        console.warn('[ShareUI] erro ao gerar/copiar link:', e);
-      }
-    });
+    if (typeof getData === 'function') this.setGetData(getData);
+    if (typeof notify === 'function') this.setNotify(notify);
+    btn.addEventListener('click', this.handleShareClick.bind(this));
   }
 }
