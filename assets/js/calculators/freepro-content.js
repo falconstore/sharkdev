@@ -356,34 +356,6 @@ export function getFreeProfHTML() {
       border-color: var(--primary);
     }
 
-    .btn-share {
-      background: linear-gradient(135deg, #8b5cf6, #3b82f6) !important;
-      color: white !important;
-      border: none !important;
-      border-radius: 8px !important;
-      padding: 0.75rem 1.5rem !important;
-      font-size: 0.75rem !important;
-      font-weight: 600 !important;
-      cursor: pointer !important;
-      transition: all 0.2s ease !important;
-      text-transform: uppercase !important;
-      letter-spacing: 0.025em !important;
-      white-space: nowrap !important;
-      min-height: 44px !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      flex: 1 !important;
-      max-width: 200px !important;
-      min-width: 140px !important;
-      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2) !important;
-    }
-
-    .btn-share:hover {
-      transform: translateY(-1px) !important;
-      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
-    }
-
     .alert {
       padding: 1rem;
       border-radius: 8px;
@@ -471,8 +443,7 @@ export function getFreeProfHTML() {
         gap: 0.75rem;
       }
       
-      .btn,
-      .btn-share {
+      .btn {
         flex: none !important;
         width: 100% !important;
         max-width: none !important;
@@ -481,8 +452,7 @@ export function getFreeProfHTML() {
     }
 
     @media (max-width: 480px) {
-      .btn,
-      .btn-share {
+      .btn {
         padding: 0.625rem 1.25rem !important;
         font-size: 0.6875rem !important;
         min-height: 40px !important;
@@ -612,7 +582,6 @@ export function getFreeProfHTML() {
 
   <div class="actions">
     <button class="btn btn-secondary" id="clearBtn">Limpar Dados</button>
-    <button class="btn btn-share" id="shareBtn">🔗 Compartilhar</button>
   </div>
 
   <div id="status" class="alert alert-warning"></div>
@@ -1113,17 +1082,6 @@ export function getFreeProfHTML() {
     $("clearBtn") && $("clearBtn").addEventListener('click', clearAll);
     $('modeFreebetBtn') && $('modeFreebetBtn').addEventListener('click', function(){ setMode('freebet'); });
     $('modeCashbackBtn') && $('modeCashbackBtn').addEventListener('click', function(){ setMode('cashback'); });
-    $("shareBtn") && $("shareBtn").addEventListener('click', function(){
-      try {
-        if (window.parent && window.parent.SharkGreen && window.parent.SharkGreen.shareUI) {
-          window.parent.SharkGreen.shareUI.handleShareClick('freepro');
-        } else {
-          alert('Sistema de compartilhamento não disponível');
-        }
-      } catch (e) {
-        alert('Erro ao compartilhar configuração');
-      }
-    });
 
     // Cálculo inicial se houver dados
     setTimeout(scheduleAutoCalc, 500);
@@ -1132,4 +1090,3 @@ export function getFreeProfHTML() {
 </script>
 </body>
 </html>`;
-}
