@@ -1,4 +1,4 @@
-// assets/js/main.js - VERSÃO CORRIGIDA COM COMPARTILHAMENTO
+// assets/js/main.js - VERSÃO LIMPA SEM FIREBASE
 // Controlador principal da aplicação
 
 import { Theme } from './ui/theme.js';
@@ -29,10 +29,10 @@ class App {
       // Carrega módulos opcionais
       await this.loadOptionalModules();
       
-      // Carrega aplicação principal
+      // Carrega aplicação principal DIRETO (sem login)
       await this.loadMainApp();
       
-      // IMPORTANTE: Inicializa ShareUI após as calculadoras estarem prontas
+      // Inicializa ShareUI
       this.shareUI = new ShareUI();
       await this.shareUI.init();
       console.log('✅ ShareUI inicializado');
@@ -63,18 +63,15 @@ class App {
     try {
       console.log('Carregando calculadoras...');
       
-      // Mostra loading
-      this.showLoadingScreen();
-      
-      // Aguarda um pouco para mostrar loading
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Remove tela de loading se existir
+      this.removeLoadingScreen();
       
       const container = document.getElementById('app-container');
       if (!container) {
         throw new Error('Container app-container não encontrado');
       }
 
-      // Template com navegação
+      // Template SEM sistema de login
       const navigationTabs = this.navigation ? `
         <div class="main-navigation">
           <div class="nav-tabs">
@@ -126,7 +123,7 @@ class App {
       this.tabSystem = new TabSystem();
       this.tabSystem.init();
 
-      // Inicializa calculadoras
+      // Inicializa calculadoras DIRETO
       this.arbiPro = new ArbiPro();
       this.freePro = new FreePro();
       this.casasRegulamentadas = new CasasRegulamentadas();
@@ -164,7 +161,6 @@ class App {
   }
 
   setupArbiProShareButton() {
-    // Tenta múltiplas vezes encontrar e configurar o botão
     let attempts = 0;
     const maxAttempts = 10;
     
@@ -173,11 +169,9 @@ class App {
       
       const shareBtn = document.getElementById('shareBtn');
       if (shareBtn) {
-        // Remove listeners antigos clonando o elemento
         const newShareBtn = shareBtn.cloneNode(true);
         shareBtn.parentNode.replaceChild(newShareBtn, shareBtn);
         
-        // Adiciona novo listener
         newShareBtn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -221,17 +215,14 @@ class App {
           const shareBtn = doc.getElementById('shareBtn');
           
           if (shareBtn) {
-            // Remove listeners antigos clonando o elemento
             const newShareBtn = shareBtn.cloneNode(true);
             shareBtn.parentNode.replaceChild(newShareBtn, shareBtn);
             
-            // Adiciona novo listener
             newShareBtn.addEventListener('click', (e) => {
               e.preventDefault();
               e.stopPropagation();
               console.log('Botão FreePro clicado');
               
-              // Acessa ShareUI do parent window
               try {
                 if (window.SharkGreen && window.SharkGreen.shareUI) {
                   window.SharkGreen.shareUI.handleShareClick('freepro');
@@ -265,19 +256,17 @@ class App {
     setTimeout(trySetup, 2000);
   }
 
-  showLoadingScreen() {
-    const container = document.getElementById('app-container');
-    if (container) {
-      container.innerHTML = `
-        <div class="post-login-loading">
-          <div class="post-login-content">
-            <div class="post-login-title">Carregando Shark 100% Green</div>
-            <div class="post-login-spinner"></div>
-            <div class="post-login-message">Inicializando calculadoras profissionais...</div>
-          </div>
-        </div>
-      `;
-    }
+  removeLoadingScreen() {
+    const loadingContainers = [
+      document.querySelector('.loading-container'),
+      document.querySelector('.post-login-loading')
+    ];
+    
+    loadingContainers.forEach(container => {
+      if (container) {
+        container.remove();
+      }
+    });
   }
 
   showError(message) {
