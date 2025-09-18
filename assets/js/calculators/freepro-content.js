@@ -1,4 +1,4 @@
-// assets/js/calculators/freepro-content.js - VERSÃO CORRIGIDA
+// assets/js/calculators/freepro-content.js - VERSÃO ATUALIZADA COM FREEBET/CASHBACK
 // HTML completo da calculadora FreePro que roda no iframe
 
 export function getFreeProfHTML() {
@@ -126,6 +126,7 @@ export function getFreeProfHTML() {
       50% { opacity: 0.7; }
     }
 
+    /* NOVO: Container para duas colunas de configuração */
     .config-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -133,6 +134,7 @@ export function getFreeProfHTML() {
       margin-bottom: 1rem;
     }
 
+    /* NOVO: Toggle para Freebet/Cashback */
     .toggle-container {
       display: flex;
       align-items: center;
@@ -320,6 +322,17 @@ export function getFreeProfHTML() {
       min-width: 140px;
     }
 
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
     .btn-secondary {
       background: rgba(55, 65, 81, 0.8);
       color: var(--text-primary);
@@ -405,6 +418,7 @@ export function getFreeProfHTML() {
     .profit-highlight { color: #3b82f6 !important; font-weight: 800 !important; }
     .text-small { font-size: 0.75rem; color: var(--text-muted); }
 
+    /* NOVO: Ocultar elementos condicionalmente */
     .freebet-only { display: block; }
     .cashback-only { display: none; }
 
@@ -452,7 +466,9 @@ export function getFreeProfHTML() {
     <p class="calc-subtitle">Otimize seus lucros com freebets e cashbacks - cálculo automático em tempo real</p>
   </div>
 
+  <!-- NOVA: Grade de configurações com duas colunas -->
   <div class="config-grid">
+    <!-- Coluna 1: Configurações básicas -->
     <div class="card">
       <div class="card-header">
         <div class="card-title">Configurações</div>
@@ -470,12 +486,14 @@ export function getFreeProfHTML() {
       </div>
     </div>
 
+    <!-- NOVA: Coluna 2: Seleção de modo -->
     <div class="card">
       <div class="card-header">
         <div class="card-title">Modo de Cálculo</div>
         <div class="badge">Shark Green</div>
       </div>
       
+      <!-- Toggle Freebet/Cashback -->
       <div class="toggle-container">
         <button id="modeFreebetBtn" class="toggle-option active">🎁 Freebet</button>
         <button id="modeCashbackBtn" class="toggle-option">💰 Cashback</button>
@@ -499,6 +517,7 @@ export function getFreeProfHTML() {
       <div class="badge">Shark Green</div>
     </div>
     
+    <!-- CAMPOS PARA FREEBET (modo padrão) -->
     <div class="freebet-only">
       <div class="form-grid form-grid-3">
         <div class="form-group">
@@ -526,6 +545,7 @@ export function getFreeProfHTML() {
       </div>
     </div>
 
+    <!-- NOVOS CAMPOS PARA CASHBACK (agora com Comissão %) -->
     <div class="cashback-only">
       <div class="form-grid form-grid-3">
         <div class="form-group">
@@ -572,15 +592,20 @@ export function getFreeProfHTML() {
     </div>
     <div style="overflow-x:auto">
       <table class="results-table">
-        <thead></thead>
+        <thead>
+          <!-- Cabeçalho gerado dinamicamente -->
+        </thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
   </div>
 
 <script>
+'use strict';
+
+// Sincronização de tema com parent
 (function() {
-  function syncTheme() {
+   function syncTheme() {
     try {
       const parentTheme = parent.document.body.getAttribute('data-theme');
       if (parentTheme === 'light') {
@@ -589,7 +614,7 @@ export function getFreeProfHTML() {
         document.body.removeAttribute('data-theme');
       }
     } catch (e) {
-      // Fallback
+      // Fallback se não conseguir acessar o parent
     }
   }
   syncTheme();
@@ -600,9 +625,10 @@ export function getFreeProfHTML() {
 })();
 
 (function(){
+  // SISTEMA DE CÁLCULO AUTOMÁTICO
   var autoCalcTimeout = null;
   var isCalculating = false;
-  var currentMode = 'freebet';
+  var currentMode = 'freebet'; // 'freebet' ou 'cashback'
   
   function $(id){ return document.getElementById(id); }
   function nf(v){ return Number.isFinite(v) ? new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:2}).format(v) : '—'; }
@@ -626,6 +652,7 @@ export function getFreeProfHTML() {
     return 1+(o-1)*(1-cc); 
   }
 
+  // Alterna modo (sem sobrescrever outras classes do <body>)
   function setMode(mode) {
     currentMode = mode;
     document.body.classList.toggle('mode-cashback', mode === 'cashback');
@@ -635,6 +662,7 @@ export function getFreeProfHTML() {
     setTimeout(scheduleAutoCalc, 0);
   }
 
+  // Debounce para otimizar performance
   function debounce(func, wait) {
     return function executedFunction() {
       var args = Array.prototype.slice.call(arguments);
@@ -648,6 +676,7 @@ export function getFreeProfHTML() {
     };
   }
 
+  // Cálculo automático com debounce
   var scheduleAutoCalc = debounce(function() {
     if (!isCalculating) {
       if (currentMode === 'freebet') {
@@ -743,6 +772,7 @@ export function getFreeProfHTML() {
       c.appendChild(card);
     }
     
+    // Aplica listeners nos novos elementos
     bindAutoCalcEvents();
     scheduleAutoCalc();
   }
@@ -760,6 +790,7 @@ export function getFreeProfHTML() {
     return {odds:odds,comm:comm,isLay:isLay}; 
   }
 
+  // CÁLCULO FREEBET (original)
   function autoCalcFreebet() {
     isCalculating = true;
     try {
@@ -844,6 +875,7 @@ export function getFreeProfHTML() {
     isCalculating = false;
   }
 
+  // CASHBACK — BACK-only com nivelamento analítico + fallback quando houver LAY
   function autoCalcCashback() {
     isCalculating = true;
     try {
@@ -851,7 +883,7 @@ export function getFreeProfHTML() {
       var odd = toNum($("cashback_odd").value),
           stake = toNum($("cashback_stake").value),
           cashbackRate = toNum($("cashback_rate").value),
-          mainCommCb = toNum($("cashback_comm").value),
+          mainCommCb = toNum($("cashback_comm").value), // NOVO
           n = parseInt($("numEntradas").value || '3', 10),
           cov = readCoverage();
 
@@ -871,19 +903,22 @@ export function getFreeProfHTML() {
       var commFrac = cov.comm.map(function(c){ return (Number.isFinite(c) && c > 0) ? c/100 : 0; });
       var onlyBack = !cov.isLay.some(Boolean);
 
-      var Oeff = effOdd(odd, mainCommCb);
+      var Oeff = effOdd(odd, mainCommCb); // odd efetiva da principal (com comissão)
       var stakes = [], eBack = [];
       var step = parseFloat($("round_step").value) || 1;
       function roundStep(v){ return Math.round(v / step) * step; }
       var MIN_STAKE = 0.50;
 
       if (onlyBack) {
+        // e_i = odd efetiva com comissão das coberturas
         for (var i = 0; i < cov.odds.length; i++) {
-          eBack[i] = effOdd(cov.odds[i], cov.comm[i]);
+          eBack[i] = effOdd(cov.odds[i], cov.comm[i]); // 1 + (L-1)*(1 - c%)
         }
+        // H = Σ (1/e_i)
         var H = eBack.reduce(function(a, e){ return a + (1 / e); }, 0);
 
         if (H >= 1) {
+          // Impossível nivelar — fallback simples
           showStatus('warning', 'Impossível nivelar (Σ 1/e ≥ 1). Usando modo de cobertura.');
           var baseLoss = stake;
           for (var j = 0; j < cov.odds.length; j++) {
@@ -892,22 +927,28 @@ export function getFreeProfHTML() {
             stakes[j] = baseLoss / util;
           }
         } else {
+          // Nível analítico (com Oeff)
           var P = stake, C = cashbackAmount;
+          // N = -P * (1 - Oeff + H*Oeff) + H * C
           var N = -P * (1 - Oeff + H * Oeff) + H * C;
+          // S_total = P*Oeff - N
           var S_total = P * Oeff - N;
+          // s_i = (N + S_total - C) / e_i
           var numer = (N + S_total - C);
           for (var k = 0; k < eBack.length; k++) {
             stakes[k] = numer / eBack[k];
           }
         }
       } else {
+        // FALLBACK quando existe LAY
         var baseLossLay = stake;
         for (var m = 0; m < cov.odds.length; m++) {
           var L = cov.odds[m], cfrac = commFrac[m];
           if (cov.isLay[m]) {
+            // ganho quando a seleção perde = stakeLay * (1 - comissão)
             stakes[m] = baseLossLay / (1 - cfrac);
             var denom = L - 1;
-            eBack[m] = 1 + (1 - cfrac) / denom;
+            eBack[m] = 1 + (1 - cfrac) / denom; // só para exibição coerente
           } else {
             var e3 = effOdd(L, cov.comm[m]);
             eBack[m] = e3;
@@ -918,18 +959,23 @@ export function getFreeProfHTML() {
         }
       }
 
+      // Arredonda e aplica mínimo
       stakes = stakes.map(roundStep).map(function(v){ return Math.max(v, MIN_STAKE); });
 
+      // Responsabilidades LAY
       var liabilities = stakes.map(function(s, i){
         return cov.isLay[i] ? (cov.odds[i] - 1) * s : 0;
       });
 
+      // Stake total S (para LAY soma a responsabilidade)
       var S = stake + stakes.reduce(function(a, s, idx){
         return a + (cov.isLay[idx] ? (cov.odds[idx]-1)*s : s);
       }, 0);
 
+      // (1) Principal vence: sem cashback — usa odd efetiva da principal
       var net1 = (stake * Oeff) - S;
 
+      // (2) Coberturas vencem: principal perde — soma cashback
       var defs = [], nets = [];
       for (var win = 0; win < stakes.length; win++) {
         var deficit;
@@ -1026,31 +1072,20 @@ export function getFreeProfHTML() {
     }
   }
 
-  document.addEventListener('DOMContentLoaded', function(){
+  // Inicialização
+  window.addEventListener('DOMContentLoaded', function(){
     renderOddsInputs();
     bindAutoCalcEvents();
 
+    // Listeners principais (aqui dentro garante que os elementos existam)
     $("numEntradas") && $("numEntradas").addEventListener('change', renderOddsInputs);
     $("clearBtn") && $("clearBtn").addEventListener('click', clearAll);
     $('modeFreebetBtn') && $('modeFreebetBtn').addEventListener('click', function(){ setMode('freebet'); });
     $('modeCashbackBtn') && $('modeCashbackBtn').addEventListener('click', function(){ setMode('cashback'); });
 
+    // Cálculo inicial se houver dados
     setTimeout(scheduleAutoCalc, 500);
   });
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', arguments.callee);
-  } else {
-    setTimeout(function() {
-      renderOddsInputs();
-      bindAutoCalcEvents();
-      $("numEntradas") && $("numEntradas").addEventListener('change', renderOddsInputs);
-      $("clearBtn") && $("clearBtn").addEventListener('click', clearAll);
-      $('modeFreebetBtn') && $('modeFreebetBtn').addEventListener('click', function(){ setMode('freebet'); });
-      $('modeCashbackBtn') && $('modeCashbackBtn').addEventListener('click', function(){ setMode('cashback'); });
-      scheduleAutoCalc();
-    }, 100);
-  }
 })();
 </script>
 </body>
