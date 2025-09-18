@@ -97,24 +97,33 @@ export class ShareUI {
    * Compat com main.js — pode ser usado direto no addEventListener.
    * Detecta automaticamente qual calculadora chamar.
    */
-  handleShareClick(ev) {
-    try {
-      if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
-
-      const el = ev?.currentTarget || ev?.target;
-      let calc = this._guessCalculatorFromElement(el);
-
-      if (!calc) {
-        // plano B: se não conseguir deduzir, mantém ArbiPro como default
-        calc = 'arbipro';
-      }
-
+  handleShareClick(evOrCalc) {
+  try {
+    // 1) Se veio string direta do main.js, use-a como calculadora
+    if (typeof evOrCalc === 'string') {
+      const calc = /freepro/i.test(evOrCalc) ? 'freepro' : 'arbipro';
       this.openShareModal(calc);
-    } catch (err) {
-      console.error('Erro em handleShareClick:', err);
-      alert('Não foi possível iniciar o compartilhamento. Veja o console.');
+      return;
     }
+
+    // 2) Se veio um evento (click), previne e tenta deduzir pelo alvo
+    const ev = evOrCalc;
+    if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
+
+    const el = ev?.currentTarget || ev?.target || null;
+
+    // tenta ler pelos data-attributes / id / texto / ancestrais
+    let calc = this._guessCalculatorFromElement(el);
+
+    // fallback — se não conseguir deduzir, assume arbipro
+    if (!calc) calc = 'arbipro';
+
+    this.openShareModal(calc);
+  } catch (err) {
+    console.error('Erro em handleShareClick:', err);
+    alert('Não foi possível iniciar o compartilhamento. Veja o console.');
   }
+}
 
   _guessCalculatorFromElement(el) {
     if (!el) return null;
