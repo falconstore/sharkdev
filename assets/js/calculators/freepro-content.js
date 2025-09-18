@@ -1105,48 +1105,60 @@ export function getFreeProfHTML() {
   // Eventos para campos condicionais da casa promo
   function bindPromoConditionals() {
     // Comissão freebet
-    $('#toggleCommission1') && $('#toggleCommission1').addEventListener('change', function() {
-      var condDiv = $('#conditionalFields1');
-      if (this.checked) {
-        if (!condDiv.querySelector('#c1')) {
-          condDiv.innerHTML += '<div class="form-group"><label class="form-label">Comissão (%)</label><input id="c1" class="form-input auto-calc" placeholder="ex: 0" inputmode="decimal" /></div>';
-          bindAutoCalcEvents();
+    var toggleComm1 = document.getElementById('toggleCommission1');
+    if (toggleComm1) {
+      toggleComm1.addEventListener('change', function() {
+        var condDiv = document.getElementById('conditionalFields1');
+        if (this.checked) {
+          if (!document.getElementById('c1')) {
+            condDiv.innerHTML += '<div class="form-group"><label class="form-label">Comissão (%)</label><input id="c1" class="form-input auto-calc" placeholder="ex: 0" inputmode="decimal" /></div>';
+            bindAutoCalcEvents();
+          }
+        } else {
+          var c1Input = document.getElementById('c1');
+          if (c1Input) c1Input.closest('.form-group').remove();
         }
-      } else {
-        var c1Input = condDiv.querySelector('#c1');
-        if (c1Input) c1Input.closest('.form-group').remove();
-      }
-      scheduleAutoCalc();
-    });
+        scheduleAutoCalc();
+      });
+    }
 
     // Comissão cashback
-    $('#toggleCashbackCommission') && $('#toggleCashbackCommission').addEventListener('change', function() {
-      var condDiv = $('#conditionalFieldsCashback');
-      if (this.checked) {
-        if (!condDiv.querySelector('#cashback_comm')) {
-          condDiv.innerHTML += '<div class="form-group"><label class="form-label">Comissão (%)</label><input id="cashback_comm" class="form-input auto-calc" placeholder="ex: 0" inputmode="decimal" /></div>';
-          bindAutoCalcEvents();
+    var toggleCashbackComm = document.getElementById('toggleCashbackCommission');
+    if (toggleCashbackComm) {
+      toggleCashbackComm.addEventListener('change', function() {
+        var condDiv = document.getElementById('conditionalFieldsCashback');
+        if (this.checked) {
+          if (!document.getElementById('cashback_comm')) {
+            condDiv.innerHTML += '<div class="form-group"><label class="form-label">Comissão (%)</label><input id="cashback_comm" class="form-input auto-calc" placeholder="ex: 0" inputmode="decimal" /></div>';
+            bindAutoCalcEvents();
+          }
+        } else {
+          var commInput = document.getElementById('cashback_comm');
+          if (commInput) commInput.closest('.form-group').remove();
         }
-      } else {
-        var commInput = condDiv.querySelector('#cashback_comm');
-        if (commInput) commInput.closest('.form-group').remove();
-      }
-      scheduleAutoCalc();
-    });
+        scheduleAutoCalc();
+      });
+    }
 
     // Botão LAY promo freebet
-    $('#promoLayBtn') && $('#promoLayBtn').addEventListener('click', function() {
-      this.classList.toggle('active');
-      this.textContent = this.classList.contains('active') ? 'LAY' : 'BACK';
-      scheduleAutoCalc();
-    });
+    var promoLayBtn = document.getElementById('promoLayBtn');
+    if (promoLayBtn) {
+      promoLayBtn.addEventListener('click', function() {
+        this.classList.toggle('active');
+        this.textContent = this.classList.contains('active') ? 'LAY' : 'BACK';
+        scheduleAutoCalc();
+      });
+    }
 
     // Botão LAY cashback
-    $('#cashbackLayBtn') && $('#cashbackLayBtn').addEventListener('click', function() {
-      this.classList.toggle('active'); 
-      this.textContent = this.classList.contains('active') ? 'LAY' : 'BACK';
-      scheduleAutoCalc();
-    });
+    var cashbackLayBtn = document.getElementById('cashbackLayBtn');
+    if (cashbackLayBtn) {
+      cashbackLayBtn.addEventListener('click', function() {
+        this.classList.toggle('active'); 
+        this.textContent = this.classList.contains('active') ? 'LAY' : 'BACK';
+        scheduleAutoCalc();
+      });
+    }
   }
 
   // Inicialização
