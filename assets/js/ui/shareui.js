@@ -221,10 +221,12 @@ export class ShareUI {
         throw new Error('Tipo de calculadora inválido');
       }
 
-      if (!shareUrl) {
-        throw new Error('Não foi possível gerar o link');
+      // Verifica se o link foi gerado corretamente
+      if (!shareUrl || typeof shareUrl !== 'string') {
+        throw new Error('Não foi possível gerar o link de compartilhamento');
       }
 
+      console.log('Link gerado:', shareUrl);
       await this.showModal(shareUrl);
       
     } catch (error) {
@@ -302,14 +304,18 @@ export class ShareUI {
 
     const input = this.modal.querySelector('#shareUrlInput');
     if (input) {
-      input.value = url;
+      // Garante que é uma string válida
+      input.value = typeof url === 'string' ? url : '';
     }
 
     this.modal.style.display = 'block';
     
     // Auto-seleciona o texto
     setTimeout(() => {
-      input?.select();
+      if (input && input.value) {
+        input.focus();
+        input.select();
+      }
     }, 100);
   }
 
@@ -416,11 +422,14 @@ export class ShareUI {
           return;
         }
 
+        console.log('Carregando configuração ArbiPro:', config);
+
         // Configura número de casas
         if (config.n) {
           const select = document.getElementById('numHouses');
           if (select) {
             select.value = config.n;
+            select.dispatchEvent(new Event('change'));
             app.arbiPro.numHouses = config.n;
           }
         }
@@ -430,38 +439,97 @@ export class ShareUI {
           const roundingSelect = document.getElementById('rounding');
           if (roundingSelect) {
             roundingSelect.value = config.r;
+            roundingSelect.dispatchEvent(new Event('change'));
             app.arbiPro.roundingValue = config.r;
           }
         }
 
-        // Configura casas
-        if (config.h && Array.isArray(config.h)) {
-          config.h.forEach((house, index) => {
-            if (index < app.arbiPro.houses.length) {
-              app.arbiPro.houses[index] = {
-                ...app.arbiPro.houses[index],
-                odd: house.o || '',
-                stake: house.s || '',
-                commission: house.c,
-                freebet: house.f || false,
-                increase: house.i,
-                lay: house.l || false,
-                fixedStake: house.x || false
-              };
-            }
-          });
-        }
+        // Aguarda re-renderização das casas
+        setTimeout(() => {
+          // Configura dados das casas
+          if (config.houses && Array.isArray(config.houses)) {
+            config.houses.forEach((house, index) => {
+              if (index < app.arbiPro.houses.length) {
+                
+                // Preenche campos básicos
+                const oddInput = document.getElementById(`odd-${index}`);
+                const stakeInput = document.getElementById(`stake-${index}`);
+                
+                if (oddInput && house.odd) {
+                  oddInput.value = house.odd;
+                  oddInput.dispatchEvent(new Event('input'));
+                }
+                
+                if (stakeInput && house.stake) {
+                  stakeInput.value = house.stake;
+                  stakeInput.dispatchEvent(new Event('input'));
+                }
 
-        // Re-renderiza e recalcula
-        app.arbiPro.renderHouses();
-        app.arbiPro.scheduleUpdate();
+                // Configura checkboxes
+                const commissionCheck = document.querySelector(`input[data-action="toggleCommission"][data-idx="${index}"]`);
+                const freebetCheck = document.querySelector(`input[data-action="toggleFreebet"][data-idx="${index}"]`);
+                const increaseCheck = document.querySelector(`input[data-action="toggleIncrease"][data-idx="${index}"]`);
+
+                if (commissionCheck && (house.commission !== null && house.commission !== undefined)) {
+                  commissionCheck.checked = true;
+                  commissionCheck.dispatchEvent(new Event('change'));
+                  
+                  setTimeout(() => {
+                    const commInput = document.getElementById(`commission-${index}`);
+                    if (commInput) {
+                      commInput.value = house.commission;
+                      commInput.dispatchEvent(new Event('input'));
+                    }
+                  }, 100);
+                }
+
+                if (freebetCheck && house.freebet) {
+                  freebetCheck.checked = true;
+                  freebetCheck.dispatchEvent(new Event('change'));
+                }
+
+                if (increaseCheck && (house.increase !== null && house.increase !== undefined)) {
+                  increaseCheck.checked = true;
+                  increaseCheck.dispatchEvent(new Event('change'));
+                  
+                  setTimeout(() => {
+                    const increaseInput = document.getElementById(`increase-${index}`);
+                    if (increaseInput) {
+                      increaseInput.value = house.increase;
+                      increaseInput.dispatchEvent(new Event('input'));
+                    }
+                  }, 100);
+                }
+
+                // Configura lay
+                if (house.lay) {
+                  const layBtn = document.querySelector(`button[data-action="toggleLay"][data-idx="${index}"]`);
+                  if (layBtn) {
+                    layBtn.click();
+                  }
+                }
+
+                // Configura stake fixada
+                if (house.fixedStake) {
+                  const fixBtn = document.querySelector(`button[data-action="fixStake"][data-idx="${index}"]`);
+                  if (fixBtn) {
+                    fixBtn.click();
+                  }
+                }
+              }
+            });
+          }
+
+          // Força recálculo
+          app.arbiPro.scheduleUpdate();
+        }, 300);
 
         console.log('Configuração ArbiPro carregada com sucesso');
         
       } catch (error) {
         console.error('Erro ao aplicar configuração ArbiPro:', error);
       }
-    }, 1000);
+    }, 1500);
   }
 
   loadFreeProConfig(config) {
@@ -476,65 +544,100 @@ export class ShareUI {
         const doc = iframe.contentDocument;
         const $ = (id) => doc.getElementById(id);
 
+        console.log('Carregando configuração FreePro:', config);
+
         // Configura modo
-        if (config.m === 'cashback') {
+        if (config.mode === 'cashback') {
           doc.body.classList.add('mode-cashback');
-          $('modeCashbackBtn')?.classList.add('active');
-          $('modeFreebetBtn')?.classList.remove('active');
+          const cashbackBtn = $('modeCashbackBtn');
+          const freebetBtn = $('modeFreebetBtn');
+          if (cashbackBtn) cashbackBtn.classList.add('active');
+          if (freebetBtn) freebetBtn.classList.remove('active');
         }
 
         // Configura número de entradas
         if (config.n && $('numEntradas')) {
           $('numEntradas').value = config.n;
-          // Dispara evento change para re-renderizar
           $('numEntradas').dispatchEvent(new Event('change'));
         }
 
         // Configura arredondamento
         if (config.r && $('round_step')) {
           $('round_step').value = config.r;
+          $('round_step').dispatchEvent(new Event('change'));
         }
 
         // Configura dados da promoção
-        if (config.p) {
-          const p = config.p;
-          
-          if (config.m === 'cashback') {
-            if ($('cashback_odd')) $('cashback_odd').value = p.o || '';
-            if ($('cashback_stake')) $('cashback_stake').value = p.s || '';
-            if ($('cashback_rate')) $('cashback_rate').value = p.cb || '';
-          } else {
-            if ($('o1')) $('o1').value = p.o || '';
-            if ($('c1')) $('c1').value = p.c || '';
-            if ($('s1')) $('s1').value = p.s || '';
-            if ($('F')) $('F').value = p.f || '';
-            if ($('r')) $('r').value = p.e || '';
+        if (config.mode === 'cashback') {
+          if (config.promoOdd && $('cashback_odd')) {
+            $('cashback_odd').value = config.promoOdd;
+            $('cashback_odd').dispatchEvent(new Event('input'));
+          }
+          if (config.promoStake && $('cashback_stake')) {
+            $('cashback_stake').value = config.promoStake;
+            $('cashback_stake').dispatchEvent(new Event('input'));
+          }
+          if (config.cashbackRate && $('cashback_rate')) {
+            $('cashback_rate').value = config.cashbackRate;
+            $('cashback_rate').dispatchEvent(new Event('input'));
+          }
+        } else {
+          if (config.promoOdd && $('o1')) {
+            $('o1').value = config.promoOdd;
+            $('o1').dispatchEvent(new Event('input'));
+          }
+          if (config.promoComm && $('c1')) {
+            $('c1').value = config.promoComm;
+            $('c1').dispatchEvent(new Event('input'));
+          }
+          if (config.promoStake && $('s1')) {
+            $('s1').value = config.promoStake;
+            $('s1').dispatchEvent(new Event('input'));
+          }
+          if (config.freebetValue && $('F')) {
+            $('F').value = config.freebetValue;
+            $('F').dispatchEvent(new Event('input'));
+          }
+          if (config.extractionRate && $('r')) {
+            $('r').value = config.extractionRate;
+            $('r').dispatchEvent(new Event('input'));
           }
         }
 
         // Aguarda renderização das coberturas e depois configura
         setTimeout(() => {
-          if (config.cov && Array.isArray(config.cov)) {
+          if (config.coverages && Array.isArray(config.coverages)) {
             const coverageCards = doc.querySelectorAll('#oddsContainer > div');
-            config.cov.forEach((cov, index) => {
+            config.coverages.forEach((cov, index) => {
               if (index < coverageCards.length) {
                 const card = coverageCards[index];
                 const oddInput = card.querySelector('input[data-type="odd"]');
                 const commInput = card.querySelector('input[data-type="comm"]');
                 const layInput = card.querySelector('input[data-type="lay"]');
                 
-                if (oddInput) oddInput.value = cov.odd || '';
-                if (commInput) commInput.value = cov.comm || '';
-                if (layInput) layInput.checked = cov.lay || false;
+                if (oddInput && cov.odd) {
+                  oddInput.value = cov.odd;
+                  oddInput.dispatchEvent(new Event('input'));
+                }
+                if (commInput && cov.comm) {
+                  commInput.value = cov.comm;
+                  commInput.dispatchEvent(new Event('input'));
+                }
+                if (layInput && cov.lay) {
+                  layInput.checked = true;
+                  layInput.dispatchEvent(new Event('change'));
+                }
               }
             });
           }
 
-          // Dispara recálculo
-          const autoCalcElements = doc.querySelectorAll('.auto-calc');
-          if (autoCalcElements.length > 0) {
-            autoCalcElements[0].dispatchEvent(new Event('input'));
-          }
+          // Dispara recálculo final
+          setTimeout(() => {
+            const autoCalcElements = doc.querySelectorAll('.auto-calc');
+            if (autoCalcElements.length > 0) {
+              autoCalcElements[0].dispatchEvent(new Event('input'));
+            }
+          }, 200);
         }, 500);
 
         console.log('Configuração FreePro carregada com sucesso');
@@ -542,6 +645,6 @@ export class ShareUI {
       } catch (error) {
         console.error('Erro ao aplicar configuração FreePro:', error);
       }
-    }, 2000);
+    }, 2500);
   }
 }
