@@ -504,17 +504,9 @@ export function getFreeProfHTML() {
     
     <!-- FREEBET MODE -->
     <div class="freebet-only">
-      <div class="grid-2" style="margin-bottom: 0.75rem;">
-        <div class="form-group">
-          <label class="form-label" for="o1">Odd</label>
-          <input id="o1" class="form-input auto-calc" placeholder="ex: 3.00" inputmode="decimal" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Odd Final</label>
-          <div class="form-input" style="display: flex; align-items: center; background: rgba(17, 24, 39, 0.4); font-family: ui-monospace, monospace;">
-            <span id="oddFinal1">3,00</span>
-          </div>
-        </div>
+      <div class="form-group">
+        <label class="form-label" for="o1">Odd</label>
+        <input id="o1" class="form-input auto-calc" placeholder="ex: 3.00" inputmode="decimal" />
       </div>
 
       <div class="form-group">
@@ -556,17 +548,9 @@ export function getFreeProfHTML() {
 
     <!-- CASHBACK MODE -->
     <div class="cashback-only">
-      <div class="grid-2" style="margin-bottom: 0.75rem;">
-        <div class="form-group">
-          <label class="form-label" for="cashback_odd">Odd</label>
-          <input id="cashback_odd" class="form-input auto-calc" placeholder="ex: 3.00" inputmode="decimal" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Odd Final</label>
-          <div class="form-input" style="display: flex; align-items: center; background: rgba(17, 24, 39, 0.4); font-family: ui-monospace, monospace;">
-            <span id="oddFinalCashback">3,00</span>
-          </div>
-        </div>
+      <div class="form-group">
+        <label class="form-label" for="cashback_odd">Odd</label>
+        <input id="cashback_odd" class="form-input auto-calc" placeholder="ex: 3.00" inputmode="decimal" />
       </div>
 
       <div class="form-group">
@@ -722,7 +706,7 @@ export function getFreeProfHTML() {
       title.className='house-title'; 
       title.textContent='Cobertura '+(i+2);
       
-      // GRID IGUAL ARBIPRO
+      // GRID SIMPLES SEM ODD FINAL
       var grid=document.createElement('div'); 
       grid.className='grid-2';
       grid.style.marginBottom='0.75rem';
@@ -739,24 +723,26 @@ export function getFreeProfHTML() {
       iOdd.placeholder='ex: 2,50'; 
       iOdd.setAttribute('data-type','odd');
       
-      var fOddFinal=document.createElement('div'); 
-      fOddFinal.className='form-group';
-      fOddFinal.style.margin='0';
-      var lOddFinal=document.createElement('label'); 
-      lOddFinal.className='form-label';
-      lOddFinal.textContent='Odd Final'; 
-      var dOddFinal=document.createElement('div');
-      dOddFinal.className='form-input';
-      dOddFinal.style.cssText='display: flex; align-items: center; background: rgba(17, 24, 39, 0.4); font-family: ui-monospace, monospace;';
-      dOddFinal.innerHTML='<span>2,50</span>';
+      // COMISSÃO NO GRID
+      var fComm=document.createElement('div'); 
+      fComm.className='form-group';
+      fComm.style.margin='0';
+      var lComm=document.createElement('label'); 
+      lComm.className='form-label';
+      lComm.textContent='Comissão (%)'; 
+      var iComm=document.createElement('input'); 
+      iComm.className='form-input auto-calc';
+      iComm.setAttribute('inputmode','decimal'); 
+      iComm.placeholder='ex: 0'; 
+      iComm.setAttribute('data-type','comm');
       
       fOdd.appendChild(lOdd); 
       fOdd.appendChild(iOdd);
-      fOddFinal.appendChild(lOddFinal); 
-      fOddFinal.appendChild(dOddFinal);
+      fComm.appendChild(lComm); 
+      fComm.appendChild(iComm);
       
       grid.appendChild(fOdd);
-      grid.appendChild(fOddFinal);
+      grid.appendChild(fComm);
       
       // STAKE COM BOTÃO LAY IGUAL ARBIPRO
       var fStake=document.createElement('div'); 
@@ -792,21 +778,15 @@ export function getFreeProfHTML() {
       fStake.appendChild(lStake);
       fStake.appendChild(divStake);
       
-      // CHECKBOXES IGUAL ARBIPRO
+      // CHECKBOXES SIMPLIFICADOS - SEM COMISSÃO (já está no grid)
       var checkboxDiv=document.createElement('div');
       checkboxDiv.style.cssText='display: flex; gap: 0.75rem; margin: 0.75rem 0; flex-wrap: wrap;';
       
-      var commLabel=document.createElement('label');
-      commLabel.className='checkbox-group';
-      var commCheck=document.createElement('input');
-      commCheck.type='checkbox';
-      commCheck.setAttribute('data-type','comm-toggle');
-      var commSpan=document.createElement('span');
-      commSpan.textContent='Comissão';
-      commLabel.appendChild(commCheck);
-      commLabel.appendChild(commSpan);
+      var layLabel=document.createElement('label');
+      layLabel.className='checkbox-group';
+      layLabel.innerHTML='<span>Configurações da Cobertura</span>';
       
-      checkboxDiv.appendChild(commLabel);
+      checkboxDiv.appendChild(layLabel);
       
       // CAMPOS CONDICIONAIS
       var condDiv=document.createElement('div');
@@ -814,13 +794,7 @@ export function getFreeProfHTML() {
       
       if(prev[i]){ 
         iOdd.value=prev[i].odd; 
-        if(prev[i].com) {
-          commCheck.checked=true;
-          var commInput=document.createElement('div');
-          commInput.className='form-group';
-          commInput.innerHTML='<label class="form-label">Comissão (%)</label><input class="form-input auto-calc" data-type="comm" placeholder="ex: 0" inputmode="decimal" value="'+prev[i].com+'" />';
-          condDiv.appendChild(commInput);
-        }
+        iComm.value=prev[i].com || ''; 
         if(prev[i].lay) {
           btnLay.classList.add('active');
           btnLay.textContent='LAY';
@@ -841,31 +815,7 @@ export function getFreeProfHTML() {
   }
 
   function bindConditionalEvents() {
-    // Checkboxes de comissão
-    document.querySelectorAll('[data-type="comm-toggle"]').forEach(function(check) {
-      check.addEventListener('change', function() {
-        var card = this.closest('.house-card');
-        var condDiv = card.querySelector('[data-conditional]');
-        
-        if (this.checked) {
-          if (!condDiv.querySelector('[data-type="comm"]')) {
-            var commInput = document.createElement('div');
-            commInput.className = 'form-group';
-            commInput.innerHTML = '<label class="form-label">Comissão (%)</label><input class="form-input auto-calc" data-type="comm" placeholder="ex: 0" inputmode="decimal" />';
-            condDiv.appendChild(commInput);
-            bindAutoCalcEvents();
-          }
-        } else {
-          var commInput = condDiv.querySelector('[data-type="comm"]');
-          if (commInput) {
-            commInput.closest('.form-group').remove();
-          }
-        }
-        scheduleAutoCalc();
-      });
-    });
-    
-    // Botões LAY
+    // Apenas botões LAY (comissão já está sempre visível)
     document.querySelectorAll('[data-type="lay"]').forEach(function(btn) {
       btn.addEventListener('click', function() {
         this.classList.toggle('active');
