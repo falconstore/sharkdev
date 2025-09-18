@@ -575,12 +575,16 @@ export function getFreeProfHTML() {
       </div>
     </div>
 
-    <!-- NOVOS CAMPOS PARA CASHBACK -->
+    <!-- NOVOS CAMPOS PARA CASHBACK (agora com Comissão %) -->
     <div class="cashback-only">
-      <div class="form-grid form-grid-2">
+      <div class="form-grid form-grid-3">
         <div class="form-group">
           <label class="form-label" for="cashback_odd">Odd da Casa</label>
           <input id="cashback_odd" class="form-control auto-calc" placeholder="ex: 3.00" inputmode="decimal" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cashback_comm">Comissão (%)</label>
+          <input id="cashback_comm" class="form-control auto-calc" placeholder="ex: 0" inputmode="decimal" />
         </div>
         <div class="form-group">
           <label class="form-label" for="cashback_stake">Stake Qualificação</label>
@@ -910,6 +914,7 @@ export function getFreeProfHTML() {
       var odd = toNum($("cashback_odd").value),
           stake = toNum($("cashback_stake").value),
           cashbackRate = toNum($("cashback_rate").value),
+          mainCommCb = toNum($("cashback_comm").value), // NOVO
           n = parseInt($("numEntradas").value || '3', 10),
           cov = readCoverage();
 
@@ -929,16 +934,16 @@ export function getFreeProfHTML() {
       var commFrac = cov.comm.map(function(c){ return (Number.isFinite(c) && c > 0) ? c/100 : 0; });
       var onlyBack = !cov.isLay.some(Boolean);
 
+      var Oeff = effOdd(odd, mainCommCb); // odd efetiva da principal (com comissão)
       var stakes = [], eBack = [];
       var step = parseFloat($("round_step").value) || 1;
       function roundStep(v){ return Math.round(v / step) * step; }
       var MIN_STAKE = 0.50;
 
       if (onlyBack) {
-        // e_i = odd efetiva com comissão
+        // e_i = odd efetiva com comissão das coberturas
         for (var i = 0; i < cov.odds.length; i++) {
-          var e = effOdd(cov.odds[i], cov.comm[i]); // 1 + (L-1)*(1 - c%)
-          eBack[i] = e;
+          eBack[i] = effOdd(cov.odds[i], cov.comm[i]); // 1 + (L-1)*(1 - c%)
         }
         // H = Σ (1/e_i)
         var H = eBack.reduce(function(a, e){ return a + (1 / e); }, 0);
@@ -948,107 +953,42 @@ export function getFreeProfHTML() {
           showStatus('warning', 'Impossível nivelar (Σ 1/e ≥ 1). Usando modo de cobertura.');
           var baseLoss = stake;
           for (var j = 0; j < cov.odds.length; j++) {
-            var e2 = eBack[j];
-            var util = (e2 - 1);
+            var util = (eBack[j] - 1);
             if (!(util > 0)) { $("k_S").textContent='—'; $("results").style.display='none'; isCalculating=false; return; }
             stakes[j] = baseLoss / util;
           }
         } else {
-          // Nível analítico (bate com seus exemplos)
-          var P = stake, O = odd, C = cashbackAmount;
-          // N = -P * (1 - O + H*O) + H * C
-          var N = -P * (1 - O + H*O) + H * C;
-          // S_total = P*O - N
-          var S_total = P * O - N;
+          // Nível analítico (com Oeff)
+          var P = stake, C = cashbackAmount;
+          // N = -P * (1 - Oeff + H*Oeff) + H * C
+          var N = -P * (1 - Oeff + H * Oeff) + H * C;
+          // S_total = P*Oeff - N
+          var S_total = P * Oeff - N;
           // s_i = (N + S_total - C) / e_i
           var numer = (N + S_total - C);
           for (var k = 0; k < eBack.length; k++) {
             stakes[k] = numer / eBack[k];
           }
         }
-     } else {
-  // -------- MIX BACK+LAY: nivelamento geral com H' = Σ (a_i / b_i) --------
-  // Para cada cobertura:
-  //  - BACK: a_i = 1,          b_i = e_i = effOdd(L, com)
-  //  - LAY : a_i = (L-1),      b_i = L - cfrac    (ganho líquido + “desalocação” da liability)
-  var a = [], b = [];
-  for (var m = 0; m < cov.odds.length; m++) {
-    var L = cov.odds[m];
-    var cfrac = commFrac[m] || 0;
-
-    if (cov.isLay[m]) {
-      var denom = L - 1;
-      if (!(denom > 0)) {
-        $("k_S").textContent = '—';
-        $("results").style.display = 'none';
-        isCalculating = false;
-        return;
-      }
-      // Parâmetros do sistema
-      a[m] = denom;
-      b[m] = L - cfrac;                 // conforme derivação: net = s*(L - cfrac) - S
-
-      // Apenas para exibição coerente (não entra no sistema)
-      eBack[m] = 1 + (1 - cfrac) / denom;
-    } else {
-      var e3 = effOdd(L, cov.comm[m]);  // e3 = 1 + (L-1)*(1 - com%)
-      if (!(e3 > 1)) {
-        $("k_S").textContent = '—';
-        $("results").style.display = 'none';
-        isCalculating = false;
-        return;
-      }
-      a[m] = 1;
-      b[m] = e3;
-
-      eBack[m] = e3;
-    }
-  }
-
-  // H' = Σ a_i / b_i
-  var Hprime = 0;
-  for (var q = 0; q < a.length; q++) Hprime += (a[q] / b[q]);
-
-  if (Hprime >= 1) {
-    // Impossível nivelar matematicamente → mantém teu fallback antigo (baseLoss)
-    showStatus('warning', 'Impossível nivelar (Σ a/b ≥ 1). Usando modo de cobertura.');
-    var baseLossLay = stake;
-    for (var j = 0; j < cov.odds.length; j++) {
-      var Lj = cov.odds[j], cfracj = commFrac[j] || 0;
-      if (cov.isLay[j]) {
-        stakes[j] = baseLossLay / (1 - cfracj);
-        var denomj = Lj - 1;
-        eBack[j] = 1 + (1 - cfracj) / denomj;
       } else {
-        var ej = effOdd(Lj, cov.comm[j]);
-        eBack[j] = ej;
-        var utilj = (ej - 1);
-        if (!(utilj > 0)) {
-          $("k_S").textContent='—';
-          $("results").style.display='none';
-          isCalculating=false;
-          return;
+        // FALLBACK quando existe LAY
+        var baseLossLay = stake;
+        for (var m = 0; m < cov.odds.length; m++) {
+          var L = cov.odds[m], cfrac = commFrac[m];
+          if (cov.isLay[m]) {
+            // ganho quando a seleção perde = stakeLay * (1 - comissão)
+            stakes[m] = baseLossLay / (1 - cfrac);
+            var denom = L - 1;
+            eBack[m] = 1 + (1 - cfrac) / denom; // só para exibição coerente
+          } else {
+            var e3 = effOdd(L, cov.comm[m]);
+            eBack[m] = e3;
+            var util3 = (e3 - 1);
+            if (!(util3 > 0)) { $("k_S").textContent='—'; $("results").style.display='none'; isCalculating=false; return; }
+            stakes[m] = baseLossLay / util3;
+          }
         }
-        stakes[j] = baseLossLay / utilj;
       }
-    }
-  } else {
-    // Nivelamento analítico (inclui principal e todas coberturas com cashback)
-    var P = stake, O = odd, C = cashbackAmount;
-
-    // N = lucro nivelado em todos cenários (inclui principal)
-    // Fórmula geral: N = P*(O - 1 - O*H') + C*H'
-    var N = P * (O - 1 - O * Hprime) + C * Hprime;
-
-    // T é o termo comum T = b_i * s_i = (N + P - C) / (1 - H')
-    var T = (N + P - C) / (1 - Hprime);
-
-    // s_i = T / b_i
-    for (var k = 0; k < b.length; k++) {
-      stakes[k] = T / b[k];
-    }
-  }
-}
 
       // Arredonda e aplica mínimo
       stakes = stakes.map(roundStep).map(function(v){ return Math.max(v, MIN_STAKE); });
@@ -1063,8 +1003,8 @@ export function getFreeProfHTML() {
         return a + (cov.isLay[idx] ? (cov.odds[idx]-1)*s : s);
       }, 0);
 
-      // (1) Principal vence: sem cashback
-      var net1 = (stake * (odd - 1)) - (S - stake);
+      // (1) Principal vence: sem cashback — usa odd efetiva da principal
+      var net1 = (stake * Oeff) - S;
 
       // (2) Coberturas vencem: principal perde — soma cashback
       var defs = [], nets = [];
@@ -1082,7 +1022,7 @@ export function getFreeProfHTML() {
       }
 
       $("k_S").textContent = nf(S);
-      updateResultsTable(stakes, defs, nets, net1, odd, 0, stake, oddsOrig, cov, liabilities);
+      updateResultsTable(stakes, defs, nets, net1, odd, mainCommCb, stake, oddsOrig, cov, liabilities);
       $("results").style.display = 'block';
 
     } catch (error) {
@@ -1139,7 +1079,7 @@ export function getFreeProfHTML() {
 
   function clearAll() {
     ["o1","c1","F","r","s1"].forEach(function(id){ var el = $(id); if(el) el.value=''; }); 
-    ["cashback_odd","cashback_stake","cashback_rate"].forEach(function(id){ var el = $(id); if(el) el.value=''; }); 
+    ["cashback_odd","cashback_stake","cashback_rate","cashback_comm"].forEach(function(id){ var el = $(id); if(el) el.value=''; }); 
     $("tbody").innerHTML=''; 
     $("results").style.display='none'; 
     $("k_S").textContent='—'; 
