@@ -211,45 +211,130 @@ export class ShareUI {
       let shareData;
       let shareUrl;
 
+      // Coleta dados da calculadora
       if (calculatorType === 'arbipro') {
+        console.log('Coletando dados do ArbiPro...');
         shareData = this.getArbiProData();
+        console.log('Dados coletados:', shareData);
+        
         shareUrl = this.shareSystem.generateArbiProLink(shareData);
+        console.log('URL gerada:', shareUrl);
       } else if (calculatorType === 'freepro') {
+        console.log('Coletando dados do FreePro...');
         shareData = this.getFreeProData();
+        console.log('Dados coletados:', shareData);
+        
         shareUrl = this.shareSystem.generateFreeProLink(shareData);
+        console.log('URL gerada:', shareUrl);
       } else {
-        throw new Error('Tipo de calculadora inválido');
+        throw new Error('Tipo de calculadora inválido: ' + calculatorType);
       }
 
       // Verifica se o link foi gerado corretamente
-      if (!shareUrl || typeof shareUrl !== 'string') {
-        throw new Error('Não foi possível gerar o link de compartilhamento');
+      if (!shareUrl) {
+        throw new Error('generateLink retornou null ou undefined');
+      }
+      
+      if (typeof shareUrl !== 'string') {
+        throw new Error('generateLink retornou um tipo inválido: ' + typeof shareUrl);
+      }
+      
+      if (shareUrl.trim() === '') {
+        throw new Error('generateLink retornou uma string vazia');
       }
 
-      console.log('Link gerado:', shareUrl);
+      console.log('Link final válido:', shareUrl);
       await this.showModal(shareUrl);
       
     } catch (error) {
-      console.error('Erro ao compartilhar:', error);
-      alert('Erro ao gerar link de compartilhamento: ' + error.message);
+      console.error('Erro detalhado ao compartilhar:', error);
+      console.error('Stack trace:', error.stack);
+      
+      // Mostra erro mais detalhado para debug
+      const errorMsg = `Erro ao gerar link: ${error.message}\n\nDetalhes técnicos:\n- Calculadora: ${calculatorType}\n- Erro: ${error.name}`;
+      alert(errorMsg);
     }
   }
 
   getArbiProData() {
     // Busca dados da calculadora ArbiPro
+    console.log('=== DEBUG: Coletando dados do ArbiPro ===');
+    
     const app = window.SharkGreen;
-    if (!app?.arbiPro) {
-      throw new Error('ArbiPro não encontrado');
+    console.log('window.SharkGreen:', app);
+    
+    if (!app) {
+      throw new Error('window.SharkGreen não encontrado');
+    }
+    
+    console.log('app.arbiPro:', app.arbiPro);
+    
+    if (!app.arbiPro) {
+      throw new Error('app.arbiPro não encontrado');
     }
 
-    return {
-      numHouses: app.arbiPro.numHouses,
-      rounding: app.arbiPro.roundingValue,
-      houses: app.arbiPro.houses.slice(0, app.arbiPro.numHouses)
+    const arbiPro = app.arbiPro;
+    console.log('ArbiPro instance:', arbiPro);
+    console.log('numHouses:', arbiPro.numHouses);
+    console.log('roundingValue:', arbiPro.roundingValue);
+    console.log('houses array:', arbiPro.houses);
+
+    const data = {
+      numHouses: arbiPro.numHouses || 2,
+      rounding: arbiPro.roundingValue || 0.01,
+      houses: arbiPro.houses ? arbiPro.houses.slice(0, arbiPro.numHouses || 2) : []
     };
+
+    console.log('Dados finais coletados:', data);
+    return data;
   }
 
-  getFreeProData() {
+  // Método de debug - pode ser chamado do console
+  debugShareSystem() {
+    console.log('=== DEBUG SHARE SYSTEM ===');
+    
+    try {
+      console.log('1. Verificando window.SharkGreen...');
+      const app = window.SharkGreen;
+      console.log('window.SharkGreen:', app);
+      
+      if (!app) {
+        console.error('❌ window.SharkGreen não encontrado');
+        return false;
+      }
+      
+      console.log('2. Verificando ArbiPro...');
+      console.log('app.arbiPro:', app.arbiPro);
+      
+      if (!app.arbiPro) {
+        console.error('❌ app.arbiPro não encontrado');
+        return false;
+      }
+      
+      console.log('3. Verificando ShareUI...');
+      console.log('app.shareUI:', app.shareUI);
+      
+      if (!app.shareUI) {
+        console.error('❌ app.shareUI não encontrado');
+        return false;
+      }
+      
+      console.log('4. Testando coleta de dados...');
+      const data = this.getArbiProData();
+      console.log('Dados coletados:', data);
+      
+      console.log('5. Testando geração de link...');
+      const link = app.shareUI.shareSystem.generateArbiProLink(data);
+      console.log('Link gerado:', link);
+      
+      console.log('✅ Sistema funcionando corretamente!');
+      return true;
+      
+    } catch (error) {
+      console.error('❌ Erro no debug:', error);
+      return false;
+    }
+  }
     // Busca dados da calculadora FreePro via iframe
     try {
       const iframe = document.getElementById('calc2frame');
