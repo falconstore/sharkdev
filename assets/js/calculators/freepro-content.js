@@ -1,5 +1,5 @@
-// assets/js/calculators/freepro-content.js - VERSÃO PADRONIZADA
-// HTML da FreePro com MESMO padrão visual do ArbiPro
+// assets/js/calculators/freepro-content.js - VERSÃO ATUALIZADA COM FREEBET/CASHBACK
+// HTML completo da calculadora FreePro que roda no iframe
 
 export function getFreeProfHTML() {
   return `<!DOCTYPE html>
@@ -49,18 +49,9 @@ export function getFreeProfHTML() {
       transition: color 0.3s ease;
     }
 
-    /* === HEADER PADRONIZADO === */
     .calc-header {
       text-align: center;
       margin-bottom: 1.5rem;
-      padding: 1rem;
-      background: rgba(31, 41, 59, 0.4);
-      border-radius: 12px;
-      border: 1px solid var(--border);
-    }
-
-    [data-theme="light"] .calc-header {
-      background: rgba(255, 255, 255, 0.6);
     }
 
     .calc-title {
@@ -77,54 +68,13 @@ export function getFreeProfHTML() {
       font-size: 0.875rem;
     }
 
-    /* === STATS GRID PADRONIZADO === */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin: 1rem 0;
-    }
-
-    .stat-card {
-      background: rgba(17, 24, 39, 0.6);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1rem;
-      text-align: center;
-      transition: all 0.3s ease;
-      min-height: 80px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-    }
-
-    [data-theme="light"] .stat-card {
-      background: rgba(255, 255, 255, 0.8);
-    }
-
-    .stat-value {
-      font-size: 1.25rem;
-      font-weight: 800;
-      font-family: ui-monospace, monospace;
-      margin-bottom: 0.25rem;
-      color: var(--primary);
-    }
-
-    .stat-label {
-      font-size: 0.625rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-weight: 600;
-    }
-
-    /* === CARDS PADRONIZADOS === */
     .card {
       background: rgba(31, 41, 59, 0.8);
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 1rem;
       margin-bottom: 1rem;
+      backdrop-filter: blur(10px);
       transition: all 0.3s ease;
     }
 
@@ -132,78 +82,104 @@ export function getFreeProfHTML() {
       background: rgba(255, 255, 255, 0.9);
     }
 
-    .section-title {
-      font-size: 1.125rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 1rem;
+    .card-promo {
+      border-left: 3px solid var(--primary);
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(31, 41, 59, 0.8));
+    }
+
+    [data-theme="light"] .card-promo {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(255, 255, 255, 0.9));
+    }
+
+    .card-header {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
     }
 
-    .section-title::before {
-      content: '';
-      width: 3px;
-      height: 20px;
-      background: linear-gradient(180deg, var(--primary), var(--secondary));
-      border-radius: 2px;
-    }
-
-    /* === HOUSE CARDS PADRONIZADOS === */
-    .house-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .house-card {
-      background: linear-gradient(135deg, rgba(31, 41, 59, 0.8), rgba(55, 65, 81, 0.6));
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1rem;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-
-    [data-theme="light"] .house-card {
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(248, 250, 252, 0.8));
-    }
-
-    .house-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
-      border-radius: 12px 12px 0 0;
-    }
-
-    .house-card:nth-child(1)::before { background: linear-gradient(90deg, var(--primary), var(--secondary)); }
-    .house-card:nth-child(2)::before { background: linear-gradient(90deg, var(--success), var(--primary)); }
-    .house-card:nth-child(3)::before { background: linear-gradient(90deg, var(--warning), var(--danger)); }
-    .house-card:nth-child(4)::before { background: linear-gradient(90deg, var(--accent), var(--primary)); }
-    .house-card:nth-child(5)::before { background: linear-gradient(90deg, var(--danger), var(--warning)); }
-
-    .house-title {
-      font-size: 0.875rem;
+    .card-title {
+      font-size: 1rem;
       font-weight: 700;
       color: var(--text-primary);
-      margin-bottom: 0.75rem;
-      text-align: center;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
     }
 
-    /* === FORMULÁRIOS PADRONIZADOS === */
-    .grid-2 { 
-      display: grid; 
-      grid-template-columns: repeat(2, 1fr); 
-      gap: 1rem; 
+    .badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.625rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
     }
+
+    .badge-auto {
+      background: linear-gradient(135deg, var(--success), var(--accent));
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* NOVO: Container para duas colunas de configuração */
+    .config-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    /* NOVO: Toggle para Freebet/Cashback */
+    .toggle-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      padding: 0.5rem;
+      background: rgba(17, 24, 39, 0.6);
+      border-radius: 25px;
+      border: 2px solid var(--border);
+    }
+
+    [data-theme="light"] .toggle-container {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .toggle-option {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      border: none;
+      background: transparent;
+      color: var(--text-secondary);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+
+    .toggle-option.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-grid-3 { grid-template-columns: repeat(3, 1fr); }
+    .form-grid-2 { grid-template-columns: repeat(2, 1fr); }
+    .form-grid-auto { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
 
     .form-group {
       margin-bottom: 0.75rem;
@@ -219,7 +195,7 @@ export function getFreeProfHTML() {
       letter-spacing: 0.05em;
     }
 
-    .form-input, .form-select {
+    .form-control {
       width: 100%;
       padding: 0.75rem;
       border: 2px solid var(--border);
@@ -230,18 +206,102 @@ export function getFreeProfHTML() {
       transition: all 0.2s ease;
     }
 
-    [data-theme="light"] .form-input,
-    [data-theme="light"] .form-select {
+    [data-theme="light"] .form-control {
       background: rgba(255, 255, 255, 0.9);
     }
 
-    .form-input:focus, .form-select:focus {
+    .form-control:focus {
       outline: none;
       border-color: var(--primary);
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
-    /* === BOTÕES PADRONIZADOS === */
+    .coverage-grid {
+      display: grid;
+      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    }
+
+    .coverage-card {
+      background: rgba(17, 24, 39, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      border-left: 3px solid var(--primary);
+      transition: background 0.3s ease;
+    }
+
+    [data-theme="light"] .coverage-card {
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .coverage-card:nth-child(1) { border-left-color: var(--success); }
+    .coverage-card:nth-child(2) { border-left-color: var(--warning); }
+    .coverage-card:nth-child(3) { border-left-color: var(--danger); }
+    .coverage-card:nth-child(4) { border-left-color: var(--primary); }
+    .coverage-card:nth-child(5) { border-left-color: var(--accent); }
+
+    .coverage-title {
+      font-weight: 700;
+      font-size: 0.875rem;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .coverage-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 0.75rem;
+      align-items: end;
+    }
+
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      min-height: 48px;
+      transition: all 0.2s ease;
+    }
+
+    .checkbox-wrapper:hover {
+      border-color: var(--primary);
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .total-display {
+      text-align: center;
+      padding: 1.5rem;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(34, 197, 94, 0.05));
+      border: 2px solid var(--primary);
+      border-radius: 12px;
+      margin: 1rem 0;
+    }
+
+    .total-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--primary);
+      font-family: ui-monospace, monospace;
+    }
+
+    .actions {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      align-items: center;
+      margin: 1.5rem 0;
+      flex-wrap: wrap;
+    }
+
     .btn {
       padding: 0.75rem 1.5rem;
       border: none;
@@ -251,10 +311,15 @@ export function getFreeProfHTML() {
       transition: all 0.2s ease;
       text-transform: uppercase;
       font-size: 0.75rem;
-      letter-spacing: 0.05em;
-      text-decoration: none;
-      display: inline-block;
-      text-align: center;
+      letter-spacing: 0.025em;
+      white-space: nowrap;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      max-width: 200px;
+      min-width: 140px;
     }
 
     .btn-primary {
@@ -263,24 +328,31 @@ export function getFreeProfHTML() {
       box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
     }
 
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+
     .btn-secondary {
       background: rgba(55, 65, 81, 0.8);
       color: var(--text-primary);
       border: 2px solid var(--border);
-    }
-
-    .btn-toggle {
-      background: rgba(55, 65, 81, 0.8);
-      color: var(--text-secondary);
-      border: 2px solid var(--border);
-      min-width: 60px;
-      padding: 0.75rem 1rem;
       transition: all 0.3s ease;
     }
 
-    .btn-toggle.active {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white;
+    .btn-secondary:hover {
+      background: rgba(55, 65, 81, 1);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+
+    [data-theme="light"] .btn-secondary {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: var(--border);
+    }
+
+    [data-theme="light"] .btn-secondary:hover {
+      background: rgba(255, 255, 255, 1);
       border-color: var(--primary);
     }
 
@@ -288,64 +360,44 @@ export function getFreeProfHTML() {
       background: linear-gradient(135deg, #8b5cf6, #3b82f6) !important;
       color: white !important;
       border: none !important;
+      border-radius: 8px !important;
+      padding: 0.75rem 1.5rem !important;
+      font-size: 0.75rem !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      transition: all 0.2s ease !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.025em !important;
+      white-space: nowrap !important;
+      min-height: 44px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      flex: 1 !important;
+      max-width: 200px !important;
+      min-width: 140px !important;
+      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.2) !important;
     }
 
-    /* === CHECKBOXES PADRONIZADOS === */
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin: 0.5rem 0;
-      font-size: 0.75rem;
-      color: var(--text-secondary);
+    .btn-share:hover {
+      transform: translateY(-1px) !important;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3) !important;
     }
 
-    .checkbox-group input[type="checkbox"] {
-      width: 16px;
-      height: 16px;
-      accent-color: var(--primary);
-      cursor: pointer;
-    }
-
-    /* === MODO TOGGLES PADRONIZADOS === */
-    .mode-toggles {
-      display: flex;
-      gap: 0.25rem;
-      background: rgba(31, 41, 59, 0.8);
-      border-radius: 12px;
-      padding: 0.25rem;
-      border: 1px solid var(--border);
-      margin-bottom: 1rem;
-    }
-
-    [data-theme="light"] .mode-toggles {
-      background: rgba(255, 255, 255, 0.9);
-    }
-
-    .mode-toggle {
-      flex: 1;
-      padding: 0.75rem 1rem;
+    .alert {
+      padding: 1rem;
       border-radius: 8px;
-      border: none;
-      background: transparent;
-      color: var(--text-secondary);
+      margin: 1rem 0;
       font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      text-align: center;
-      font-size: 0.875rem;
-      text-transform: uppercase;
-      letter-spacing: 0.025em;
+      display: none;
     }
 
-    .mode-toggle.active {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      color: white;
-      transform: translateY(-1px);
-      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.1);
+      border: 2px solid var(--warning);
+      color: #fbbf24;
     }
 
-    /* === TABELA PADRONIZADA === */
     .results-table {
       width: 100%;
       border-collapse: collapse;
@@ -353,6 +405,7 @@ export function getFreeProfHTML() {
       border-radius: 12px;
       overflow: hidden;
       margin-top: 1rem;
+      transition: background 0.3s ease;
     }
 
     [data-theme="light"] .results-table {
@@ -368,6 +421,7 @@ export function getFreeProfHTML() {
       font-size: 0.75rem;
       letter-spacing: 0.05em;
       border-bottom: 2px solid var(--primary);
+      transition: background 0.3s ease;
     }
 
     [data-theme="light"] .results-table th {
@@ -387,69 +441,72 @@ export function getFreeProfHTML() {
     .results-table th:not(:first-child),
     .results-table td:not(:first-child) { text-align: right; }
 
-    /* === CLASSES DE LUCRO === */
     .profit-positive { color: #22c55e !important; font-weight: 700 !important; }
     .profit-negative { color: #dc2626 !important; font-weight: 700 !important; }
     .profit-highlight { color: #3b82f6 !important; font-weight: 800 !important; }
     .text-small { font-size: 0.75rem; color: var(--text-muted); }
 
-    /* === CAMPOS CONDICIONAIS === */
+    /* NOVO: Ocultar elementos condicionalmente */
     .freebet-only { display: block; }
     .cashback-only { display: none; }
 
     .mode-cashback .freebet-only { display: none; }
     .mode-cashback .cashback-only { display: block; }
 
-    /* === RESPONSIVIDADE === */
     @media (max-width: 768px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.75rem;
-      }
-      
-      .house-grid {
+      .config-grid {
         grid-template-columns: 1fr;
       }
       
-      .grid-2 { 
+      .form-grid-3, .form-grid-2, .form-grid-auto { 
         grid-template-columns: 1fr; 
+      }
+      .coverage-fields { 
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+      
+      .actions {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+      
+      .btn,
+      .btn-share {
+        flex: none !important;
+        width: 100% !important;
+        max-width: none !important;
+        min-width: none !important;
       }
     }
 
     @media (max-width: 480px) {
-      .stats-grid {
-        grid-template-columns: 1fr;
-        gap: 0.5rem;
-      }
-      
-      .stat-card {
-        min-height: 70px;
-        padding: 0.5rem;
-      }
-      
-      .stat-value {
-        font-size: 0.875rem;
-      }
-      
-      .stat-label {
-        font-size: 0.5rem;
+      .btn,
+      .btn-share {
+        padding: 0.625rem 1.25rem !important;
+        font-size: 0.6875rem !important;
+        min-height: 40px !important;
       }
     }
   </style>
 </head>
 <body>
-  <!-- HEADER IGUAL AO ARBIPRO -->
   <div class="calc-header">
     <h1 class="calc-title">Calculadora Shark FreePro</h1>
-    <p class="calc-subtitle">Otimize seus lucros com freebets e cashbacks - Padrão Shark Green</p>
+    <p class="calc-subtitle">Otimize seus lucros com freebets e cashbacks - cálculo automático em tempo real</p>
   </div>
 
-  <!-- STATS GRID IGUAL AO ARBIPRO -->
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-label">Configurações</div>
-      <div class="form-group" style="margin: 0.75rem 0 0 0;">
-        <select id="numEntradas" class="form-select" style="font-size: 0.75rem; padding: 0.5rem;">
+  <!-- NOVA: Grade de configurações com duas colunas -->
+  <div class="config-grid">
+    <!-- Coluna 1: Configurações básicas -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Configurações</div>
+        <div class="badge badge-auto">⚡ Auto</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="numEntradas">Número de Entradas</label>
+        <select id="numEntradas" class="form-control">
           <option value="2">2 Mercados</option>
           <option value="3" selected>3 Mercados</option>
           <option value="4">4 Mercados</option>
@@ -459,10 +516,22 @@ export function getFreeProfHTML() {
       </div>
     </div>
 
-    <div class="stat-card">
-      <div class="stat-label">Arredondamento</div>
-      <div class="form-group" style="margin: 0.75rem 0 0 0;">
-        <select id="round_step" class="form-select auto-calc" style="font-size: 0.75rem; padding: 0.5rem;">
+    <!-- NOVA: Coluna 2: Seleção de modo -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Modo de Cálculo</div>
+        <div class="badge">Shark Green</div>
+      </div>
+      
+      <!-- Toggle Freebet/Cashback -->
+      <div class="toggle-container">
+        <button id="modeFreebetBtn" class="toggle-option active">🎁 Freebet</button>
+        <button id="modeCashbackBtn" class="toggle-option">💰 Cashback</button>
+      </div>
+      
+      <div class="form-group">
+        <label class="form-label" for="round_step">Arredondamento</label>
+        <select id="round_step" class="form-control auto-calc">
           <option value="0.01">R$ 0,01</option>
           <option value="0.10">R$ 0,10</option>
           <option value="0.50">R$ 0,50</option>
@@ -470,134 +539,93 @@ export function getFreeProfHTML() {
         </select>
       </div>
     </div>
-
-    <div class="stat-card">
-      <div class="stat-value" id="k_S">R$ 0,00</div>
-      <div class="stat-label">Total Investido</div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-value profit-highlight">100%</div>
-      <div class="stat-label">Shark Green</div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-label">Compartilhar</div>
-      <button id="shareBtn" class="btn-share" style="margin-top: 0.75rem; width: 100%; padding: 0.5rem; font-size: 0.75rem;">
-        🔗 Compartilhar
-      </button>
-    </div>
   </div>
 
-  <!-- MODO TOGGLE IGUAL AO ARBIPRO -->
-  <div class="card">
-    <div class="section-title">Modo de Cálculo</div>
-    <div class="mode-toggles">
-      <button id="modeFreebetBtn" class="mode-toggle active">🎁 Freebet</button>
-      <button id="modeCashbackBtn" class="mode-toggle">💰 Cashback</button>
+  <div class="card card-promo">
+    <div class="card-header">
+      <div class="card-title">Casa Promoção</div>
+      <div class="badge">Shark Green</div>
     </div>
-  </div>
-
-  <!-- CASA PROMOÇÃO IGUAL AO ARBIPRO -->
-  <div class="card">
-    <div class="section-title">Casa Promoção</div>
     
-    <!-- FREEBET MODE -->
+    <!-- CAMPOS PARA FREEBET (modo padrão) -->
     <div class="freebet-only">
-      <div class="form-group">
-        <label class="form-label" for="o1">Odd</label>
-        <input id="o1" class="form-input auto-calc" placeholder="ex: 3.00" inputmode="decimal" />
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="s1">Stake</label>
-        <div style="display: flex; gap: 0.5rem;">
-          <div style="position: relative; flex: 1;">
-            <span style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 600; font-size: 0.75rem;">R$</span>
-            <input id="s1" class="form-input auto-calc" placeholder="ex: 50" inputmode="decimal" 
-              style="padding-left: 2.25rem; font-family: ui-monospace, monospace;" />
-          </div>
-          <button id="promoLayBtn" class="btn-toggle">BACK</button>
+      <div class="form-grid form-grid-3">
+        <div class="form-group">
+          <label class="form-label" for="o1">Odd da Casa</label>
+          <input id="o1" class="form-control auto-calc" placeholder="ex: 3.00" inputmode="decimal" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="c1">Comissão (%)</label>
+          <input id="c1" class="form-control auto-calc" placeholder="ex: 0" inputmode="decimal" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="s1">Stake Qualificação</label>
+          <input id="s1" class="form-control auto-calc" placeholder="ex: 50" inputmode="decimal" />
         </div>
       </div>
-
-      <div style="display: flex; gap: 0.75rem; margin: 0.75rem 0; flex-wrap: wrap;">
-        <label class="checkbox-group">
-          <input type="checkbox" id="toggleCommission1" />
-          <span>Comissão</span>
-        </label>
-        <label class="checkbox-group">
-          <input type="checkbox" id="toggleFreebet1" />
-          <span>Freebet</span>
-        </label>
-      </div>
-
-      <div id="conditionalFields1"></div>
-
-      <div class="grid-2">
+      <div class="form-grid form-grid-2">
         <div class="form-group">
           <label class="form-label" for="F">Valor da Freebet</label>
-          <input id="F" class="form-input auto-calc" placeholder="ex: 50" inputmode="decimal" />
+          <input id="F" class="form-control auto-calc" placeholder="ex: 50" inputmode="decimal" />
         </div>
         <div class="form-group">
           <label class="form-label" for="r">Taxa de Extração (%)</label>
-          <input id="r" class="form-input auto-calc" placeholder="ex: 70" inputmode="decimal" />
+          <input id="r" class="form-control auto-calc" placeholder="ex: 70" inputmode="decimal" />
         </div>
       </div>
     </div>
 
-    <!-- CASHBACK MODE -->
+    <!-- NOVOS CAMPOS PARA CASHBACK (agora com Comissão %) -->
     <div class="cashback-only">
-      <div class="form-group">
-        <label class="form-label" for="cashback_odd">Odd</label>
-        <input id="cashback_odd" class="form-input auto-calc" placeholder="ex: 3.00" inputmode="decimal" />
-      </div>
-
-      <div class="form-group">
-        <label class="form-label" for="cashback_stake">Stake</label>
-        <div style="display: flex; gap: 0.5rem;">
-          <div style="position: relative; flex: 1;">
-            <span style="position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 600; font-size: 0.75rem;">R$</span>
-            <input id="cashback_stake" class="form-input auto-calc" placeholder="ex: 50" inputmode="decimal" 
-              style="padding-left: 2.25rem; font-family: ui-monospace, monospace;" />
-          </div>
-          <button id="cashbackLayBtn" class="btn-toggle">BACK</button>
+      <div class="form-grid form-grid-3">
+        <div class="form-group">
+          <label class="form-label" for="cashback_odd">Odd da Casa</label>
+          <input id="cashback_odd" class="form-control auto-calc" placeholder="ex: 3.00" inputmode="decimal" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cashback_comm">Comissão (%)</label>
+          <input id="cashback_comm" class="form-control auto-calc" placeholder="ex: 0" inputmode="decimal" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="cashback_stake">Stake Qualificação</label>
+          <input id="cashback_stake" class="form-control auto-calc" placeholder="ex: 50" inputmode="decimal" />
         </div>
       </div>
-
-      <div style="display: flex; gap: 0.75rem; margin: 0.75rem 0; flex-wrap: wrap;">
-        <label class="checkbox-group">
-          <input type="checkbox" id="toggleCashbackCommission" />
-          <span>Comissão</span>
-        </label>
-      </div>
-
-      <div id="conditionalFieldsCashback"></div>
-
       <div class="form-group">
         <label class="form-label" for="cashback_rate">Taxa do Cashback (%)</label>
-        <input id="cashback_rate" class="form-input auto-calc" placeholder="ex: 10" inputmode="decimal" />
+        <input id="cashback_rate" class="form-control auto-calc" placeholder="ex: 10" inputmode="decimal" />
       </div>
     </div>
   </div>
 
-  <!-- COBERTURAS IGUAL AO ARBIPRO -->
   <div class="card">
-    <div class="section-title">Coberturas</div>
-    <div id="oddsContainer" class="house-grid"></div>
+    <div class="card-header">
+      <div class="card-title">Coberturas</div>
+    </div>
+    <div id="oddsContainer" class="coverage-grid"></div>
   </div>
 
-  <!-- AÇÕES PADRONIZADAS -->
-  <div class="actions" style="display: flex; gap: 0.75rem; justify-content: center; margin: 1.5rem 0;">
+  <div class="total-display">
+    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.375rem; text-transform: uppercase;">Stake Total</div>
+    <div class="total-value" id="k_S">—</div>
+  </div>
+
+  <div class="actions">
     <button class="btn btn-secondary" id="clearBtn">Limpar Dados</button>
+    <button class="btn btn-share" id="shareBtn">🔗 Compartilhar</button>
   </div>
 
-  <!-- RESULTADOS IGUAL AO ARBIPRO -->
+  <div id="status" class="alert alert-warning"></div>
+
   <div class="card" id="results" style="display:none">
-    <div class="section-title">Resultados Shark FreePro</div>
+    <div class="card-header">
+      <div class="card-title">Resultados Shark FreePro</div>
+    </div>
     <div style="overflow-x:auto">
       <table class="results-table">
-        <thead></thead>
+        <thead>
+          <!-- Cabeçalho gerado dinamicamente -->
+        </thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
@@ -606,7 +634,6 @@ export function getFreeProfHTML() {
 <script>
 'use strict';
 
-// CÓDIGO JAVASCRIPT MANTÉM A FUNCIONALIDADE, MAS USA LAYOUT PADRONIZADO
 // Sincronização de tema com parent
 (function() {
    function syncTheme() {
@@ -617,7 +644,9 @@ export function getFreeProfHTML() {
       } else {
         document.body.removeAttribute('data-theme');
       }
-    } catch (e) {}
+    } catch (e) {
+      // Fallback se não conseguir acessar o parent
+    }
   }
   syncTheme();
   try {
@@ -627,9 +656,10 @@ export function getFreeProfHTML() {
 })();
 
 (function(){
+  // SISTEMA DE CÁLCULO AUTOMÁTICO
   var autoCalcTimeout = null;
   var isCalculating = false;
-  var currentMode = 'freebet';
+  var currentMode = 'freebet'; // 'freebet' ou 'cashback'
   
   function $(id){ return document.getElementById(id); }
   function nf(v){ return Number.isFinite(v) ? new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:2}).format(v) : '—'; }
@@ -641,12 +671,19 @@ export function getFreeProfHTML() {
     if(str.indexOf(',')!==-1) return parseFloat(str.replace(',','.')); 
     return parseFloat(str); 
   }
-
+  function showStatus(cls,msg){ 
+    var el=$("status"); 
+    el.className='alert alert-'+cls; 
+    el.style.display='block'; 
+    el.textContent=msg; 
+  }
+  function hideStatus(){ $("status").style.display='none'; }
   function effOdd(o,c){ 
     var cc=(Number.isFinite(c)&&c>0)?c/100:0; 
     return 1+(o-1)*(1-cc); 
   }
 
+  // Alterna modo (sem sobrescrever outras classes do <body>)
   function setMode(mode) {
     currentMode = mode;
     document.body.classList.toggle('mode-cashback', mode === 'cashback');
@@ -656,6 +693,7 @@ export function getFreeProfHTML() {
     setTimeout(scheduleAutoCalc, 0);
   }
 
+  // Debounce para otimizar performance
   function debounce(func, wait) {
     return function executedFunction() {
       var args = Array.prototype.slice.call(arguments);
@@ -669,6 +707,7 @@ export function getFreeProfHTML() {
     };
   }
 
+  // Cálculo automático com debounce
   var scheduleAutoCalc = debounce(function() {
     if (!isCalculating) {
       if (currentMode === 'freebet') {
@@ -700,16 +739,14 @@ export function getFreeProfHTML() {
     
     for(var i=0;i<blocks;i++){
       var card=document.createElement('div'); 
-      card.className='house-card';
+      card.className='coverage-card';
       
       var title=document.createElement('div'); 
-      title.className='house-title'; 
-      title.textContent='Cobertura '+(i+2);
+      title.className='coverage-title'; 
+      title.innerHTML='<span style="width:10px;height:10px;border-radius:50%;background:currentColor;display:inline-block"></span>Resultado '+(i+2);
       
-      // GRID SIMPLES SEM ODD FINAL
-      var grid=document.createElement('div'); 
-      grid.className='grid-2';
-      grid.style.marginBottom='0.75rem';
+      var fieldsDiv=document.createElement('div'); 
+      fieldsDiv.className='coverage-fields';
       
       var fOdd=document.createElement('div'); 
       fOdd.className='form-group';
@@ -718,153 +755,86 @@ export function getFreeProfHTML() {
       lOdd.className='form-label';
       lOdd.textContent='Odd'; 
       var iOdd=document.createElement('input'); 
-      iOdd.className='form-input auto-calc';
+      iOdd.className='form-control auto-calc';
       iOdd.setAttribute('inputmode','decimal'); 
       iOdd.placeholder='ex: 2,50'; 
       iOdd.setAttribute('data-type','odd');
       
-      // COMISSÃO NO GRID
-      var fComm=document.createElement('div'); 
-      fComm.className='form-group';
-      fComm.style.margin='0';
-      var lComm=document.createElement('label'); 
-      lComm.className='form-label';
-      lComm.textContent='Comissão (%)'; 
-      var iComm=document.createElement('input'); 
-      iComm.className='form-input auto-calc';
-      iComm.setAttribute('inputmode','decimal'); 
-      iComm.placeholder='ex: 0'; 
-      iComm.setAttribute('data-type','comm');
+      var fCom=document.createElement('div'); 
+      fCom.className='form-group';
+      fCom.style.margin='0';
+      var lCom=document.createElement('label'); 
+      lCom.className='form-label';
+      lCom.textContent='Comissão (%)'; 
+      var iCom=document.createElement('input'); 
+      iCom.className='form-control auto-calc';
+      iCom.setAttribute('inputmode','decimal'); 
+      iCom.placeholder='ex: 0'; 
+      iCom.setAttribute('data-type','comm');
       
-      fOdd.appendChild(lOdd); 
-      fOdd.appendChild(iOdd);
-      fComm.appendChild(lComm); 
-      fComm.appendChild(iComm);
-      
-      grid.appendChild(fOdd);
-      grid.appendChild(fComm);
-      
-      // STAKE COM BOTÃO LAY IGUAL ARBIPRO
-      var fStake=document.createElement('div'); 
-      fStake.className='form-group';
-      var lStake=document.createElement('label'); 
-      lStake.className='form-label';
-      lStake.textContent='Stake'; 
-      var divStake=document.createElement('div');
-      divStake.style.cssText='display: flex; gap: 0.5rem;';
-      
-      var divRelative=document.createElement('div');
-      divRelative.style.cssText='position: relative; flex: 1;';
-      var spanReal=document.createElement('span');
-      spanReal.style.cssText='position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-weight: 600; font-size: 0.75rem;';
-      spanReal.textContent='R$';
-      var iStake=document.createElement('input'); 
-      iStake.className='form-input auto-calc';
-      iStake.setAttribute('inputmode','decimal'); 
-      iStake.placeholder='auto'; 
-      iStake.setAttribute('data-type','stake');
-      iStake.style.cssText='padding-left: 2.25rem; font-family: ui-monospace, monospace;';
-      
-      var btnLay=document.createElement('button');
-      btnLay.className='btn-toggle';
-      btnLay.setAttribute('data-type','lay');
-      btnLay.textContent='BACK';
-      
-      divRelative.appendChild(spanReal);
-      divRelative.appendChild(iStake);
-      divStake.appendChild(divRelative);
-      divStake.appendChild(btnLay);
-      
-      fStake.appendChild(lStake);
-      fStake.appendChild(divStake);
-      
-      // CHECKBOXES SIMPLIFICADOS - SEM COMISSÃO (já está no grid)
-      var checkboxDiv=document.createElement('div');
-      checkboxDiv.style.cssText='display: flex; gap: 0.75rem; margin: 0.75rem 0; flex-wrap: wrap;';
-      
-      var layLabel=document.createElement('label');
-      layLabel.className='checkbox-group';
-      layLabel.innerHTML='<span>Configurações da Cobertura</span>';
-      
-      checkboxDiv.appendChild(layLabel);
-      
-      // CAMPOS CONDICIONAIS
-      var condDiv=document.createElement('div');
-      condDiv.setAttribute('data-conditional',i);
+      var fLay=document.createElement('div'); 
+      fLay.className='checkbox-wrapper'; 
+      var iLay=document.createElement('input'); 
+      iLay.type='checkbox'; 
+      iLay.className='auto-calc';
+      iLay.setAttribute('data-type','lay'); 
+      var tLay=document.createElement('span'); 
+      tLay.textContent='Lay';
       
       if(prev[i]){ 
         iOdd.value=prev[i].odd; 
-        iComm.value=prev[i].com || ''; 
-        if(prev[i].lay) {
-          btnLay.classList.add('active');
-          btnLay.textContent='LAY';
-        }
+        iCom.value=prev[i].com; 
+        iLay.checked=!!prev[i].lay; 
       }
       
+      fOdd.appendChild(lOdd); 
+      fOdd.appendChild(iOdd);
+      fCom.appendChild(lCom); 
+      fCom.appendChild(iCom);
+      fLay.appendChild(iLay); 
+      fLay.appendChild(tLay);
+      
+      fieldsDiv.appendChild(fOdd); 
+      fieldsDiv.appendChild(fCom); 
+      fieldsDiv.appendChild(fLay);
+      
       card.appendChild(title); 
-      card.appendChild(grid);
-      card.appendChild(fStake);
-      card.appendChild(checkboxDiv);
-      card.appendChild(condDiv);
+      card.appendChild(fieldsDiv);
       c.appendChild(card);
     }
     
+    // Aplica listeners nos novos elementos
     bindAutoCalcEvents();
-    bindConditionalEvents();
     scheduleAutoCalc();
-  }
-
-  function bindConditionalEvents() {
-    // Apenas botões LAY (comissão já está sempre visível)
-    document.querySelectorAll('[data-type="lay"]').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        this.classList.toggle('active');
-        if (this.classList.contains('active')) {
-          this.textContent = 'LAY';
-        } else {
-          this.textContent = 'BACK';
-        }
-        scheduleAutoCalc();
-      });
-    });
   }
 
   function readCoverage(){ 
     var odds=[],comm=[],isLay=[];
-    var oInputs=document.querySelectorAll('#oddsContainer [data-type="odd"]'); 
-    var cInputs=document.querySelectorAll('#oddsContainer [data-type="comm"]'); 
-    var lBtns=document.querySelectorAll('#oddsContainer [data-type="lay"]'); 
+    var oInputs=document.querySelectorAll('#oddsContainer input[data-type="odd"]'); 
+    var cInputs=document.querySelectorAll('#oddsContainer input[data-type="comm"]'); 
+    var lInputs=document.querySelectorAll('#oddsContainer input[data-type="lay"]'); 
     
     for(var i=0;i<oInputs.length;i++){odds.push(toNum(oInputs[i].value));} 
     for(var j=0;j<cInputs.length;j++){comm.push(toNum(cInputs[j].value));} 
-    for(var k=0;k<lBtns.length;k++){isLay.push(lBtns[k].classList.contains('active'));} 
-    
-    // LÓGICA ORIGINAL - preenche com NaN
-    while(comm.length < odds.length) comm.push(NaN);
-    while(isLay.length < odds.length) isLay.push(false);
+    for(var k=0;k<lInputs.length;k++){isLay.push(!!lInputs[k].checked);} 
     
     return {odds:odds,comm:comm,isLay:isLay}; 
   }
 
-  // LÓGICA ORIGINAL MANTIDA - apenas corrige leitura de campos
+  // CÁLCULO FREEBET (original)
   function autoCalcFreebet() {
     isCalculating = true;
     try {
-      var o1=toNum($("o1").value);
-      var c1_input = document.getElementById('c1');
-      var c1 = c1_input ? toNum(c1_input.value) : NaN; // MANTÉM NaN como original
-      var n=parseInt($("numEntradas").value||'3',10); 
-      var cov=readCoverage();
-      var F=toNum($("F").value);
-      var rPerc=toNum($("r").value);
-      var s1=toNum($("s1").value);
+      hideStatus();
+      var o1=toNum($("o1").value), c1=toNum($("c1").value), n=parseInt($("numEntradas").value||'3',10), 
+          cov=readCoverage(), F=toNum($("F").value), rPerc=toNum($("r").value), s1=toNum($("s1").value);
       
       if(!Number.isFinite(o1)||o1<=1||
          cov.odds.length!==(n-1)||cov.odds.some(function(v){return !Number.isFinite(v)||v<=1;})||
          !Number.isFinite(F)||F<0||
          !Number.isFinite(rPerc)||rPerc<0||rPerc>100||
          !Number.isFinite(s1)||s1<=0) {
-        $("k_S").textContent='R$ 0,00';
+        $("k_S").textContent='—';
         $("results").style.display='none';
         isCalculating = false;
         return;
@@ -882,7 +852,7 @@ export function getFreeProfHTML() {
         if(cov.isLay[i]){ 
           var denom=L-1; 
           if(!(denom>0)){
-            $("k_S").textContent='R$ 0,00';
+            $("k_S").textContent='—';
             $("results").style.display='none';
             isCalculating = false;
             return;
@@ -925,33 +895,26 @@ export function getFreeProfHTML() {
       }
 
       $("k_S").textContent=nf(S);
-      
-      // Atualiza stakes nos inputs
-      var stakeInputs = document.querySelectorAll('#oddsContainer [data-type="stake"]');
-      stakes.forEach(function(stake, i) {
-        if (stakeInputs[i]) {
-          stakeInputs[i].value = stake.toFixed(2).replace('.', ',');
-        }
-      });
-      
       updateResultsTable(stakes, defs, nets, net1, o1, c1, s1, oddsOrig, cov, liabilities);
       $("results").style.display='block';
       
     } catch (error) {
       console.warn('Erro no cálculo automático freebet:', error);
-      $("k_S").textContent='R$ 0,00';
+      $("k_S").textContent='—';
       $("results").style.display='none';
     }
     isCalculating = false;
   }
 
+  // CASHBACK — BACK-only com nivelamento analítico + fallback quando houver LAY
   function autoCalcCashback() {
     isCalculating = true;
     try {
+      hideStatus();
       var odd = toNum($("cashback_odd").value),
           stake = toNum($("cashback_stake").value),
           cashbackRate = toNum($("cashback_rate").value),
-          mainCommCb = toNum($("cashback_comm").value),
+          mainCommCb = toNum($("cashback_comm").value), // NOVO
           n = parseInt($("numEntradas").value || '3', 10),
           cov = readCoverage();
 
@@ -960,7 +923,7 @@ export function getFreeProfHTML() {
           !Number.isFinite(cashbackRate) || cashbackRate < 0 || cashbackRate > 100 ||
           cov.odds.length !== (n - 1) ||
           cov.odds.some(function(v){ return !Number.isFinite(v) || v <= 1; })) {
-        $("k_S").textContent = 'R$ 0,00';
+        $("k_S").textContent = '—';
         $("results").style.display = 'none';
         isCalculating = false;
         return;
@@ -969,41 +932,81 @@ export function getFreeProfHTML() {
       var cashbackAmount = stake * (cashbackRate / 100);
       var oddsOrig = cov.odds.slice();
       var commFrac = cov.comm.map(function(c){ return (Number.isFinite(c) && c > 0) ? c/100 : 0; });
+      var onlyBack = !cov.isLay.some(Boolean);
 
-      var Oeff = effOdd(odd, mainCommCb);
+      var Oeff = effOdd(odd, mainCommCb); // odd efetiva da principal (com comissão)
       var stakes = [], eBack = [];
       var step = parseFloat($("round_step").value) || 1;
       function roundStep(v){ return Math.round(v / step) * step; }
       var MIN_STAKE = 0.50;
 
-      var baseLoss = stake;
-      for (var j = 0; j < cov.odds.length; j++) {
-        var L = cov.odds[j], cfrac = commFrac[j];
-        if (cov.isLay[j]) {
-          stakes[j] = baseLoss / (1 - cfrac);
-          var denom = L - 1;
-          eBack[j] = 1 + (1 - cfrac) / denom;
+      if (onlyBack) {
+        // e_i = odd efetiva com comissão das coberturas
+        for (var i = 0; i < cov.odds.length; i++) {
+          eBack[i] = effOdd(cov.odds[i], cov.comm[i]); // 1 + (L-1)*(1 - c%)
+        }
+        // H = Σ (1/e_i)
+        var H = eBack.reduce(function(a, e){ return a + (1 / e); }, 0);
+
+        if (H >= 1) {
+          // Impossível nivelar — fallback simples
+          showStatus('warning', 'Impossível nivelar (Σ 1/e ≥ 1). Usando modo de cobertura.');
+          var baseLoss = stake;
+          for (var j = 0; j < cov.odds.length; j++) {
+            var util = (eBack[j] - 1);
+            if (!(util > 0)) { $("k_S").textContent='—'; $("results").style.display='none'; isCalculating=false; return; }
+            stakes[j] = baseLoss / util;
+          }
         } else {
-          var e3 = effOdd(L, cov.comm[j]);
-          eBack[j] = e3;
-          var util3 = (e3 - 1);
-          if (!(util3 > 0)) { $("k_S").textContent='R$ 0,00'; $("results").style.display='none'; isCalculating=false; return; }
-          stakes[j] = baseLoss / util3;
+          // Nível analítico (com Oeff)
+          var P = stake, C = cashbackAmount;
+          // N = -P * (1 - Oeff + H*Oeff) + H * C
+          var N = -P * (1 - Oeff + H * Oeff) + H * C;
+          // S_total = P*Oeff - N
+          var S_total = P * Oeff - N;
+          // s_i = (N + S_total - C) / e_i
+          var numer = (N + S_total - C);
+          for (var k = 0; k < eBack.length; k++) {
+            stakes[k] = numer / eBack[k];
+          }
+        }
+      } else {
+        // FALLBACK quando existe LAY
+        var baseLossLay = stake;
+        for (var m = 0; m < cov.odds.length; m++) {
+          var L = cov.odds[m], cfrac = commFrac[m];
+          if (cov.isLay[m]) {
+            // ganho quando a seleção perde = stakeLay * (1 - comissão)
+            stakes[m] = baseLossLay / (1 - cfrac);
+            var denom = L - 1;
+            eBack[m] = 1 + (1 - cfrac) / denom; // só para exibição coerente
+          } else {
+            var e3 = effOdd(L, cov.comm[m]);
+            eBack[m] = e3;
+            var util3 = (e3 - 1);
+            if (!(util3 > 0)) { $("k_S").textContent='—'; $("results").style.display='none'; isCalculating=false; return; }
+            stakes[m] = baseLossLay / util3;
+          }
         }
       }
 
+      // Arredonda e aplica mínimo
       stakes = stakes.map(roundStep).map(function(v){ return Math.max(v, MIN_STAKE); });
 
+      // Responsabilidades LAY
       var liabilities = stakes.map(function(s, i){
         return cov.isLay[i] ? (cov.odds[i] - 1) * s : 0;
       });
 
+      // Stake total S (para LAY soma a responsabilidade)
       var S = stake + stakes.reduce(function(a, s, idx){
         return a + (cov.isLay[idx] ? (cov.odds[idx]-1)*s : s);
       }, 0);
 
+      // (1) Principal vence: sem cashback — usa odd efetiva da principal
       var net1 = (stake * Oeff) - S;
 
+      // (2) Coberturas vencem: principal perde — soma cashback
       var defs = [], nets = [];
       for (var win = 0; win < stakes.length; win++) {
         var deficit;
@@ -1019,21 +1022,12 @@ export function getFreeProfHTML() {
       }
 
       $("k_S").textContent = nf(S);
-      
-      // Atualiza stakes nos inputs
-      var stakeInputs = document.querySelectorAll('#oddsContainer [data-type="stake"]');
-      stakes.forEach(function(stake, i) {
-        if (stakeInputs[i]) {
-          stakeInputs[i].value = stake.toFixed(2).replace('.', ',');
-        }
-      });
-      
       updateResultsTable(stakes, defs, nets, net1, odd, mainCommCb, stake, oddsOrig, cov, liabilities);
       $("results").style.display = 'block';
 
     } catch (error) {
       console.warn('Erro no cálculo automático cashback:', error);
-      $("k_S").textContent = 'R$ 0,00';
+      $("k_S").textContent = '—';
       $("results").style.display = 'none';
     }
     isCalculating = false;
@@ -1043,8 +1037,8 @@ export function getFreeProfHTML() {
     var hasLayBets = cov.isLay.some(function(lay) { return lay; });
     var thead = document.querySelector('.results-table thead');
     var headerHTML = hasLayBets
-      ? '<tr><th>Cenário</th><th>Odd</th><th>Comissão</th><th>Stake</th><th>Responsabilidade</th><th>Déficit</th><th>Lucro Final</th></tr>'
-      : '<tr><th>Cenário</th><th>Odd</th><th>Comissão</th><th>Stake</th><th>Déficit</th><th>Lucro Final</th></tr>';
+      ? '<tr><th>Cenário</th><th>Odd</th><th>Comissão</th><th>Apostar</th><th>Responsabilidade</th><th>Déficit</th><th>Lucro Final</th></tr>'
+      : '<tr><th>Cenário</th><th>Odd</th><th>Comissão</th><th>Apostar</th><th>Déficit</th><th>Lucro Final</th></tr>';
     thead.innerHTML = headerHTML;
 
     var tb=$("tbody"); 
@@ -1088,7 +1082,8 @@ export function getFreeProfHTML() {
     ["cashback_odd","cashback_stake","cashback_rate","cashback_comm"].forEach(function(id){ var el = $(id); if(el) el.value=''; }); 
     $("tbody").innerHTML=''; 
     $("results").style.display='none'; 
-    $("k_S").textContent='R$ 0,00'; 
+    $("k_S").textContent='—'; 
+    hideStatus(); 
     renderOddsInputs(); 
   }
 
@@ -1108,71 +1103,12 @@ export function getFreeProfHTML() {
     }
   }
 
-  // Eventos para campos condicionais da casa promo
-  function bindPromoConditionals() {
-    // Comissão freebet
-    var toggleComm1 = document.getElementById('toggleCommission1');
-    if (toggleComm1) {
-      toggleComm1.addEventListener('change', function() {
-        var condDiv = document.getElementById('conditionalFields1');
-        if (this.checked) {
-          if (!document.getElementById('c1')) {
-            condDiv.innerHTML += '<div class="form-group"><label class="form-label">Comissão (%)</label><input id="c1" class="form-input auto-calc" placeholder="ex: 0" inputmode="decimal" /></div>';
-            bindAutoCalcEvents();
-          }
-        } else {
-          var c1Input = document.getElementById('c1');
-          if (c1Input) c1Input.closest('.form-group').remove();
-        }
-        scheduleAutoCalc();
-      });
-    }
-
-    // Comissão cashback
-    var toggleCashbackComm = document.getElementById('toggleCashbackCommission');
-    if (toggleCashbackComm) {
-      toggleCashbackComm.addEventListener('change', function() {
-        var condDiv = document.getElementById('conditionalFieldsCashback');
-        if (this.checked) {
-          if (!document.getElementById('cashback_comm')) {
-            condDiv.innerHTML += '<div class="form-group"><label class="form-label">Comissão (%)</label><input id="cashback_comm" class="form-input auto-calc" placeholder="ex: 0" inputmode="decimal" /></div>';
-            bindAutoCalcEvents();
-          }
-        } else {
-          var commInput = document.getElementById('cashback_comm');
-          if (commInput) commInput.closest('.form-group').remove();
-        }
-        scheduleAutoCalc();
-      });
-    }
-
-    // Botão LAY promo freebet
-    var promoLayBtn = document.getElementById('promoLayBtn');
-    if (promoLayBtn) {
-      promoLayBtn.addEventListener('click', function() {
-        this.classList.toggle('active');
-        this.textContent = this.classList.contains('active') ? 'LAY' : 'BACK';
-        scheduleAutoCalc();
-      });
-    }
-
-    // Botão LAY cashback
-    var cashbackLayBtn = document.getElementById('cashbackLayBtn');
-    if (cashbackLayBtn) {
-      cashbackLayBtn.addEventListener('click', function() {
-        this.classList.toggle('active'); 
-        this.textContent = this.classList.contains('active') ? 'LAY' : 'BACK';
-        scheduleAutoCalc();
-      });
-    }
-  }
-
   // Inicialização
   window.addEventListener('DOMContentLoaded', function(){
     renderOddsInputs();
     bindAutoCalcEvents();
-    bindPromoConditionals();
 
+    // Listeners principais (aqui dentro garante que os elementos existam)
     $("numEntradas") && $("numEntradas").addEventListener('change', renderOddsInputs);
     $("clearBtn") && $("clearBtn").addEventListener('click', clearAll);
     $('modeFreebetBtn') && $('modeFreebetBtn').addEventListener('click', function(){ setMode('freebet'); });
@@ -1189,6 +1125,7 @@ export function getFreeProfHTML() {
       }
     });
 
+    // Cálculo inicial se houver dados
     setTimeout(scheduleAutoCalc, 500);
   });
 })();
