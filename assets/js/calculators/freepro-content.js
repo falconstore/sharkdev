@@ -575,9 +575,16 @@ export function getFreeProfHTML() {
     <div id="oddsContainer" class="coverage-grid"></div>
   </div>
 
-  <div class="total-display">
-    <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.375rem; text-transform: uppercase;">Stake Total</div>
-    <div class="total-value" id="k_S">—</div>
+  <div class="stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+    <div class="total-display">
+      <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.375rem; text-transform: uppercase;">Stake Total</div>
+      <div class="total-value" id="k_S">—</div>
+    </div>
+    
+    <div class="total-display">
+      <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.375rem; text-transform: uppercase;">Total Investido (ROI)</div>
+      <div class="total-value profit-highlight" id="roi_display">—</div>
+    </div>
   </div>
 
   <div class="actions">
@@ -805,6 +812,8 @@ export function getFreeProfHTML() {
          !Number.isFinite(s1)||s1<=0) {
         $("k_S").textContent='—';
         $("results").style.display='none';
+        var roiEl = document.getElementById("roi_display");
+        if (roiEl) roiEl.textContent = '—';
         isCalculating = false;
         return;
       }
@@ -864,12 +873,24 @@ export function getFreeProfHTML() {
       }
 
       $("k_S").textContent=nf(S);
+      
+      // Calcular ROI (stake total / lucro médio final)
+      var lucroMedio = (net1 + nets.reduce(function(a,b){ return a+b; }, 0)) / (nets.length + 1);
+      var roi = (S > 0 && lucroMedio > 0) ? (lucroMedio / S) * 100 : 0;
+      var roiEl = document.getElementById("roi_display");
+      if (roiEl) {
+        roiEl.textContent = roi > 0 ? "+" + roi.toFixed(2) + "%" : roi.toFixed(2) + "%";
+        roiEl.className = "total-value " + (roi >= 0 ? "profit-highlight" : "profit-negative");
+      }
+      
       updateResultsTable(stakes, defs, nets, net1, o1, c1, s1, oddsOrig, cov, liabilities);
       $("results").style.display='block';
       
     } catch (error) {
       console.warn('Erro no cálculo automático freebet:', error);
       $("k_S").textContent='—';
+      var roiEl = document.getElementById("roi_display");
+      if (roiEl) roiEl.textContent = '—';
       $("results").style.display='none';
     }
     isCalculating = false;
@@ -894,6 +915,8 @@ export function getFreeProfHTML() {
           cov.odds.some(function(v){ return !Number.isFinite(v) || v <= 1; })) {
         $("k_S").textContent = '—';
         $("results").style.display = 'none';
+        var roiEl = document.getElementById("roi_display");
+        if (roiEl) roiEl.textContent = '—';
         isCalculating = false;
         return;
       }
@@ -991,12 +1014,24 @@ export function getFreeProfHTML() {
       }
 
       $("k_S").textContent = nf(S);
+      
+      // Calcular ROI (lucro médio / stake total)
+      var lucroMedio = (net1 + nets.reduce(function(a,b){ return a+b; }, 0)) / (nets.length + 1);
+      var roi = (S > 0 && lucroMedio > 0) ? (lucroMedio / S) * 100 : 0;
+      var roiEl = document.getElementById("roi_display");
+      if (roiEl) {
+        roiEl.textContent = roi > 0 ? "+" + roi.toFixed(2) + "%" : roi.toFixed(2) + "%";
+        roiEl.className = "total-value " + (roi >= 0 ? "profit-highlight" : "profit-negative");
+      }
+      
       updateResultsTable(stakes, defs, nets, net1, odd, mainCommCb, stake, oddsOrig, cov, liabilities);
       $("results").style.display = 'block';
 
     } catch (error) {
       console.warn('Erro no cálculo automático cashback:', error);
       $("k_S").textContent = '—';
+      var roiEl = document.getElementById("roi_display");
+      if (roiEl) roiEl.textContent = '—';
       $("results").style.display = 'none';
     }
     isCalculating = false;
@@ -1052,6 +1087,8 @@ export function getFreeProfHTML() {
     $("tbody").innerHTML=''; 
     $("results").style.display='none'; 
     $("k_S").textContent='—'; 
+    var roiEl = document.getElementById("roi_display");
+    if (roiEl) roiEl.textContent = '—';
     hideStatus(); 
     renderOddsInputs(); 
   }
