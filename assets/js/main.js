@@ -1,4 +1,4 @@
-// assets/js/main.js - VERSÃO COM COMPARTILHAMENTO FUNCIONANDO
+// assets/js/main.js - VERSÃO CORRIGIDA
 // Controlador principal da aplicação
 
 import { Theme } from './ui/theme.js';
@@ -6,7 +6,7 @@ import { TabSystem } from './ui/tabs.js';
 import { ArbiPro } from './calculators/arbipro.js';
 import { FreePro } from './calculators/freepro.js';
 import { CasasRegulamentadas } from './calculators/casas-regulamentadas.js';
-import { ShareUI } from './ui/shareui.js'; // IMPORTAÇÃO DIRETA
+import ShareUI from './ui/shareui.js'; // CORREÇÃO: import default
 
 class App {
   constructor() {
@@ -150,7 +150,7 @@ class App {
     }
   }
 
-  // NOVO MÉTODO: Configura o sistema de compartilhamento
+  // MÉTODO: Configura o sistema de compartilhamento
   setupShareSystem() {
     console.log('Configurando sistema de compartilhamento...');
     
@@ -181,12 +181,10 @@ class App {
     this.setupFreeProShareButton();
     
     // Carrega configuração compartilhada se existir na URL
-    if (this.shareUI.loadSharedConfig) {
-      setTimeout(() => {
-        console.log('Verificando configuração compartilhada na URL...');
-        this.shareUI.loadSharedConfig();
-      }, 500);
-    }
+    setTimeout(() => {
+      console.log('Verificando configuração compartilhada na URL...');
+      // A configuração já foi carregada no init() do ShareUI
+    }, 500);
   }
 
   setupFreeProShareButton() {
