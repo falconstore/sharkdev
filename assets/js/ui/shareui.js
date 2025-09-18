@@ -1,7 +1,7 @@
 // assets/js/ui/shareui.js
 // Sistema de interface de compartilhamento com DEBUG DETALHADO
 
-import { ShareSystem } from '../utils/share.js';
+import ShareSystem from '../utils/share.js'; // CORREÇÃO: import default
 
 export class ShareUI {
   constructor() {
@@ -843,6 +843,5 @@ export class ShareUI {
   }
 }
 
-// Export tanto named quanto default para máxima compatibilidade
-export { ShareUI };
+// Export apenas default para evitar duplicação
 export default ShareUI;
