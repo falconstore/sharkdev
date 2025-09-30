@@ -251,6 +251,12 @@ export class ArbiPro {
         <div class="section-title">Casas de Apostas</div>
         <div id="houses" class="house-grid"></div>
       </div>
+      
+  <div style="display: flex; justify-content: center; margin: 1.5rem 0;">
+    <button id="shareArbiBtn" class="btn btn-primary" style="min-width: 250px;">
+    🔗 Compartilhar Configuração
+  </button>
+</div>
 
       <div class="card" style="margin-top: 1.5rem;">
         <div class="section-title">Resultados Shark ArbiPro</div>
