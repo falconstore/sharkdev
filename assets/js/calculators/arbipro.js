@@ -253,10 +253,10 @@ export class ArbiPro {
       </div>
       
   <div style="display: flex; justify-content: center; margin: 1.5rem 0;">
-    <button id="shareArbiBtn" class="btn btn-primary" style="min-width: 250px;">
-    🔗 Compartilhar Configuração
-  </button>
-</div>
+        <button id="shareArbiBtn" class="btn btn-primary" style="min-width: 250px;">
+          🔗 Compartilhar
+        </button>
+      </div>
 
       <div class="card" style="margin-top: 1.5rem;">
         <div class="section-title">Resultados Shark ArbiPro</div>
