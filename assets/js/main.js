@@ -1,4 +1,4 @@
-// assets/js/main.js - VERSÃO LIMPA SEM FIREBASE E SEM SISTEMA DE COMPARTILHAMENTO
+// assets/js/main.js - VERSÃO COMPLETA E ATUALIZADA
 // Controlador principal da aplicação
 
 import { Theme } from './ui/theme.js';
@@ -15,6 +15,7 @@ class App {
     this.freePro = null;
     this.casasRegulamentadas = null;
     this.navigation = null;
+    this.shareUI = null;
   }
 
   async init() {
@@ -29,6 +30,9 @@ class App {
       
       // Carrega aplicação principal DIRETO (sem login)
       await this.loadMainApp();
+      
+      // Carrega sistema de compartilhamento
+      await this.loadShareSystem();
       
       console.log('Calculadoras Shark 100% Green inicializadas com sucesso');
     } catch (error) {
@@ -135,6 +139,101 @@ class App {
     }
   }
 
+  async loadShareSystem() {
+    try {
+      console.log('🔗 Carregando sistema de compartilhamento...');
+      
+      const { ShareUI } = await import('./ui/shareui.js');
+      this.shareUI = new ShareUI();
+      await this.shareUI.init();
+      
+      // Expor globalmente para facilitar acesso
+      window.SharkShareUI = this.shareUI;
+      
+      // Bind ArbiPro - tenta múltiplas vezes
+      this.bindArbiProShare();
+      
+      // Bind FreePro - tenta múltiplas vezes
+      this.bindFreeProShare();
+      
+      console.log('✅ Sistema de compartilhamento carregado');
+    } catch (e) {
+      console.error('❌ Erro ao carregar share:', e);
+    }
+  }
+
+  bindArbiProShare() {
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    const tryBind = () => {
+      attempts++;
+      const arbiBtn = document.getElementById('shareArbiBtn');
+      
+      if (arbiBtn) {
+        arbiBtn.onclick = () => {
+          if (this.shareUI) {
+            this.shareUI.share('arbipro');
+          } else {
+            console.error('ShareUI não disponível');
+          }
+        };
+        console.log('✅ Botão ArbiPro vinculado');
+        return true;
+      }
+      
+      if (attempts < maxAttempts) {
+        setTimeout(tryBind, 500);
+      } else {
+        console.warn('⚠️ Botão shareArbiBtn não encontrado após', maxAttempts, 'tentativas');
+      }
+      return false;
+    };
+    
+    setTimeout(tryBind, 1500);
+  }
+
+  bindFreeProShare() {
+    let attempts = 0;
+    const maxAttempts = 15;
+    
+    const tryBind = () => {
+      attempts++;
+      
+      try {
+        const iframe = document.getElementById('calc2frame');
+        if (iframe?.contentDocument) {
+          const freeBtn = iframe.contentDocument.getElementById('shareBtn');
+          
+          if (freeBtn) {
+            freeBtn.onclick = () => {
+              if (this.shareUI) {
+                this.shareUI.share('freepro');
+              } else if (window.parent?.SharkGreen?.shareUI) {
+                window.parent.SharkGreen.shareUI.share('freepro');
+              } else {
+                console.error('ShareUI não disponível');
+              }
+            };
+            console.log('✅ Botão FreePro vinculado');
+            return true;
+          }
+        }
+      } catch (e) {
+        // Esperado durante carregamento
+      }
+      
+      if (attempts < maxAttempts) {
+        setTimeout(tryBind, 1000);
+      } else {
+        console.warn('⚠️ Botão shareBtn (FreePro) não encontrado após', maxAttempts, 'tentativas');
+      }
+      return false;
+    };
+    
+    setTimeout(tryBind, 3500);
+  }
+
   removeLoadingScreen() {
     const loadingContainers = [
       document.querySelector('.loading-container'),
@@ -171,7 +270,8 @@ class App {
       tabSystem: this.tabSystem,
       arbiPro: this.arbiPro,
       freePro: this.freePro,
-      casasRegulamentadas: this.casasRegulamentadas
+      casasRegulamentadas: this.casasRegulamentadas,
+      shareUI: this.shareUI
     };
   }
 }
