@@ -1023,4 +1023,76 @@ export function getFreeProfHTML() {
     function pf(v){return Number.isFinite(v)?new Intl.NumberFormat('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}).format(v)+'%':'—';}
 
     var mainLabel = currentMode === 'cashback' ? '1 vence (Ganhou)' : '1 vence (Casa Promo)';
-    var rows=
+    var rows=[[ mainLabel, mainOdd, mainComm, mainStake, net1, net1, false, 0, '' ]];
+    for(var k=0;k<stakes.length;k++){
+      var isLay=cov.isLay[k]; 
+      var liab=liabilities[k];
+      rows.push([ (k+2)+' vence', oddsOrig[k], cov.comm[k], stakes[k], defs[k], nets[k], isLay, liab, '' ]);
+    }
+
+    for(var rix=0; rix<rows.length; rix++){
+      var nome=rows[rix][0], odd=rows[rix][1], comm=rows[rix][2], stake=rows[rix][3], 
+          deficit=rows[rix][4], final=rows[rix][5], isLayRow=rows[rix][6], liabRow=rows[rix][7];
+      
+      var apostarCell = '<strong>'+nf(stake)+'</strong>' + (isLayRow ? '<br><span class="text-small">(LAY)</span>' : '');
+      var responsabilidadeCell = hasLayBets ? ('<td>' + (isLayRow ? '<strong>'+nf(liabRow)+'</strong>' : '—') + '</td>') : '';
+
+      var deficitClass = deficit >= 0 ? 'profit-positive' : 'profit-negative';
+      var finalClass = final >= 0 ? 'profit-positive' : 'profit-negative';
+      
+      var tr=document.createElement('tr');
+      tr.innerHTML = '<td><strong>'+nome+'</strong></td>'+
+                     '<td>'+oddf(odd)+'</td>'+
+                     '<td>'+pf(comm)+'</td>'+
+                     '<td>'+apostarCell+'</td>'+
+                     responsabilidadeCell +
+                     '<td class="'+deficitClass+'"><strong>'+nf(deficit)+'</strong></td>'+
+                     '<td class="'+finalClass+'"><strong>'+nf(final)+'</strong></td>';
+      tb.appendChild(tr);
+    }
+  }
+
+  function clearAll() {
+    ["o1","c1","F","r","s1"].forEach(function(id){ var el = $(id); if(el) el.value=''; }); 
+    ["cashback_odd","cashback_stake","cashback_rate","cashback_comm"].forEach(function(id){ var el = $(id); if(el) el.value=''; }); 
+    $("tbody").innerHTML=''; 
+    $("results").style.display='none'; 
+    $("k_S").textContent='—'; 
+    var roiEl = document.getElementById("roi_display");
+    if (roiEl) roiEl.textContent = '—';
+    hideStatus(); 
+    renderOddsInputs(); 
+  }
+
+  function bindAutoCalcEvents() {
+    var elements = document.querySelectorAll('.auto-calc');
+    for(var i = 0; i < elements.length; i++) {
+      elements[i].removeEventListener('input', scheduleAutoCalc);
+      elements[i].removeEventListener('change', scheduleAutoCalc);
+    }
+    for(var j = 0; j < elements.length; j++) {
+      if (elements[j].type === 'checkbox') {
+        elements[j].addEventListener('change', scheduleAutoCalc);
+      } else {
+        elements[j].addEventListener('input', scheduleAutoCalc);
+        elements[j].addEventListener('change', scheduleAutoCalc);
+      }
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', function(){
+    renderOddsInputs();
+    bindAutoCalcEvents();
+
+    $("numEntradas") && $("numEntradas").addEventListener('change', renderOddsInputs);
+    $("clearBtn") && $("clearBtn").addEventListener('click', clearAll);
+    $('modeFreebetBtn') && $('modeFreebetBtn').addEventListener('click', function(){ setMode('freebet'); });
+    $('modeCashbackBtn') && $('modeCashbackBtn').addEventListener('click', function(){ setMode('cashback'); });
+
+    setTimeout(scheduleAutoCalc, 500);
+  });
+})();
+</script>
+</body>
+</html>`;
+}
