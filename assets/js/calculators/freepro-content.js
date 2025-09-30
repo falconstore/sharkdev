@@ -1,6 +1,4 @@
-// assets/js/calculators/freepro-content.js - VERSÃO COMPLETA E ATUALIZADA
-// HTML completo da calculadora FreePro que roda no iframe
-
+// assets/js/calculators/freepro-content.js - VERSÃO CORRIGIDA COMPLETA
 export function getFreeProfHTML() {
   return `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -177,7 +175,6 @@ export function getFreeProfHTML() {
 
     .form-grid-3 { grid-template-columns: repeat(3, 1fr); }
     .form-grid-2 { grid-template-columns: repeat(2, 1fr); }
-    .form-grid-auto { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
 
     .form-group {
       margin-bottom: 0.75rem;
@@ -423,37 +420,15 @@ export function getFreeProfHTML() {
     .mode-cashback .cashback-only { display: block; }
 
     @media (max-width: 768px) {
-      .config-grid {
-        grid-template-columns: 1fr;
-      }
-      
-      .form-grid-3, .form-grid-2, .form-grid-auto { 
-        grid-template-columns: 1fr; 
-      }
-      .coverage-fields { 
-        grid-template-columns: 1fr;
-        gap: 0.75rem;
-      }
-      
-      .actions {
-        flex-direction: column;
-        gap: 0.75rem;
-      }
-      
-      .btn {
-        flex: none !important;
-        width: 100% !important;
-        max-width: none !important;
-        min-width: none !important;
-      }
+      .config-grid { grid-template-columns: 1fr; }
+      .form-grid-3, .form-grid-2 { grid-template-columns: 1fr; }
+      .coverage-fields { grid-template-columns: 1fr; gap: 0.75rem; }
+      .actions { flex-direction: column; gap: 0.75rem; }
+      .btn { flex: none !important; width: 100% !important; max-width: none !important; min-width: none !important; }
     }
 
     @media (max-width: 480px) {
-      .btn {
-        padding: 0.625rem 1.25rem !important;
-        font-size: 0.6875rem !important;
-        min-height: 40px !important;
-      }
+      .btn { padding: 0.625rem 1.25rem !important; font-size: 0.6875rem !important; min-height: 40px !important; }
     }
   </style>
 </head>
@@ -604,7 +579,6 @@ export function getFreeProfHTML() {
 <script>
 'use strict';
 
-// Sincronização de tema com parent
 (function() {
   function syncTheme() {
     try {
@@ -614,9 +588,7 @@ export function getFreeProfHTML() {
       } else {
         document.body.removeAttribute('data-theme');
       }
-    } catch (e) {
-      // Fallback se não conseguir acessar o parent
-    }
+    } catch (e) {}
   }
   syncTheme();
   try {
@@ -636,7 +608,7 @@ export function getFreeProfHTML() {
     if(s===undefined||s===null) return NaN; 
     var str=String(s).trim(); 
     if(!str) return NaN; 
-    if(str.indexOf(',')!==-1 && str.indexOf('.')!==-1) return parseFloat(str.replace(/\.|\,/g, function(match) { return match === ',' ? '.' : ''; })); 
+    if(str.indexOf(',')!==-1 && str.indexOf('.')!==-1) return parseFloat(str.replace(/\\.|\,/g, function(match) { return match === ',' ? '.' : ''; })); 
     if(str.indexOf(',')!==-1) return parseFloat(str.replace(',','.')); 
     return parseFloat(str); 
   }
@@ -800,7 +772,7 @@ export function getFreeProfHTML() {
          !Number.isFinite(s1)||s1<=0) {
         $("k_S").textContent='—';
         $("results").style.display='none';
-        var roiEl = document.getElementById("roi_display");
+        var roiEl = $("roi_display");
         if (roiEl) roiEl.textContent = '—';
         isCalculating = false;
         return;
@@ -864,7 +836,7 @@ export function getFreeProfHTML() {
       
       var lucroMedio = (net1 + nets.reduce(function(a,b){ return a+b; }, 0)) / (nets.length + 1);
       var roi = (S > 0 && lucroMedio > 0) ? (lucroMedio / S) * 100 : 0;
-      var roiEl = document.getElementById("roi_display");
+      var roiEl = $("roi_display");
       if (roiEl) {
         roiEl.textContent = roi > 0 ? "+" + roi.toFixed(2) + "%" : roi.toFixed(2) + "%";
         roiEl.className = "total-value " + (roi >= 0 ? "profit-highlight" : "profit-negative");
@@ -874,9 +846,9 @@ export function getFreeProfHTML() {
       $("results").style.display='block';
       
     } catch (error) {
-      console.warn('Erro no cálculo automático freebet:', error);
+      console.warn('Erro no cálculo freebet:', error);
       $("k_S").textContent='—';
-      var roiEl = document.getElementById("roi_display");
+      var roiEl = $("roi_display");
       if (roiEl) roiEl.textContent = '—';
       $("results").style.display='none';
     }
@@ -901,7 +873,7 @@ export function getFreeProfHTML() {
           cov.odds.some(function(v){ return !Number.isFinite(v) || v <= 1; })) {
         $("k_S").textContent = '—';
         $("results").style.display = 'none';
-        var roiEl = document.getElementById("roi_display");
+        var roiEl = $("roi_display");
         if (roiEl) roiEl.textContent = '—';
         isCalculating = false;
         return;
@@ -925,7 +897,7 @@ export function getFreeProfHTML() {
         var H = eBack.reduce(function(a, e){ return a + (1 / e); }, 0);
 
         if (H >= 1) {
-          showStatus('warning', 'Impossível nivelar (Σ 1/e ≥ 1). Usando modo de cobertura.');
+          showStatus('warning', 'Impossível nivelar. Usando modo de cobertura.');
           var baseLoss = stake;
           for (var j = 0; j < cov.odds.length; j++) {
             var util = (eBack[j] - 1);
@@ -989,7 +961,7 @@ export function getFreeProfHTML() {
       
       var lucroMedio = (net1 + nets.reduce(function(a,b){ return a+b; }, 0)) / (nets.length + 1);
       var roi = S > 0 ? (lucroMedio / S) * 100 : 0;
-      var roiEl = document.getElementById("roi_display");
+      var roiEl = $("roi_display");
       if (roiEl) {
         roiEl.textContent = roi >= 0 ? "+" + roi.toFixed(2) + "%" : roi.toFixed(2) + "%";
         roiEl.className = "total-value " + (roi >= 0 ? "profit-highlight" : "profit-negative");
@@ -999,9 +971,9 @@ export function getFreeProfHTML() {
       $("results").style.display = 'block';
 
     } catch (error) {
-      console.warn('Erro no cálculo automático cashback:', error);
+      console.warn('Erro no cálculo cashback:', error);
       $("k_S").textContent = '—';
-      var roiEl = document.getElementById("roi_display");
+      var roiEl = $("roi_display");
       if (roiEl) roiEl.textContent = '—';
       $("results").style.display = 'none';
     }
@@ -1058,7 +1030,7 @@ export function getFreeProfHTML() {
     $("tbody").innerHTML=''; 
     $("results").style.display='none'; 
     $("k_S").textContent='—'; 
-    var roiEl = document.getElementById("roi_display");
+    var roiEl = $("roi_display");
     if (roiEl) roiEl.textContent = '—';
     hideStatus(); 
     renderOddsInputs(); 
