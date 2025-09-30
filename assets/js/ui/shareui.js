@@ -1,418 +1,351 @@
 // assets/js/ui/shareui.js
-// Share UI — compatível com main.js (expondo handleShareClick), robusto para ArbiPro e FreePro.
-
 import { ShareSystem } from '../utils/share.js';
-
-function $(root, sel) {
-  try { return (root || document).querySelector(sel) || null; } catch { return null; }
-}
-function qsa(root, sel) {
-  try { return Array.from((root || document).querySelectorAll(sel)); } catch { return []; }
-}
-function val(input) {
-  if (!input) return '';
-  const v = (input.value ?? '').toString().trim();
-  return v;
-}
-function num(input, fallback = null) {
-  const v = val(input);
-  if (v === '') return fallback;
-  const n = Number(v.replace(',', '.'));
-  return Number.isFinite(n) ? n : fallback;
-}
-function bool(el) {
-  if (!el) return false;
-  if ('checked' in el) return !!el.checked;
-  return !!el.value;
-}
-function any(...xs) {
-  for (const x of xs) {
-    if (!x) continue;
-    if (typeof x === 'string') {
-      const el = document.querySelector(x);
-      if (el) return el;
-    } else if (Array.isArray(x) && x.length === 2 && x[0] && x[1]) {
-      try {
-        const el = x[0].querySelector(x[1]);
-        if (el) return el;
-      } catch {}
-    }
-  }
-  return null;
-}
-
-const SEL = {
-  arbipro: {
-    rounding: '#roundStep, #rounding, [data-field="rounding"]',
-    houseRow: (i) => `#house-${i}, [data-house-index="${i}"]`,
-    odd:   (i) => `#odd-${i},   [data-input="odd"][data-idx="${i}"],   input[name="odd-${i}"]`,
-    stake: (i) => `#stake-${i}, [data-input="stake"][data-idx="${i}"], input[name="stake-${i}"]`,
-    comm:  (i) => `#comm-${i},  [data-input="commission"][data-idx="${i}"], input[name="comm-${i}"]`,
-    freebet:(i)=> `#freebet-${i},[data-input="freebet"][data-idx="${i}"], input[name="freebet-${i}"]`,
-    increase:(i)=>`#increase-${i},[data-input="increase"][data-idx="${i}"], input[name="increase-${i}"]`,
-    lay:   (i) => `#lay-${i},   [data-input="lay"][data-idx="${i}"],   input[name="lay-${i}"]`,
-    fixed: (i) => `#fixedStake-${i}, [data-input="fixedStake"][data-idx="${i}"], input[name="fixedStake-${i}"]`,
-  },
-  freepro: {
-    iframe: '#calc2frame, #freepro-frame, iframe#calc-freepro',
-    numEntradas: '#numEntradas, [data-field="numEntradas"]',
-    roundStep:   '#roundStep, #rounding, [data-field="roundStep"]',
-    // modo cashback: por classe no body ou presença de campo cashbackRate
-    modeCashbackFlag: (doc) => doc?.body?.classList?.contains('mode-cashback'),
-    // casa promoção
-    promoOdd:      '#promoOdd, #oddPromo, [name="promoOdd"], [data-input="promoOdd"]',
-    promoComm:     '#promoComm, #commPromo, [name="promoComm"], [data-input="promoComm"]',
-    promoStake:    '#promoStake, #stakePromo, [name="promoStake"], [data-input="promoStake"]',
-    freebetValue:  '#freebetValue, #valorFreebet, [name="freebetValue"], [data-input="freebetValue"]',
-    extractionRate:'#extractionRate, #taxaExtracao, [name="extractionRate"], [data-input="extractionRate"]',
-    cashbackRate:  '#cashbackRate, [data-input="cashbackRate"]',
-    // coberturas i>=2
-    covOdd:  (i) => `#odd-${i},  [data-input="odd"][data-idx="${i}"],  input[name="odd-${i}"]`,
-    covComm: (i) => `#comm-${i}, [data-input="comm"][data-idx="${i}"], input[name="comm-${i}"]`,
-    covLay:  (i) => `#lay-${i},  [data-input="lay"][data-idx="${i}"],  input[name="lay-${i}"]`,
-  },
-};
 
 export class ShareUI {
   constructor() {
+    this.shareSystem = new ShareSystem();
+    this.modal = null;
     this.initialized = false;
-    this.shareSystem = null;
-
-    // 🔧 Compat API esperada pelo main.js
-    this.handleShareClick = this.handleShareClick.bind(this);
   }
 
   async init() {
-    try {
-      this.shareSystem = new ShareSystem();
-      this.initialized = true;
-      console.log('✅ ShareUI inicializado');
-    } catch (e) {
-      console.error('❌ Falha ao inicializar ShareUI:', e);
-      this.initialized = false;
-    }
+    console.log('🚀 Inicializando ShareUI...');
+    this.createModal();
+    this.loadSharedConfig();
+    this.initialized = true;
+    console.log('✅ ShareUI inicializado');
   }
 
-  /**
-   * Compat com main.js — pode ser usado direto no addEventListener.
-   * Detecta automaticamente qual calculadora chamar.
-   */
-  handleShareClick(evOrCalc) {
-  try {
-    // 1) Se veio string direta do main.js, use-a como calculadora
-    if (typeof evOrCalc === 'string') {
-      const calc = /freepro/i.test(evOrCalc) ? 'freepro' : 'arbipro';
-      this.openShareModal(calc);
-      return;
-    }
+  createModal() {
+    if (document.getElementById('shareModal')) return;
 
-    // 2) Se veio um evento (click), previne e tenta deduzir pelo alvo
-    const ev = evOrCalc;
-    if (ev && typeof ev.preventDefault === 'function') ev.preventDefault();
-
-    const el = ev?.currentTarget || ev?.target || null;
-
-    // tenta ler pelos data-attributes / id / texto / ancestrais
-    let calc = this._guessCalculatorFromElement(el);
-
-    // fallback — se não conseguir deduzir, assume arbipro
-    if (!calc) calc = 'arbipro';
-
-    this.openShareModal(calc);
-  } catch (err) {
-    console.error('Erro em handleShareClick:', err);
-    alert('Não foi possível iniciar o compartilhamento. Veja o console.');
-  }
-}
-
-  _guessCalculatorFromElement(el) {
-    if (!el) return null;
-
-    // Preferência por data-attributes
-    const ds = el.dataset || {};
-    const hinted =
-      ds.calc || ds.shareCalc || ds.calculator || ds.share || null;
-    if (hinted && /freepro/i.test(hinted)) return 'freepro';
-    if (hinted && /arbi/i.test(hinted))   return 'arbipro';
-
-    // Por id ou texto
-    const id = (el.id || '').toLowerCase();
-    if (id.includes('freepro')) return 'freepro';
-    if (id.includes('arbipro') || id.includes('arbi')) return 'arbipro';
-
-    const txt = (el.textContent || '').toLowerCase();
-    if (txt.includes('freepro')) return 'freepro';
-    if (txt.includes('arbipro') || txt.includes('arbi')) return 'arbipro';
-
-    // Checa ancestrais com data-calc
-    const withData = el.closest?.('[data-calc],[data-share],[data-calculator]');
-    if (withData) {
-      const ds2 = withData.dataset || {};
-      const hinted2 = ds2.calc || ds2.share || ds2.calculator || null;
-      if (hinted2 && /freepro/i.test(hinted2)) return 'freepro';
-      if (hinted2 && /arbi/i.test(hinted2))    return 'arbipro';
-    }
-
-    return null;
-  }
-
-  async openShareModal(calculator = 'arbipro') {
-    console.log('=== INICIANDO COMPARTILHAMENTO ===');
-    console.log('Calculadora:', calculator);
-
-    if (!this.shareSystem) {
-      alert('Sistema de compartilhamento não disponível');
-      return;
-    }
-
-    try {
-      let data = null;
-
-      if (calculator === 'arbipro') {
-        data = this.getArbiProData();
-      } else if (calculator === 'freepro') {
-        data = this.getFreeProData();
-      }
-
-      console.log('Dados capturados:', data);
-
-      if (!data || !this.hasValidData(data, calculator)) {
-        alert('Preencha os dados da calculadora antes de compartilhar');
-        return;
-      }
-
-      const shareLink =
-        calculator === 'arbipro'
-          ? this.shareSystem.generateArbiProLink(data)
-          : this.shareSystem.generateFreeProLink(data);
-
-      console.log('Link gerado:', shareLink);
-      this.showShareModal(shareLink);
-    } catch (error) {
-      console.error('❌ Erro ao compartilhar:', error);
-      alert('Erro ao gerar link de compartilhamento: ' + error.message);
-    }
-  }
-
-  hasValidData(data, calculator) {
-    if (!data) return false;
-
-    if (calculator === 'arbipro') {
-      return Array.isArray(data.houses) && data.houses.some(h => h && h.o);
-    }
-
-    if (calculator === 'freepro') {
-      if (!data.p) return false;
-      if (data.mode !== 'cashback') {
-        return !!(data.p.o || data.p.s || data.p.f);
-      }
-      return !!(data.p.o || data.p.s || data.p.r);
-    }
-
-    return false;
-  }
-
-  // -------- Captura ArbiPro --------
-  getArbiProData() {
-    console.log('Capturando dados ArbiPro...');
-    try {
-      const data = { numHouses: 2, rounding: 0.01, houses: [] };
-
-      const roundingEl = any(SEL.arbipro.rounding);
-      const rounding = num(roundingEl, 0.01);
-      data.rounding = Number.isFinite(rounding) ? rounding : 0.01;
-
-      let i = 1;
-      while (true) {
-        const row = any(SEL.arbipro.houseRow(i));
-        if (!row && i > 4) break;
-        if (row) {
-          const o = num(any(row, SEL.arbipro.odd(i)), null);
-          const s = num(any(row, SEL.arbipro.stake(i)), null);
-          const c = num(any(row, SEL.arbipro.comm(i)), null);
-          const f = bool(any(row, SEL.arbipro.freebet(i)));
-          const inc= num(any(row, SEL.arbipro.increase(i)), null);
-          const l = bool(any(row, SEL.arbipro.lay(i)));
-          const x = bool(any(row, SEL.arbipro.fixed(i)));
-
-          data.houses.push({
-            o: o ?? '',
-            s: s ?? '',
-            c: c ?? null,
-            f,
-            i: inc,
-            l,
-            x,
-          });
-        }
-        i++;
-      }
-      data.numHouses = Math.max(2, data.houses.length || 2);
-
-      console.log('Dados ArbiPro finais:', data);
-      return data;
-    } catch (error) {
-      console.error('Erro ao capturar dados ArbiPro:', error);
-      return null;
-    }
-  }
-
-  // -------- Captura FreePro --------
-  getFreeProData() {
-    console.log('Capturando dados FreePro...');
-    try {
-      const iframe = any(SEL.freepro.iframe);
-      const frame = typeof iframe?.contentDocument !== 'undefined' ? iframe : null;
-      if (!frame) {
-        console.error('Iframe FreePro não encontrado');
-        return null;
-      }
-
-      const doc = frame.contentDocument;
-      const isCashback =
-        SEL.freepro.modeCashbackFlag(doc) || !!$(doc, SEL.freepro.cashbackRate);
-
-      const n = Math.max(2, parseInt(val($(doc, SEL.freepro.numEntradas)) || '3', 10) || 3);
-      const r = num($(doc, SEL.freepro.roundStep), 1.0) ?? 1.0;
-
-      const p = {
-        o: num($(doc, SEL.freepro.promoOdd), '') ?? '',
-        c: num($(doc, SEL.freepro.promoComm), '') ?? '',
-        s: num($(doc, SEL.freepro.promoStake), '') ?? '',
-        f: isCashback ? '' : (num($(doc, SEL.freepro.freebetValue), '') ?? ''),
-        e: isCashback ? '' : (num($(doc, SEL.freepro.extractionRate), 70) ?? 70),
-        r: isCashback ? (num($(doc, SEL.freepro.cashbackRate), '') ?? '') : '',
-      };
-
-      const cov = [];
-      for (let i = 2; i <= n; i++) {
-        const cOdd  = num($(doc, SEL.freepro.covOdd(i)),  '');
-        const cComm = num($(doc, SEL.freepro.covComm(i)), '');
-        const cLay  = bool($(doc, SEL.freepro.covLay(i)));
-
-        cov.push({
-          odd:  cOdd  === '' ? '' : cOdd,
-          comm: cComm === '' ? '' : cComm,
-          lay:  cLay,
-        });
-      }
-
-      const data = { n, r, p, cov, mode: isCashback ? 'cashback' : 'normal' };
-      console.log('Dados FreePro finais:', data);
-      return data;
-    } catch (error) {
-      console.error('Erro ao capturar dados FreePro:', error);
-      return null;
-    }
-  }
-
-  // -------- Modal simples --------
-  showShareModal(url) {
-    try {
-      let overlay = document.getElementById('shareOverlay');
-      if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'shareOverlay';
-        overlay.style.cssText = `
-          position: fixed; inset: 0; z-index: 9999;
-          display: flex; align-items: center; justify-content: center;
-          background: rgba(0,0,0,0.6);
-        `;
-        document.body.appendChild(overlay);
-      }
-
-      overlay.innerHTML = `
-        <div id="shareCard" style="
-          width: min(560px, 92vw);
-          background: #0f172a;
-          border: 1px solid #1f2a36;
-          color: #e2e8f0;
+    const modal = document.createElement('div');
+    modal.id = 'shareModal';
+    modal.innerHTML = `
+      <div id="shareOverlay" style="
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        background: rgba(0,0,0,0.85);
+        align-items: center;
+        justify-content: center;
+      ">
+        <div style="
+          background: var(--bg-card);
           border-radius: 16px;
-          padding: 24px;
-          box-shadow: 0 20px 40px rgba(0,0,0,0.45);
-          font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Arial;
+          padding: 2rem;
+          width: 90%;
+          max-width: 600px;
+          border: 2px solid var(--primary);
+          box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         ">
-          <div style="display:flex; align-items:center; gap:.75rem; margin-bottom: 12px;">
-            <span style="font-size: 22px;">🔗</span>
-            <h3 style="margin:0; font-size: 18px;">Link de Compartilhamento</h3>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h3 style="margin: 0; color: var(--text-primary); font-size: 1.5rem;">
+              🔗 Link de Compartilhamento
+            </h3>
+            <button id="closeShareModal" style="
+              background: none;
+              border: none;
+              font-size: 2rem;
+              cursor: pointer;
+              color: var(--text-muted);
+              line-height: 1;
+              padding: 0;
+              width: 32px;
+              height: 32px;
+            ">&times;</button>
           </div>
-          <p style="margin: 0 0 12px; color: #94a3b8;">Copie o link abaixo para compartilhar suas configurações.</p>
-          <textarea id="shareUrlText" readonly style="
-            width:100%; height: 112px; resize: none; padding: 12px;
-            border-radius: 12px; background: #0b1220; border: 1px solid #1f2a36;
-            color:#93c5fd; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+          
+          <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 0.875rem;">
+            Copie o link abaixo para compartilhar suas configurações:
+          </p>
+          
+          <textarea id="shareUrlInput" readonly style="
+            width: 100%;
+            height: 120px;
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            resize: none;
+            margin-bottom: 1.5rem;
             word-break: break-all;
-          ">${url}</textarea>
-          <div style="display:flex; gap: 12px; margin-top: 14px;">
-            <button id="copyBtn" style="
-              flex:1; padding: 10px 14px; border: none; border-radius: 10px;
-              background: linear-gradient(135deg, #3b82f6, #22c55e); color:white; font-weight: 600;
-            ">Copiar Link</button>
-            <button id="closeBtn" style="
-              padding: 10px 14px; border: 1px solid #334155; border-radius: 10px;
-              background: #0b1220; color: #cbd5e1;
-            ">Fechar</button>
+          "></textarea>
+          
+          <div style="display: flex; gap: 1rem;">
+            <button id="copyShareBtn" class="btn btn-primary" style="
+              flex: 1;
+              font-size: 1rem;
+              padding: 1rem;
+            ">
+              📋 Copiar Link
+            </button>
+            <button id="closeShareBtn" class="btn btn-secondary" style="
+              padding: 1rem 1.5rem;
+            ">
+              Fechar
+            </button>
           </div>
         </div>
-      `;
+      </div>
+    `;
 
-      const ta = $('#shareCard', '#shareUrlText') || document.getElementById('shareUrlText');
-      const copyBtn = $('#shareCard', '#copyBtn') || document.getElementById('copyBtn');
-      const closeBtn = $('#shareCard', '#closeBtn') || document.getElementById('closeBtn');
+    document.body.appendChild(modal);
+    this.bindModalEvents();
+  }
 
-      if (copyBtn && ta) {
-        copyBtn.onclick = async () => {
-          try {
-            ta.select();
-            await navigator.clipboard.writeText(ta.value);
-            copyBtn.textContent = 'Copiado!';
-            setTimeout(() => (copyBtn.textContent = 'Copiar Link'), 1600);
-          } catch {
-            try {
-              document.execCommand('copy');
-              copyBtn.textContent = 'Copiado!';
-              setTimeout(() => (copyBtn.textContent = 'Copiar Link'), 1600);
-            } catch {
-              alert('Não foi possível copiar automaticamente. Copie manualmente.');
-            }
-          }
-        };
+  bindModalEvents() {
+    const overlay = document.getElementById('shareOverlay');
+    const closeBtn1 = document.getElementById('closeShareModal');
+    const closeBtn2 = document.getElementById('closeShareBtn');
+    const copyBtn = document.getElementById('copyShareBtn');
+
+    const close = () => overlay.style.display = 'none';
+    
+    closeBtn1.onclick = close;
+    closeBtn2.onclick = close;
+    overlay.onclick = (e) => e.target === overlay && close();
+    
+    copyBtn.onclick = async () => {
+      const input = document.getElementById('shareUrlInput');
+      try {
+        await navigator.clipboard.writeText(input.value);
+        copyBtn.innerHTML = '✅ Link Copiado!';
+        setTimeout(() => copyBtn.innerHTML = '📋 Copiar Link', 2000);
+      } catch (e) {
+        input.select();
+        document.execCommand('copy');
+        copyBtn.innerHTML = '✅ Link Copiado!';
+        setTimeout(() => copyBtn.innerHTML = '📋 Copiar Link', 2000);
       }
-      if (closeBtn) {
-        closeBtn.onclick = () => overlay.remove();
+    };
+  }
+
+  async share(calculator) {
+    console.log('📤 Compartilhando:', calculator);
+    try {
+      let data, url;
+      
+      if (calculator === 'arbipro') {
+        data = this.getArbiProData();
+        url = this.shareSystem.generateArbiProLink(data);
+      } else if (calculator === 'freepro') {
+        data = this.getFreeProData();
+        url = this.shareSystem.generateFreeProLink(data);
       }
-    } catch (e) {
-      console.error('Erro ao exibir modal de compartilhamento:', e);
-      alert('Falha ao exibir o link. Veja o console.');
+
+      this.showModal(url);
+    } catch (error) {
+      console.error('❌ Erro:', error);
+      alert('Erro: ' + error.message);
     }
   }
 
-  /**
-   * Fallback opcional: ele mesmo faz o binding se você quiser.
-   */
-  bindButtons(selectors = { arbipro: '#btnShareArbiPro', freepro: '#btnShareFreePro' }) {
-    const tryBind = (sel, fn) => {
-      let tries = 0;
-      const MAX = 20;
-      const iv = setInterval(() => {
-        const el = document.querySelector(sel);
-        if (el) {
-          clearInterval(iv);
-          el.addEventListener('click', fn, { passive: true });
-          console.log(`✅ Botão vinculado: ${sel}`);
-          return;
-        }
-        tries++;
-        if (tries >= MAX) {
-          clearInterval(iv);
-          console.warn(`⚠️ Não foi possível vincular: ${sel} após ${MAX} tentativas`);
-        }
-      }, 250);
+  showModal(url) {
+    const overlay = document.getElementById('shareOverlay');
+    const input = document.getElementById('shareUrlInput');
+    input.value = url;
+    overlay.style.display = 'flex';
+    setTimeout(() => input.select(), 100);
+  }
+
+  getArbiProData() {
+    const app = window.SharkGreen?.arbiPro;
+    if (!app) throw new Error('ArbiPro não encontrado');
+    return {
+      numHouses: app.numHouses,
+      rounding: app.roundingValue,
+      houses: app.houses.slice(0, app.numHouses)
+    };
+  }
+
+  getFreeProData() {
+    const iframe = document.getElementById('calc2frame');
+    if (!iframe?.contentDocument) throw new Error('FreePro não encontrado');
+
+    const doc = iframe.contentDocument;
+    const $ = (id) => doc.getElementById(id);
+    const mode = doc.body.classList.contains('mode-cashback') ? 'cashback' : 'freebet';
+    
+    const data = {
+      n: parseInt($('numEntradas')?.value || '3'),
+      r: parseFloat($('round_step')?.value || '1.0'),
+      mode,
+      p: {},
+      cov: []
     };
 
-    if (selectors.arbipro) tryBind(selectors.arbipro, this.handleShareClick);
-    if (selectors.freepro) tryBind(selectors.freepro, this.handleShareClick);
+    if (mode === 'cashback') {
+      data.p = {
+        o: $('cashback_odd')?.value || '',
+        c: $('cashback_comm')?.value || '',
+        s: $('cashback_stake')?.value || '',
+        r: $('cashback_rate')?.value || ''
+      };
+    } else {
+      data.p = {
+        o: $('o1')?.value || '',
+        c: $('c1')?.value || '',
+        s: $('s1')?.value || '',
+        f: $('F')?.value || '',
+        e: $('r')?.value || ''
+      };
+    }
+
+    const cards = doc.querySelectorAll('#oddsContainer > div');
+    cards.forEach(card => {
+      const odd = card.querySelector('input[data-type="odd"]')?.value || '';
+      const comm = card.querySelector('input[data-type="comm"]')?.value || '';
+      const lay = card.querySelector('input[data-type="lay"]')?.checked || false;
+      data.cov.push({ odd, comm, lay });
+    });
+
+    return data;
+  }
+
+  loadSharedConfig() {
+    const config = this.shareSystem.readFromUrl();
+    if (!config) return;
+
+    console.log('📥 Carregando configuração:', config);
+
+    setTimeout(() => {
+      if (config.t === 'arbipro') {
+        this.loadArbiPro(config);
+      } else if (config.t === 'freepro') {
+        this.loadFreePro(config);
+      }
+      this.shareSystem.cleanUrl();
+    }, 2000);
+  }
+
+  loadArbiPro(config) {
+    const app = window.SharkGreen?.arbiPro;
+    if (!app) return;
+
+    const numSelect = document.getElementById('numHouses');
+    if (numSelect && config.n) {
+      numSelect.value = config.n;
+      numSelect.dispatchEvent(new Event('change'));
+    }
+
+    const roundSelect = document.getElementById('rounding');
+    if (roundSelect && config.r) {
+      roundSelect.value = config.r;
+      roundSelect.dispatchEvent(new Event('change'));
+    }
+
+    setTimeout(() => {
+      (config.h || []).forEach((house, idx) => {
+        const oddInput = document.getElementById(`odd-${idx}`);
+        const stakeInput = document.getElementById(`stake-${idx}`);
+
+        if (oddInput && house.o) {
+          oddInput.value = house.o;
+          oddInput.dispatchEvent(new Event('input'));
+        }
+
+        if (stakeInput && house.s) {
+          stakeInput.value = house.s;
+          stakeInput.dispatchEvent(new Event('input'));
+        }
+
+        if (house.c !== null && house.c !== undefined) {
+          const commCheck = document.querySelector(`input[data-action="toggleCommission"][data-idx="${idx}"]`);
+          if (commCheck) {
+            commCheck.checked = true;
+            commCheck.dispatchEvent(new Event('change'));
+            setTimeout(() => {
+              const commInput = document.getElementById(`commission-${idx}`);
+              if (commInput) {
+                commInput.value = house.c;
+                commInput.dispatchEvent(new Event('input'));
+              }
+            }, 100);
+          }
+        }
+
+        if (house.f) {
+          const fbCheck = document.querySelector(`input[data-action="toggleFreebet"][data-idx="${idx}"]`);
+          if (fbCheck) {
+            fbCheck.checked = true;
+            fbCheck.dispatchEvent(new Event('change'));
+          }
+        }
+
+        if (house.l) {
+          const layBtn = document.querySelector(`button[data-action="toggleLay"][data-idx="${idx}"]`);
+          if (layBtn) layBtn.click();
+        }
+
+        if (house.x) {
+          const fixBtn = document.querySelector(`button[data-action="fixStake"][data-idx="${idx}"]`);
+          if (fixBtn) fixBtn.click();
+        }
+      });
+
+      app.scheduleUpdate();
+    }, 500);
+  }
+
+  loadFreePro(config) {
+    const iframe = document.getElementById('calc2frame');
+    if (!iframe?.contentDocument) return;
+
+    const doc = iframe.contentDocument;
+    const $ = (id) => doc.getElementById(id);
+
+    if (config.m === 'cashback') {
+      doc.body.classList.add('mode-cashback');
+      $('modeCashbackBtn')?.classList.add('active');
+      $('modeFreebetBtn')?.classList.remove('active');
+    }
+
+    if ($('numEntradas')) {
+      $('numEntradas').value = config.n;
+      $('numEntradas').dispatchEvent(new Event('change'));
+    }
+
+    if ($('round_step')) {
+      $('round_step').value = config.r;
+    }
+
+    setTimeout(() => {
+      if (config.m === 'cashback') {
+        if ($('cashback_odd')) $('cashback_odd').value = config.p.o || '';
+        if ($('cashback_comm')) $('cashback_comm').value = config.p.c || '';
+        if ($('cashback_stake')) $('cashback_stake').value = config.p.s || '';
+        if ($('cashback_rate')) $('cashback_rate').value = config.p.r || '';
+      } else {
+        if ($('o1')) $('o1').value = config.p.o || '';
+        if ($('c1')) $('c1').value = config.p.c || '';
+        if ($('s1')) $('s1').value = config.p.s || '';
+        if ($('F')) $('F').value = config.p.f || '';
+        if ($('r')) $('r').value = config.p.e || '';
+      }
+
+      setTimeout(() => {
+        const cards = doc.querySelectorAll('#oddsContainer > div');
+        (config.cov || []).forEach((cov, idx) => {
+          if (idx < cards.length) {
+            const card = cards[idx];
+            const oddInput = card.querySelector('input[data-type="odd"]');
+            const commInput = card.querySelector('input[data-type="comm"]');
+            const layInput = card.querySelector('input[data-type="lay"]');
+
+            if (oddInput) oddInput.value = cov.odd;
+            if (commInput) commInput.value = cov.comm;
+            if (layInput) layInput.checked = cov.lay;
+          }
+        });
+
+        const triggerEl = $('o1') || $('cashback_odd');
+        if (triggerEl) triggerEl.dispatchEvent(new Event('input'));
+      }, 300);
+    }, 300);
   }
 }
-
-export default ShareUI;
