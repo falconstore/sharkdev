@@ -1,4 +1,4 @@
-// assets/js/ui/shareui.js - VERSÃO CORRIGIDA COM NORMALIZAÇÃO
+// assets/js/ui/shareui.js - VERSÃO COM DELAYS CORRIGIDOS
 import { ShareSystem } from '../utils/share.js';
 
 export class ShareUI {
@@ -158,7 +158,6 @@ export class ShareUI {
     }, 100);
   }
 
-  // ✅ VERSÃO CORRIGIDA - NORMALIZA OS DADOS
   getArbiProData() {
     console.log('📸 Capturando dados ArbiPro...');
     
@@ -334,17 +333,30 @@ export class ShareUI {
 
       setTimeout(() => {
         this.fillArbiProHouses(config, app);
-      }, 800);
+      }, 1000);
     };
     
     applyConfig();
   }
 
-  // ✅ VERSÃO CORRIGIDA - SÓ ATIVA SE TIVER VALOR
+  // ✅ VERSÃO COM PROCESSAMENTO SEQUENCIAL E DELAYS MAIORES
   fillArbiProHouses(config, app) {
-    (config.h || []).forEach((house, idx) => {
+    let currentIndex = 0;
+    const houses = config.h || [];
+
+    const processNextHouse = () => {
+      if (currentIndex >= houses.length) {
+        setTimeout(() => {
+          app.scheduleUpdate();
+          console.log('✅ ArbiPro carregado com sucesso!');
+        }, 500);
+        return;
+      }
+
+      const house = houses[currentIndex];
+      const idx = currentIndex;
       console.log(`🏠 Carregando Casa ${idx + 1}:`, house);
-      
+
       if (house.o) {
         const oddInput = document.getElementById(`odd-${idx}`);
         if (oddInput) {
@@ -361,45 +373,8 @@ export class ShareUI {
         }
       }
 
-      if (house.c !== null && house.c !== undefined) {
-        console.log(`  └─ Ativando comissão: ${house.c}%`);
-        
-        const commCheck = document.querySelector(`input[data-action="toggleCommission"][data-idx="${idx}"]`);
-        if (commCheck && !commCheck.checked) {
-          commCheck.checked = true;
-          commCheck.dispatchEvent(new Event('change'));
-          
-          setTimeout(() => {
-            const commInput = document.getElementById(`commission-${idx}`);
-            if (commInput) {
-              commInput.value = house.c;
-              commInput.dispatchEvent(new Event('input'));
-            }
-          }, 200);
-        }
-      }
-
-      if (house.i !== null && house.i !== undefined) {
-        console.log(`  └─ Ativando aumento: ${house.i}%`);
-        
-        const incCheck = document.querySelector(`input[data-action="toggleIncrease"][data-idx="${idx}"]`);
-        if (incCheck && !incCheck.checked) {
-          incCheck.checked = true;
-          incCheck.dispatchEvent(new Event('change'));
-          
-          setTimeout(() => {
-            const incInput = document.getElementById(`increase-${idx}`);
-            if (incInput) {
-              incInput.value = house.i;
-              incInput.dispatchEvent(new Event('input'));
-            }
-          }, 200);
-        }
-      }
-
       if (house.f === true || house.f === 1) {
         console.log(`  └─ Ativando freebet`);
-        
         const fbCheck = document.querySelector(`input[data-action="toggleFreebet"][data-idx="${idx}"]`);
         if (fbCheck && !fbCheck.checked) {
           fbCheck.checked = true;
@@ -409,7 +384,6 @@ export class ShareUI {
 
       if (house.l === true || house.l === 1) {
         console.log(`  └─ Ativando LAY`);
-        
         const layBtn = document.querySelector(`button[data-action="toggleLay"][data-idx="${idx}"]`);
         if (layBtn) {
           const currentLay = app.houses[idx]?.lay;
@@ -419,23 +393,69 @@ export class ShareUI {
         }
       }
 
-      if (house.x === true || house.x === 1) {
-        console.log(`  └─ Fixando stake`);
-        
-        const fixBtn = document.querySelector(`button[data-action="fixStake"][data-idx="${idx}"]`);
-        if (fixBtn) {
-          const currentFixed = app.houses[idx]?.fixedStake;
-          if (!currentFixed) {
-            fixBtn.click();
+      setTimeout(() => {
+        if (house.c !== null && house.c !== undefined) {
+          console.log(`  └─ Ativando comissão: ${house.c}%`);
+          const commCheck = document.querySelector(`input[data-action="toggleCommission"][data-idx="${idx}"]`);
+          if (commCheck && !commCheck.checked) {
+            commCheck.checked = true;
+            commCheck.dispatchEvent(new Event('change'));
+            
+            setTimeout(() => {
+              const commInput = document.getElementById(`commission-${idx}`);
+              if (commInput) {
+                commInput.value = house.c;
+                commInput.dispatchEvent(new Event('input'));
+                console.log(`    ✓ Comissão definida: ${house.c}%`);
+              } else {
+                console.warn(`    ✗ Campo commission-${idx} não encontrado`);
+              }
+            }, 300);
           }
         }
-      }
-    });
 
-    setTimeout(() => {
-      app.scheduleUpdate();
-      console.log('✅ ArbiPro carregado com sucesso!');
-    }, 500);
+        if (house.i !== null && house.i !== undefined) {
+          console.log(`  └─ Ativando aumento: ${house.i}%`);
+          const incCheck = document.querySelector(`input[data-action="toggleIncrease"][data-idx="${idx}"]`);
+          if (incCheck && !incCheck.checked) {
+            incCheck.checked = true;
+            incCheck.dispatchEvent(new Event('change'));
+            
+            setTimeout(() => {
+              const incInput = document.getElementById(`increase-${idx}`);
+              if (incInput) {
+                incInput.value = house.i;
+                incInput.dispatchEvent(new Event('input'));
+                console.log(`    ✓ Aumento definido: ${house.i}%`);
+              } else {
+                console.warn(`    ✗ Campo increase-${idx} não encontrado`);
+              }
+            }, 300);
+          }
+        }
+
+        if (house.x === true || house.x === 1) {
+          console.log(`  └─ Fixando stake`);
+          setTimeout(() => {
+            const fixBtn = document.querySelector(`button[data-action="fixStake"][data-idx="${idx}"]`);
+            if (fixBtn) {
+              const currentFixed = app.houses[idx]?.fixedStake;
+              if (!currentFixed) {
+                fixBtn.click();
+                console.log(`    ✓ Stake fixada`);
+              }
+            }
+          }, 350);
+        }
+
+        setTimeout(() => {
+          currentIndex++;
+          processNextHouse();
+        }, 800);
+      }, 400);
+    };
+
+    processNextHouse();
   }
 
   loadFreePro(config) {
