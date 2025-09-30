@@ -1,4 +1,4 @@
-// assets/js/ui/shareui.js - VERSÃO COM DELAYS CORRIGIDOS
+// assets/js/ui/shareui.js - VERSÃO CORRIGIDA COM NORMALIZAÇÃO
 import { ShareSystem } from '../utils/share.js';
 
 export class ShareUI {
@@ -158,6 +158,7 @@ export class ShareUI {
     }, 100);
   }
 
+  // ✅ VERSÃO CORRIGIDA - NORMALIZA OS DADOS
   getArbiProData() {
     console.log('📸 Capturando dados ArbiPro...');
     
@@ -333,73 +334,33 @@ export class ShareUI {
 
       setTimeout(() => {
         this.fillArbiProHouses(config, app);
-      }, 1000);
+      }, 800);
     };
     
     applyConfig();
   }
 
-  // ✅ VERSÃO COM PROCESSAMENTO SEQUENCIAL E DELAYS MAIORES
- fillArbiProHouses(config, app) {
-  let currentIndex = 0;
-  const houses = config.h || [];
-
-  const processNextHouse = () => {
-    if (currentIndex >= houses.length) {
-      setTimeout(() => {
-        app.scheduleUpdate();
-        console.log('✅ ArbiPro carregado com sucesso!');
-      }, 500);
-      return;
-    }
-
-    const house = houses[currentIndex];
-    const idx = currentIndex;
-    console.log(`🏠 Carregando Casa ${idx + 1}:`, house);
-
-    // 1. ODD
-    if (house.o) {
-      const oddInput = document.getElementById(`odd-${idx}`);
-      if (oddInput) {
-        oddInput.value = house.o;
-        oddInput.dispatchEvent(new Event('input'));
-      }
-    }
-
-    // 2. STAKE
-    if (house.s) {
-      const stakeInput = document.getElementById(`stake-${idx}`);
-      if (stakeInput) {
-        stakeInput.value = house.s;
-        stakeInput.dispatchEvent(new Event('input'));
-      }
-    }
-
-    // 3. FREEBET
-    if (house.f === true || house.f === 1) {
-      console.log(`  └─ Ativando freebet`);
-      const fbCheck = document.querySelector(`input[data-action="toggleFreebet"][data-idx="${idx}"]`);
-      if (fbCheck && !fbCheck.checked) {
-        fbCheck.checked = true;
-        fbCheck.dispatchEvent(new Event('change'));
-      }
-    }
-
-    // 4. LAY
-    if (house.l === true || house.l === 1) {
-      console.log(`  └─ Ativando LAY`);
-      const layBtn = document.querySelector(`button[data-action="toggleLay"][data-idx="${idx}"]`);
-      if (layBtn) {
-        const currentLay = app.houses[idx]?.lay;
-        if (!currentLay) {
-          layBtn.click();
+  // ✅ VERSÃO CORRIGIDA - SÓ ATIVA SE TIVER VALOR
+  fillArbiProHouses(config, app) {
+    (config.h || []).forEach((house, idx) => {
+      console.log(`🏠 Carregando Casa ${idx + 1}:`, house);
+      
+      if (house.o) {
+        const oddInput = document.getElementById(`odd-${idx}`);
+        if (oddInput) {
+          oddInput.value = house.o;
+          oddInput.dispatchEvent(new Event('input'));
         }
       }
-    }
 
-    // ✅ AGUARDA 500ms para freebet/lay renderizarem
-    setTimeout(() => {
-      // 5. COMISSÃO (com MutationObserver)
+      if (house.s) {
+        const stakeInput = document.getElementById(`stake-${idx}`);
+        if (stakeInput) {
+          stakeInput.value = house.s;
+          stakeInput.dispatchEvent(new Event('input'));
+        }
+      }
+
       if (house.c !== null && house.c !== undefined) {
         console.log(`  └─ Ativando comissão: ${house.c}%`);
         
@@ -408,20 +369,16 @@ export class ShareUI {
           commCheck.checked = true;
           commCheck.dispatchEvent(new Event('change'));
           
-          // ✅ AGUARDA o campo aparecer no DOM
-          this.waitForElement(`commission-${idx}`, 3000).then(commInput => {
+          setTimeout(() => {
+            const commInput = document.getElementById(`commission-${idx}`);
             if (commInput) {
               commInput.value = house.c;
               commInput.dispatchEvent(new Event('input'));
-              console.log(`    ✓ Comissão definida: ${house.c}%`);
-            } else {
-              console.error(`    ✗ Campo commission-${idx} não apareceu após 3 segundos`);
             }
-          });
+          }, 200);
         }
       }
 
-      // 6. AUMENTO (com MutationObserver)
       if (house.i !== null && house.i !== undefined) {
         console.log(`  └─ Ativando aumento: ${house.i}%`);
         
@@ -430,72 +387,118 @@ export class ShareUI {
           incCheck.checked = true;
           incCheck.dispatchEvent(new Event('change'));
           
-          // ✅ AGUARDA o campo aparecer no DOM
-          this.waitForElement(`increase-${idx}`, 3000).then(incInput => {
+          setTimeout(() => {
+            const incInput = document.getElementById(`increase-${idx}`);
             if (incInput) {
               incInput.value = house.i;
               incInput.dispatchEvent(new Event('input'));
-              console.log(`    ✓ Aumento definido: ${house.i}%`);
-            } else {
-              console.error(`    ✗ Campo increase-${idx} não apareceu após 3 segundos`);
             }
-          });
+          }, 200);
         }
       }
 
-      // 7. FIXED STAKE
-      if (house.x === true || house.x === 1) {
-        console.log(`  └─ Fixando stake`);
-        setTimeout(() => {
-          const fixBtn = document.querySelector(`button[data-action="fixStake"][data-idx="${idx}"]`);
-          if (fixBtn) {
-            const currentFixed = app.houses[idx]?.fixedStake;
-            if (!currentFixed) {
-              fixBtn.click();
-              console.log(`    ✓ Stake fixada`);
-            }
-          }
-        }, 400);
+      if (house.f === true || house.f === 1) {
+        console.log(`  └─ Ativando freebet`);
+        
+        const fbCheck = document.querySelector(`input[data-action="toggleFreebet"][data-idx="${idx}"]`);
+        if (fbCheck && !fbCheck.checked) {
+          fbCheck.checked = true;
+          fbCheck.dispatchEvent(new Event('change'));
+        }
       }
 
-      // ✅ PRÓXIMA CASA após 1 segundo
-      setTimeout(() => {
-        currentIndex++;
-        processNextHouse();
-      }, 1000);
+      if (house.l === true || house.l === 1) {
+        console.log(`  └─ Ativando LAY`);
+        
+        const layBtn = document.querySelector(`button[data-action="toggleLay"][data-idx="${idx}"]`);
+        if (layBtn) {
+          const currentLay = app.houses[idx]?.lay;
+          if (!currentLay) {
+            layBtn.click();
+          }
+        }
+      }
+
+      if (house.x === true || house.x === 1) {
+        console.log(`  └─ Fixando stake`);
+        
+        const fixBtn = document.querySelector(`button[data-action="fixStake"][data-idx="${idx}"]`);
+        if (fixBtn) {
+          const currentFixed = app.houses[idx]?.fixedStake;
+          if (!currentFixed) {
+            fixBtn.click();
+          }
+        }
+      }
+    });
+
+    setTimeout(() => {
+      app.scheduleUpdate();
+      console.log('✅ ArbiPro carregado com sucesso!');
     }, 500);
-  };
+  }
 
-  processNextHouse();
-}
-
-// ✅ MÉTODO NOVO: Aguarda elemento aparecer no DOM
-waitForElement(elementId, timeout = 5000) {
-  return new Promise((resolve) => {
-    const element = document.getElementById(elementId);
-    if (element) {
-      resolve(element);
+  loadFreePro(config) {
+    console.log('⚙️ Carregando FreePro...');
+    
+    const iframe = document.getElementById('calc2frame');
+    if (!iframe?.contentDocument) {
+      console.error('❌ FreePro não encontrado');
       return;
     }
 
-    let timeoutId = null;
-    const observer = new MutationObserver(() => {
-      const element = document.getElementById(elementId);
-      if (element) {
-        clearTimeout(timeoutId);
-        observer.disconnect();
-        resolve(element);
+    const doc = iframe.contentDocument;
+    const $ = (id) => doc.getElementById(id);
+
+    if (config.m === 'cashback') {
+      doc.body.classList.add('mode-cashback');
+      $('modeCashbackBtn')?.classList.add('active');
+      $('modeFreebetBtn')?.classList.remove('active');
+    }
+
+    if ($('numEntradas')) {
+      $('numEntradas').value = config.n;
+      $('numEntradas').dispatchEvent(new Event('change'));
+    }
+
+    if ($('round_step')) {
+      $('round_step').value = config.r;
+    }
+
+    setTimeout(() => {
+      if (config.m === 'cashback') {
+        if ($('cashback_odd')) $('cashback_odd').value = config.p.o || '';
+        if ($('cashback_comm')) $('cashback_comm').value = config.p.c || '';
+        if ($('cashback_stake')) $('cashback_stake').value = config.p.s || '';
+        if ($('cashback_rate')) $('cashback_rate').value = config.p.r || '';
+      } else {
+        if ($('o1')) $('o1').value = config.p.o || '';
+        if ($('c1')) $('c1').value = config.p.c || '';
+        if ($('s1')) $('s1').value = config.p.s || '';
+        if ($('F')) $('F').value = config.p.f || '';
+        if ($('r')) $('r').value = config.p.e || '';
       }
-    });
 
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
+      setTimeout(() => {
+        const cards = doc.querySelectorAll('#oddsContainer > div');
+        (config.cov || []).forEach((cov, idx) => {
+          if (idx < cards.length) {
+            const card = cards[idx];
+            const oddInput = card.querySelector('input[data-type="odd"]');
+            const commInput = card.querySelector('input[data-type="comm"]');
+            const layInput = card.querySelector('input[data-type="lay"]');
 
-    timeoutId = setTimeout(() => {
-      observer.disconnect();
-      resolve(null);
-    }, timeout);
-  });
+            if (oddInput) oddInput.value = cov.odd;
+            if (commInput) commInput.value = cov.comm;
+            if (layInput) layInput.checked = cov.lay;
+          }
+        });
+
+        const triggerEl = $('o1') || $('cashback_odd');
+        if (triggerEl) triggerEl.dispatchEvent(new Event('input'));
+        
+        console.log('✅ FreePro carregado com sucesso!');
+      }, 300);
+    }, 300);
+  }
 }
