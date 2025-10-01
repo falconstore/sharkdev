@@ -420,35 +420,36 @@ export class ShareUI {
             }
           }
 
-          // COMISSÃO COM RETRY
-          if (house.c !== null && house.c !== undefined) {
-            let attempts = 0;
-            const maxAttempts = 10;
+          // ✅ COMISSÃO COM RETRY CORRIGIDO
+        if (house.c !== null && house.c !== undefined) {
+          let commissionAttempts = 0;
+          const maxCommissionAttempts = 5;
+          
+          const tryFillCommission = () => {
+            const commInput = document.getElementById(`commission-${idx}`);
             
-            const tryFillCommission = () => {
-              const commInput = document.getElementById(`commission-${idx}`);
-              
-              if (commInput) {
-                commInput.value = house.c;
-                commInput.dispatchEvent(new Event('input'));
-                console.log(`    ✓ Comissão: ${house.c}% (tentativa ${attempts + 1})`);
-              } else {
-                attempts++;
-                if (attempts < maxAttempts) {
-                  console.log(`    ⏳ Tentando novamente... (${attempts}/${maxAttempts})`);
-                  setTimeout(tryFillCommission, 300);
-                } else {
-                  console.error(`    ✗ Campo commission-${idx} não encontrado após ${maxAttempts} tentativas`);
-                  console.error(`    📋 Campos disponíveis:`, 
-                    Array.from(document.querySelectorAll(`[id*="commission"]`)).map(el => el.id)
-                  );
-                }
-              }
-            };
+            if (commInput) {
+              commInput.value = house.c;
+              commInput.dispatchEvent(new Event('input'));
+              console.log(`    ✓ Comissão: ${house.c}% (tentativa ${commissionAttempts + 1})`);
+              return; // ✅ PARA AQUI SE ENCONTROU
+            }
             
-            tryFillCommission();
-          }
-
+            commissionAttempts++;
+            if (commissionAttempts < maxCommissionAttempts) {
+              console.log(`    ⏳ Campo commission-${idx} não encontrado, tentando novamente... (${commissionAttempts}/${maxCommissionAttempts})`);
+              setTimeout(tryFillCommission, 300);
+            } else {
+              console.error(`    ✗ Campo commission-${idx} não encontrado após ${maxCommissionAttempts} tentativas`);
+              console.error(`    📋 Debug - Campos disponíveis:`, 
+                Array.from(document.querySelectorAll(`[id*="commission"]`)).map(el => el.id)
+              );
+              return; // ✅ PARA AQUI APÓS ESGOTAR TENTATIVAS
+            }
+          };
+          
+          tryFillCommission();
+        }
           // AUMENTO COM RETRY
           if (house.i !== null && house.i !== undefined) {
             let attempts = 0;
