@@ -1,4 +1,4 @@
-// assets/js/ui/shareui.js - VERSÃO CORRIGIDA
+// assets/js/ui/shareui.js - VERSÃO CORRIGIDA COMPLETA
 import { ShareSystem } from '../utils/share.js';
 
 function $(root, sel) {
@@ -200,7 +200,6 @@ export class ShareUI {
     return false;
   }
 
-  // -------- Captura ArbiPro --------
   getArbiProData() {
     console.log('Capturando dados ArbiPro...');
     try {
@@ -266,7 +265,6 @@ export class ShareUI {
     }
   }
 
-  // -------- Captura FreePro --------
   getFreeProData() {
     console.log('Capturando dados FreePro...');
     try {
@@ -333,7 +331,6 @@ export class ShareUI {
     }
   }
 
-  // -------- Modal --------
   showShareModal(url) {
     try {
       let overlay = document.getElementById('shareOverlay');
