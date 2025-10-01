@@ -34,6 +34,11 @@ class App {
       // Carrega sistema de compartilhamento
       await this.loadShareSystem();
       
+      // Carrega configuração compartilhada da URL
+      setTimeout(() => {
+        this.loadSharedConfiguration();
+      }, 2000);
+      
       console.log('Calculadoras Shark 100% Green inicializadas com sucesso');
     } catch (error) {
       console.error('Erro ao inicializar app:', error);
@@ -173,7 +178,7 @@ class App {
       if (arbiBtn) {
         arbiBtn.onclick = () => {
           if (this.shareUI) {
-            this.shareUI.share('arbipro');
+            this.shareUI.openShareModal('arbipro');
           } else {
             console.error('ShareUI não disponível');
           }
@@ -208,9 +213,9 @@ class App {
           if (freeBtn) {
             freeBtn.onclick = () => {
               if (this.shareUI) {
-                this.shareUI.share('freepro');
+                this.shareUI.openShareModal('freepro');
               } else if (window.parent?.SharkGreen?.shareUI) {
-                window.parent.SharkGreen.shareUI.share('freepro');
+                window.parent.SharkGreen.shareUI.openShareModal('freepro');
               } else {
                 console.error('ShareUI não disponível');
               }
@@ -232,6 +237,222 @@ class App {
     };
     
     setTimeout(tryBind, 3500);
+  }
+
+  async loadSharedConfiguration() {
+    try {
+      const { ShareSystem } = await import('./utils/share.js');
+      const config = ShareSystem.readFromUrl(window.location.href);
+      
+      if (!config) return;
+      
+      console.log('🔗 Configuração compartilhada detectada:', config);
+      
+      // 🔥 CORREÇÃO: Abre a calculadora correta
+      if (config.t === 'arbipro') {
+        // Garante que está na aba ArbiPro
+        const tab1 = document.getElementById('tabBtn1');
+        if (tab1) tab1.click();
+        
+        setTimeout(() => this.loadArbiProConfig(config), 500);
+      } else if (config.t === 'freepro') {
+        // Garante que está na aba FreePro
+        const tab2 = document.getElementById('tabBtn2');
+        if (tab2) tab2.click();
+        
+        setTimeout(() => this.loadFreeProConfig(config), 1500);
+      }
+      
+      // Limpa URL
+      const url = new URL(window.location.href);
+      url.searchParams.delete('share');
+      url.searchParams.delete('s');
+      window.history.replaceState({}, document.title, url.toString());
+      
+    } catch (error) {
+      console.error('Erro ao carregar configuração compartilhada:', error);
+    }
+  }
+
+  loadArbiProConfig(config) {
+    if (!this.arbiPro) return;
+    
+    console.log('📥 Carregando ArbiPro config:', config);
+    
+    // Define número de casas
+    const numHousesSelect = document.getElementById('numHouses');
+    if (numHousesSelect && config.n) {
+      numHousesSelect.value = config.n;
+      numHousesSelect.dispatchEvent(new Event('change'));
+    }
+    
+    // Define arredondamento
+    const roundSelect = document.getElementById('rounding');
+    if (roundSelect && config.r) {
+      roundSelect.value = config.r;
+      roundSelect.dispatchEvent(new Event('change'));
+    }
+    
+    setTimeout(() => {
+      if (!config.h || !Array.isArray(config.h)) return;
+      
+      config.h.forEach((house, idx) => {
+        // Odd
+        const oddInput = document.getElementById(`odd-${idx}`);
+        if (oddInput && house.o) {
+          oddInput.value = String(house.o).replace('.', ',');
+          oddInput.dispatchEvent(new Event('input'));
+        }
+        
+        // 🔥 CORREÇÃO: Stake APENAS para casa 0 (fixa)
+        if (idx === 0) {
+          const stakeInput = document.getElementById(`stake-${idx}`);
+          if (stakeInput && house.s) {
+            stakeInput.value = String(house.s).replace('.', ',');
+            stakeInput.dispatchEvent(new Event('input'));
+          }
+        }
+        
+        // 🔥 CORREÇÃO: Comissão - ativa checkbox e define valor
+        if (house.c !== null && house.c !== undefined) {
+          const commCheck = document.querySelector(`input[data-action="toggleCommission"][data-idx="${idx}"]`);
+          if (commCheck && !commCheck.checked) {
+            commCheck.checked = true;
+            commCheck.dispatchEvent(new Event('change'));
+            
+            setTimeout(() => {
+              const commInput = document.getElementById(`commission-${idx}`);
+              if (commInput) {
+                commInput.value = String(house.c).replace('.', ',');
+                commInput.dispatchEvent(new Event('input'));
+              }
+            }, 200);
+          }
+        }
+        
+        // Freebet
+        if (house.f) {
+          const fbCheck = document.querySelector(`input[data-action="toggleFreebet"][data-idx="${idx}"]`);
+          if (fbCheck && !fbCheck.checked) {
+            fbCheck.checked = true;
+            fbCheck.dispatchEvent(new Event('change'));
+          }
+        }
+        
+        // Aumento de odd
+        if (house.i !== null && house.i !== undefined) {
+          const incCheck = document.querySelector(`input[data-action="toggleIncrease"][data-idx="${idx}"]`);
+          if (incCheck && !incCheck.checked) {
+            incCheck.checked = true;
+            incCheck.dispatchEvent(new Event('change'));
+            
+            setTimeout(() => {
+              const incInput = document.getElementById(`increase-${idx}`);
+              if (incInput) {
+                incInput.value = String(house.i).replace('.', ',');
+                incInput.dispatchEvent(new Event('input'));
+              }
+            }, 200);
+          }
+        }
+        
+        // 🔥 CORREÇÃO: LAY - clica no botão se necessário
+        if (house.l) {
+          const layBtn = document.querySelector(`button[data-action="toggleLay"][data-idx="${idx}"]`);
+          if (layBtn && !layBtn.classList.contains('active')) {
+            layBtn.click();
+          }
+        }
+      });
+      
+      // Força recálculo
+      if (this.arbiPro) {
+        this.arbiPro.scheduleUpdate();
+      }
+    }, 800);
+  }
+
+  loadFreeProConfig(config) {
+    console.log('📥 Carregando FreePro config:', config);
+    
+    const iframe = document.getElementById('calc2frame');
+    if (!iframe?.contentDocument) {
+      console.warn('Iframe FreePro não disponível ainda');
+      return;
+    }
+    
+    const doc = iframe.contentDocument;
+    const $ = (id) => doc.getElementById(id);
+    
+    // 🔥 CORREÇÃO: Define o modo correto (freebet ou cashback)
+    const isCashback = config.mode === 'cashback';
+    
+    if (isCashback) {
+      const cashbackBtn = $('modeCashbackBtn');
+      if (cashbackBtn && !doc.body.classList.contains('mode-cashback')) {
+        cashbackBtn.click();
+      }
+    } else {
+      const freebetBtn = $('modeFreebetBtn');
+      if (freebetBtn && doc.body.classList.contains('mode-cashback')) {
+        freebetBtn.click();
+      }
+    }
+    
+    setTimeout(() => {
+      // Número de entradas
+      if ($('numEntradas') && config.n) {
+        $('numEntradas').value = config.n;
+        $('numEntradas').dispatchEvent(new Event('change'));
+      }
+      
+      // Arredondamento
+      if ($('round_step') && config.r) {
+        $('round_step').value = config.r;
+      }
+      
+      setTimeout(() => {
+        const p = config.p || {};
+        
+        if (isCashback) {
+          // Modo Cashback
+          if ($('cashback_odd')) $('cashback_odd').value = p.o || '';
+          if ($('cashback_comm')) $('cashback_comm').value = p.c || '';
+          if ($('cashback_stake')) $('cashback_stake').value = p.s || '';
+          if ($('cashback_rate')) $('cashback_rate').value = p.r || '';
+        } else {
+          // Modo Freebet
+          if ($('o1')) $('o1').value = p.o || '';
+          if ($('c1')) $('c1').value = p.c || '';
+          if ($('s1')) $('s1').value = p.s || '';
+          if ($('F')) $('F').value = p.f || '';
+          if ($('r')) $('r').value = p.e || 70;
+        }
+        
+        // Coberturas
+        setTimeout(() => {
+          const cards = doc.querySelectorAll('#oddsContainer > div');
+          const cov = config.cov || [];
+          
+          cov.forEach((c, index) => {
+            if (index < cards.length) {
+              const card = cards[index];
+              const oddInput = card.querySelector('input[data-type="odd"]');
+              const commInput = card.querySelector('input[data-type="comm"]');
+              const layInput = card.querySelector('input[data-type="lay"]');
+              
+              if (oddInput) oddInput.value = c.odd || '';
+              if (commInput) commInput.value = c.comm || '';
+              if (layInput) layInput.checked = c.lay || false;
+            }
+          });
+          
+          // Dispara cálculo automático
+          const autoCalc = doc.querySelector('.auto-calc');
+          if (autoCalc) autoCalc.dispatchEvent(new Event('input'));
+        }, 400);
+      }, 400);
+    }, 300);
   }
 
   removeLoadingScreen() {
