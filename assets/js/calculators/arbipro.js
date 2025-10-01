@@ -1,4 +1,4 @@
-// PASSO 11 - assets/js/calculators/arbipro.js
+// assets/js/calculators/arbipro.js - VERSÃO COMPLETA ATUALIZADA
 // Calculadora de Arbitragem completa
 
 import { Utils } from '../utils/helpers.js';
@@ -206,9 +206,9 @@ export class ArbiPro {
 
     app.innerHTML = `
       <div class="calc-header">
-  <h1 style="font-size: 1.75rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; text-align: center;">Calculadora ArbiPro</h1>
-  <p style="color: var(--text-secondary); font-size: 0.875rem; text-align: center;">Calcule stakes otimizados para garantir lucro em qualquer resultado</p>
-</div>
+        <h1 style="font-size: 1.75rem; font-weight: 800; background: linear-gradient(135deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; text-align: center;">Calculadora ArbiPro</h1>
+        <p style="color: var(--text-secondary); font-size: 0.875rem; text-align: center;">Calcule stakes otimizados para garantir lucro em qualquer resultado</p>
+      </div>
 
       <div class="stats-grid">
         <div class="stat-card">
@@ -251,12 +251,6 @@ export class ArbiPro {
         <div class="section-title">Casas de Apostas</div>
         <div id="houses" class="house-grid"></div>
       </div>
-      
-  <div style="display: flex; justify-content: center; margin: 1.5rem 0;">
-        <button id="shareArbiBtn" class="btn btn-primary" style="min-width: 250px;">
-          🔗 Compartilhar
-        </button>
-      </div>
 
       <div class="card" style="margin-top: 1.5rem;">
         <div class="section-title">Resultados Shark ArbiPro</div>
@@ -274,6 +268,15 @@ export class ArbiPro {
             <tbody id="resultsRows"></tbody>
           </table>
         </div>
+      </div>
+
+      <div class="actions" style="display: flex; justify-content: center; gap: 1rem; margin-top: 1.5rem; flex-wrap: wrap;">
+        <button id="shareArbiBtn" class="btn btn-primary" style="min-width: 180px;">
+          🔗 Compartilhar
+        </button>
+        <button id="clearArbiBtn" class="btn btn-secondary" style="min-width: 180px;">
+          🗑️ Limpar Dados
+        </button>
       </div>
     `;
 
@@ -397,6 +400,12 @@ export class ArbiPro {
 
     // Events das casas
     this.bindHouseEvents();
+    
+    // Botão Limpar
+    const clearBtn = document.getElementById('clearArbiBtn');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => this.clearAll());
+    }
   }
 
   bindHouseEvents() {
@@ -558,52 +567,96 @@ export class ArbiPro {
   }
 
   updateResultsTable() {
-  const active = this.activeHouses();
-  const hasLayBets = active.some(h => h.lay);
-  const hasOddIncrease = active.some(h => h.increase !== null);
-  
-  const headerHTML = `
-    <tr>
-      <th>Casa</th>
-      <th>Odd</th>
-      ${hasOddIncrease ? '<th>Odd Final</th>' : ''}
-      <th>Comissão</th>
-      <th>Stake</th>
-      ${hasLayBets ? '<th>Responsabilidade</th>' : ''}
-      <th>Lucro</th>
-    </tr>
-  `;
-  
-  const rowsHTML = active.map((h, idx) => {
-    const oddOriginal = Utils.parseFlex(h.odd) || 0;
-    const oddText = oddOriginal.toFixed(2).replace('.', ',');
-    const oddFinalText = hasOddIncrease ? 
-      `<td>${h.finalOdd ? h.finalOdd.toFixed(2).replace('.', ',') : oddText}</td>` : '';
-    const commissionText = (h.commission === null) ? '—' : (h.commission || 0).toFixed(2) + '%';
-    const stakeText = h.stake ? h.stake : "0,00";
-    const profit = this.results.profits[idx] || 0;
-    const profitClass = profit >= 0 ? 'profit-positive' : 'profit-negative';
-    const profitValue = Utils.formatBRL(profit);
-    const responsibilityCell = hasLayBets ? 
-      `<td>${h.lay ? '<strong>R$ ' + (h.responsibility || '0,00') + '</strong>' : '—'}</td>` : '';
+    const active = this.activeHouses();
+    const hasLayBets = active.some(h => h.lay);
+    const hasOddIncrease = active.some(h => h.increase !== null);
     
-    return `
+    const headerHTML = `
       <tr>
-        <td><strong>Casa ${idx + 1}</strong></td>
-        <td>${oddText}</td>
-        ${oddFinalText}
-        <td>${commissionText}</td>
-        <td><strong>R$ ${stakeText}</strong>${h.freebet ? '<br><span class="text-small">(Freebet)</span>' : ''}${h.lay ? '<br><span class="text-small">(LAY)</span>' : ''}</td>
-        ${responsibilityCell}
-        <td class="${profitClass}"><strong>${profitValue}</strong></td>
+        <th>Casa</th>
+        <th>Odd</th>
+        ${hasOddIncrease ? '<th>Odd Final</th>' : ''}
+        <th>Comissão</th>
+        <th>Stake</th>
+        ${hasLayBets ? '<th>Responsabilidade</th>' : ''}
+        <th>Lucro</th>
       </tr>
     `;
-  }).join("");
+    
+    const rowsHTML = active.map((h, idx) => {
+      const oddOriginal = Utils.parseFlex(h.odd) || 0;
+      const oddText = oddOriginal.toFixed(2).replace('.', ',');
+      const oddFinalText = hasOddIncrease ? 
+        `<td>${h.finalOdd ? h.finalOdd.toFixed(2).replace('.', ',') : oddText}</td>` : '';
+      const commissionText = (h.commission === null) ? '—' : (h.commission || 0).toFixed(2) + '%';
+      const stakeText = h.stake ? h.stake : "0,00";
+      const profit = this.results.profits[idx] || 0;
+      const profitClass = profit >= 0 ? 'profit-positive' : 'profit-negative';
+      const profitValue = Utils.formatBRL(profit);
+      const responsibilityCell = hasLayBets ? 
+        `<td>${h.lay ? '<strong>R$ ' + (h.responsibility || '0,00') + '</strong>' : '—'}</td>` : '';
+      
+      return `
+        <tr>
+          <td><strong>Casa ${idx + 1}</strong></td>
+          <td>${oddText}</td>
+          ${oddFinalText}
+          <td>${commissionText}</td>
+          <td><strong>R$ ${stakeText}</strong>${h.freebet ? '<br><span class="text-small">(Freebet)</span>' : ''}${h.lay ? '<br><span class="text-small">(LAY)</span>' : ''}</td>
+          ${responsibilityCell}
+          <td class="${profitClass}"><strong>${profitValue}</strong></td>
+        </tr>
+      `;
+    }).join("");
 
-  const thead = document.querySelector('#panel-1 .results-table thead');
-  const tbody = document.getElementById("resultsRows");
-  
-  if (thead) thead.innerHTML = headerHTML;
-  if (tbody) tbody.innerHTML = rowsHTML;
- }
+    const thead = document.querySelector('#panel-1 .results-table thead');
+    const tbody = document.getElementById("resultsRows");
+    
+    if (thead) thead.innerHTML = headerHTML;
+    if (tbody) tbody.innerHTML = rowsHTML;
+  }
+
+  clearAll() {
+    console.log('Limpando todos os dados do ArbiPro...');
+    
+    // Reset configurações
+    const numHousesSelect = document.getElementById('numHouses');
+    if (numHousesSelect) {
+      numHousesSelect.value = '2';
+      this.numHouses = 2;
+    }
+    
+    const roundSelect = document.getElementById('rounding');
+    if (roundSelect) {
+      roundSelect.value = '0.01';
+      this.roundingValue = 0.01;
+      this.displayRounding = '0.01';
+    }
+    
+    // Reset houses data
+    this.houses = Array.from({ length: this.MAX_HOUSES }).map((_, index) => ({
+      odd: "",
+      increase: null,
+      finalOdd: 0,
+      stake: "0",
+      commission: null,
+      freebet: false,
+      fixedStake: index === 0,
+      lay: false,
+      responsibility: ""
+    }));
+    
+    // Reset manual overrides
+    this.manualOverrides = {};
+    
+    // Reset results
+    this.results = { profits: [], totalStake: 0, roi: 0 };
+    
+    // Re-render interface
+    this.renderHouses();
+    this.updateAllHouseUIs();
+    this.updateResultsUI();
+    
+    console.log('✅ Dados limpos com sucesso');
+  }
 }
