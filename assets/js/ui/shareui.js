@@ -1,4 +1,4 @@
-// assets/js/ui/shareui.js - VERSÃO CORRIGIDA COM NORMALIZAÇÃO
+// assets/js/ui/shareui.js - VERSÃO COMPLETA COM MUTATIONOBSERVER
 import { ShareSystem } from '../utils/share.js';
 
 export class ShareUI {
@@ -158,7 +158,6 @@ export class ShareUI {
     }, 100);
   }
 
-  // ✅ VERSÃO CORRIGIDA - NORMALIZA OS DADOS
   getArbiProData() {
     console.log('📸 Capturando dados ArbiPro...');
     
@@ -334,17 +333,30 @@ export class ShareUI {
 
       setTimeout(() => {
         this.fillArbiProHouses(config, app);
-      }, 800);
+      }, 1000);
     };
     
     applyConfig();
   }
 
-  // ✅ VERSÃO CORRIGIDA - SÓ ATIVA SE TIVER VALOR
   fillArbiProHouses(config, app) {
-    (config.h || []).forEach((house, idx) => {
+    let currentIndex = 0;
+    const houses = config.h || [];
+
+    const processNextHouse = () => {
+      if (currentIndex >= houses.length) {
+        setTimeout(() => {
+          app.scheduleUpdate();
+          console.log('✅ ArbiPro carregado com sucesso!');
+        }, 500);
+        return;
+      }
+
+      const house = houses[currentIndex];
+      const idx = currentIndex;
       console.log(`🏠 Carregando Casa ${idx + 1}:`, house);
-      
+
+      // 1. ODD
       if (house.o) {
         const oddInput = document.getElementById(`odd-${idx}`);
         if (oddInput) {
@@ -353,6 +365,7 @@ export class ShareUI {
         }
       }
 
+      // 2. STAKE
       if (house.s) {
         const stakeInput = document.getElementById(`stake-${idx}`);
         if (stakeInput) {
@@ -361,45 +374,9 @@ export class ShareUI {
         }
       }
 
-      if (house.c !== null && house.c !== undefined) {
-        console.log(`  └─ Ativando comissão: ${house.c}%`);
-        
-        const commCheck = document.querySelector(`input[data-action="toggleCommission"][data-idx="${idx}"]`);
-        if (commCheck && !commCheck.checked) {
-          commCheck.checked = true;
-          commCheck.dispatchEvent(new Event('change'));
-          
-          setTimeout(() => {
-            const commInput = document.getElementById(`commission-${idx}`);
-            if (commInput) {
-              commInput.value = house.c;
-              commInput.dispatchEvent(new Event('input'));
-            }
-          }, 200);
-        }
-      }
-
-      if (house.i !== null && house.i !== undefined) {
-        console.log(`  └─ Ativando aumento: ${house.i}%`);
-        
-        const incCheck = document.querySelector(`input[data-action="toggleIncrease"][data-idx="${idx}"]`);
-        if (incCheck && !incCheck.checked) {
-          incCheck.checked = true;
-          incCheck.dispatchEvent(new Event('change'));
-          
-          setTimeout(() => {
-            const incInput = document.getElementById(`increase-${idx}`);
-            if (incInput) {
-              incInput.value = house.i;
-              incInput.dispatchEvent(new Event('input'));
-            }
-          }, 200);
-        }
-      }
-
+      // 3. FREEBET
       if (house.f === true || house.f === 1) {
         console.log(`  └─ Ativando freebet`);
-        
         const fbCheck = document.querySelector(`input[data-action="toggleFreebet"][data-idx="${idx}"]`);
         if (fbCheck && !fbCheck.checked) {
           fbCheck.checked = true;
@@ -407,9 +384,9 @@ export class ShareUI {
         }
       }
 
+      // 4. LAY
       if (house.l === true || house.l === 1) {
         console.log(`  └─ Ativando LAY`);
-        
         const layBtn = document.querySelector(`button[data-action="toggleLay"][data-idx="${idx}"]`);
         if (layBtn) {
           const currentLay = app.houses[idx]?.lay;
@@ -419,23 +396,76 @@ export class ShareUI {
         }
       }
 
-      if (house.x === true || house.x === 1) {
-        console.log(`  └─ Fixando stake`);
-        
-        const fixBtn = document.querySelector(`button[data-action="fixStake"][data-idx="${idx}"]`);
-        if (fixBtn) {
-          const currentFixed = app.houses[idx]?.fixedStake;
-          if (!currentFixed) {
-            fixBtn.click();
+      // ✅ AGUARDA 500ms para freebet/lay renderizarem
+      setTimeout(() => {
+        // 5. COMISSÃO (com MutationObserver)
+        if (house.c !== null && house.c !== undefined) {
+          console.log(`  └─ Ativando comissão: ${house.c}%`);
+          
+          const commCheck = document.querySelector(`input[data-action="toggleCommission"][data-idx="${idx}"]`);
+          if (commCheck && !commCheck.checked) {
+            commCheck.checked = true;
+            commCheck.dispatchEvent(new Event('change'));
+            
+            // ✅ AGUARDA o campo aparecer no DOM
+            this.waitForElement(`commission-${idx}`, 3000).then(commInput => {
+              if (commInput) {
+                commInput.value = house.c;
+                commInput.dispatchEvent(new Event('input'));
+                console.log(`    ✓ Comissão definida: ${house.c}%`);
+              } else {
+                console.error(`    ✗ Campo commission-${idx} não apareceu após 3 segundos`);
+              }
+            });
           }
         }
-      }
-    });
 
-    setTimeout(() => {
-      app.scheduleUpdate();
-      console.log('✅ ArbiPro carregado com sucesso!');
-    }, 500);
+        // 6. AUMENTO (com MutationObserver)
+        if (house.i !== null && house.i !== undefined) {
+          console.log(`  └─ Ativando aumento: ${house.i}%`);
+          
+          const incCheck = document.querySelector(`input[data-action="toggleIncrease"][data-idx="${idx}"]`);
+          if (incCheck && !incCheck.checked) {
+            incCheck.checked = true;
+            incCheck.dispatchEvent(new Event('change'));
+            
+            // ✅ AGUARDA o campo aparecer no DOM
+            this.waitForElement(`increase-${idx}`, 3000).then(incInput => {
+              if (incInput) {
+                incInput.value = house.i;
+                incInput.dispatchEvent(new Event('input'));
+                console.log(`    ✓ Aumento definido: ${house.i}%`);
+              } else {
+                console.error(`    ✗ Campo increase-${idx} não apareceu após 3 segundos`);
+              }
+            });
+          }
+        }
+
+        // 7. FIXED STAKE
+        if (house.x === true || house.x === 1) {
+          console.log(`  └─ Fixando stake`);
+          setTimeout(() => {
+            const fixBtn = document.querySelector(`button[data-action="fixStake"][data-idx="${idx}"]`);
+            if (fixBtn) {
+              const currentFixed = app.houses[idx]?.fixedStake;
+              if (!currentFixed) {
+                fixBtn.click();
+                console.log(`    ✓ Stake fixada`);
+              }
+            }
+          }, 400);
+        }
+
+        // ✅ PRÓXIMA CASA após 1 segundo
+        setTimeout(() => {
+          currentIndex++;
+          processNextHouse();
+        }, 1000);
+      }, 500);
+    };
+
+    processNextHouse();
   }
 
   loadFreePro(config) {
@@ -500,5 +530,36 @@ export class ShareUI {
         console.log('✅ FreePro carregado com sucesso!');
       }, 300);
     }, 300);
+  }
+
+  // ✅ MÉTODO NOVO: Aguarda elemento aparecer no DOM
+  waitForElement(elementId, timeout = 5000) {
+    return new Promise((resolve) => {
+      const element = document.getElementById(elementId);
+      if (element) {
+        resolve(element);
+        return;
+      }
+
+      let timeoutId = null;
+      const observer = new MutationObserver(() => {
+        const element = document.getElementById(elementId);
+        if (element) {
+          clearTimeout(timeoutId);
+          observer.disconnect();
+          resolve(element);
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+
+      timeoutId = setTimeout(() => {
+        observer.disconnect();
+        resolve(null);
+      }, timeout);
+    });
   }
 }
