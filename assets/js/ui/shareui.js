@@ -411,14 +411,17 @@ export class ShareUI {
             }
           }
 
-          if (house.s) {
-            const stakeInput = document.getElementById(`stake-${idx}`);
-            if (stakeInput) {
-              stakeInput.value = house.s;
-              stakeInput.dispatchEvent(new Event('input'));
-              console.log(`    ✓ Stake: ${house.s}`);
-            }
+            // ✅ SÓ PREENCHE STAKE SE A CASA ESTIVER FIXADA
+        if (house.s && (house.x === true || house.x === 1)) {
+          const stakeInput = document.getElementById(`stake-${idx}`);
+          if (stakeInput) {
+            stakeInput.value = house.s;
+            stakeInput.dispatchEvent(new Event('input'));
+            console.log(`    ✓ Stake: ${house.s} (casa fixada)`);
           }
+        } else if (house.s) {
+          console.log(`    ⏭️ Stake ${house.s} ignorada (casa não fixada - será calculada automaticamente)`);
+        }
 
           // ✅ COMISSÃO COM RETRY CORRIGIDO
         if (house.c !== null && house.c !== undefined) {
