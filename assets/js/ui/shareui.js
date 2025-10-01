@@ -1,4 +1,4 @@
-// assets/js/ui/shareui.js - VERSÃO COM ORDEM CORRIGIDA
+// assets/js/ui/shareui.js - VERSÃO COM RETRY ROBUSTO
 import { ShareSystem } from '../utils/share.js';
 
 export class ShareUI {
@@ -339,7 +339,6 @@ export class ShareUI {
     applyConfig();
   }
 
-  // ✅ VERSÃO COM ORDEM CORRIGIDA
   fillArbiProHouses(config, app) {
     let currentIndex = 0;
     const houses = config.h || [];
@@ -357,7 +356,7 @@ export class ShareUI {
       const idx = currentIndex;
       console.log(`🏠 Carregando Casa ${idx + 1}:`, house);
 
-      // FASE 1: ATIVAR CHECKBOXES E BOTÕES
+      // FASE 1: CHECKBOXES/BOTÕES
       if (house.f === true || house.f === 1) {
         console.log(`  └─ Ativando freebet`);
         const fbCheck = document.querySelector(`input[data-action="toggleFreebet"][data-idx="${idx}"]`);
@@ -396,70 +395,104 @@ export class ShareUI {
         }
       }
 
-      // AGUARDA CAMPOS RENDERIZAREM
       setTimeout(() => {
-        console.log(`  📝 Preenchendo campos...`);
-
-        // FASE 2: PREENCHER CAMPOS
-        if (house.o) {
-          const oddInput = document.getElementById(`odd-${idx}`);
-          if (oddInput) {
-            oddInput.value = house.o;
-            oddInput.dispatchEvent(new Event('input'));
-            console.log(`    ✓ Odd: ${house.o}`);
-          }
-        }
-
-        if (house.s) {
-          const stakeInput = document.getElementById(`stake-${idx}`);
-          if (stakeInput) {
-            stakeInput.value = house.s;
-            stakeInput.dispatchEvent(new Event('input'));
-            console.log(`    ✓ Stake: ${house.s}`);
-          }
-        }
-
-        if (house.c !== null && house.c !== undefined) {
-          const commInput = document.getElementById(`commission-${idx}`);
-          if (commInput) {
-            commInput.value = house.c;
-            commInput.dispatchEvent(new Event('input'));
-            console.log(`    ✓ Comissão: ${house.c}%`);
-          } else {
-            console.error(`    ✗ Campo commission-${idx} não encontrado`);
-          }
-        }
-
-        if (house.i !== null && house.i !== undefined) {
-          const incInput = document.getElementById(`increase-${idx}`);
-          if (incInput) {
-            incInput.value = house.i;
-            incInput.dispatchEvent(new Event('input'));
-            console.log(`    ✓ Aumento: ${house.i}%`);
-          } else {
-            console.error(`    ✗ Campo increase-${idx} não encontrado`);
-          }
-        }
-
-        if (house.x === true || house.x === 1) {
-          console.log(`  └─ Fixando stake`);
-          setTimeout(() => {
-            const fixBtn = document.querySelector(`button[data-action="fixStake"][data-idx="${idx}"]`);
-            if (fixBtn) {
-              const currentFixed = app.houses[idx]?.fixedStake;
-              if (!currentFixed) {
-                fixBtn.click();
-                console.log(`    ✓ Stake fixada`);
-              }
-            }
-          }, 200);
-        }
-
+        console.log(`  ⏳ Aguardando re-render...`);
+        
         setTimeout(() => {
-          currentIndex++;
-          processNextHouse();
+          console.log(`  📝 Preenchendo campos...`);
+
+          // FASE 2: PREENCHER CAMPOS
+          if (house.o) {
+            const oddInput = document.getElementById(`odd-${idx}`);
+            if (oddInput) {
+              oddInput.value = house.o;
+              oddInput.dispatchEvent(new Event('input'));
+              console.log(`    ✓ Odd: ${house.o}`);
+            }
+          }
+
+          if (house.s) {
+            const stakeInput = document.getElementById(`stake-${idx}`);
+            if (stakeInput) {
+              stakeInput.value = house.s;
+              stakeInput.dispatchEvent(new Event('input'));
+              console.log(`    ✓ Stake: ${house.s}`);
+            }
+          }
+
+          // COMISSÃO COM RETRY
+          if (house.c !== null && house.c !== undefined) {
+            let attempts = 0;
+            const maxAttempts = 10;
+            
+            const tryFillCommission = () => {
+              const commInput = document.getElementById(`commission-${idx}`);
+              
+              if (commInput) {
+                commInput.value = house.c;
+                commInput.dispatchEvent(new Event('input'));
+                console.log(`    ✓ Comissão: ${house.c}% (tentativa ${attempts + 1})`);
+              } else {
+                attempts++;
+                if (attempts < maxAttempts) {
+                  console.log(`    ⏳ Tentando novamente... (${attempts}/${maxAttempts})`);
+                  setTimeout(tryFillCommission, 300);
+                } else {
+                  console.error(`    ✗ Campo commission-${idx} não encontrado após ${maxAttempts} tentativas`);
+                  console.error(`    📋 Campos disponíveis:`, 
+                    Array.from(document.querySelectorAll(`[id*="commission"]`)).map(el => el.id)
+                  );
+                }
+              }
+            };
+            
+            tryFillCommission();
+          }
+
+          // AUMENTO COM RETRY
+          if (house.i !== null && house.i !== undefined) {
+            let attempts = 0;
+            const maxAttempts = 10;
+            
+            const tryFillIncrease = () => {
+              const incInput = document.getElementById(`increase-${idx}`);
+              
+              if (incInput) {
+                incInput.value = house.i;
+                incInput.dispatchEvent(new Event('input'));
+                console.log(`    ✓ Aumento: ${house.i}%`);
+              } else {
+                attempts++;
+                if (attempts < maxAttempts) {
+                  setTimeout(tryFillIncrease, 300);
+                } else {
+                  console.error(`    ✗ Campo increase-${idx} não encontrado`);
+                }
+              }
+            };
+            
+            tryFillIncrease();
+          }
+
+          if (house.x === true || house.x === 1) {
+            setTimeout(() => {
+              const fixBtn = document.querySelector(`button[data-action="fixStake"][data-idx="${idx}"]`);
+              if (fixBtn) {
+                const currentFixed = app.houses[idx]?.fixedStake;
+                if (!currentFixed) {
+                  fixBtn.click();
+                  console.log(`    ✓ Stake fixada`);
+                }
+              }
+            }, 400);
+          }
+
+          setTimeout(() => {
+            currentIndex++;
+            processNextHouse();
+          }, 1500);
         }, 600);
-      }, 800);
+      }, 1200);
     };
 
     processNextHouse();
