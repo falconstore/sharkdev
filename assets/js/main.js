@@ -304,12 +304,30 @@ class App {
           oddInput.dispatchEvent(new Event('input'));
         }
         
-        // 🔥 CORREÇÃO: Stake APENAS para casa 0 (fixa)
+        // 🔥 CORREÇÃO DEFINITIVA: Stake APENAS para casa 0 (fixa)
         if (idx === 0) {
           const stakeInput = document.getElementById(`stake-${idx}`);
           if (stakeInput && house.s) {
+            // Remove override manual se existir
+            if (this.arbiPro.manualOverrides[idx]) {
+              delete this.arbiPro.manualOverrides[idx].stake;
+            }
+            
             stakeInput.value = String(house.s).replace('.', ',');
-            stakeInput.dispatchEvent(new Event('input'));
+            
+            // Dispara múltiplos eventos para garantir
+            stakeInput.dispatchEvent(new Event('input', { bubbles: true }));
+            stakeInput.dispatchEvent(new Event('change', { bubbles: true }));
+            
+            setTimeout(() => {
+              stakeInput.dispatchEvent(new Event('blur', { bubbles: true }));
+              
+              // Atualiza diretamente no objeto
+              if (this.arbiPro.houses[idx]) {
+                this.arbiPro.houses[idx].stake = String(house.s).replace('.', ',');
+                this.arbiPro.houses[idx].fixedStake = true;
+              }
+            }, 100);
           }
         }
         
@@ -346,7 +364,7 @@ class App {
             incCheck.checked = true;
             incCheck.dispatchEvent(new Event('change'));
             
-            setTimeout(() => {
+              setTimeout(() => {
               const incInput = document.getElementById(`increase-${idx}`);
               if (incInput) {
                 incInput.value = String(house.i).replace('.', ',');
@@ -365,10 +383,12 @@ class App {
         }
       });
       
-      // Força recálculo
-      if (this.arbiPro) {
-        this.arbiPro.scheduleUpdate();
-      }
+      // Força recálculo FINAL
+      setTimeout(() => {
+        if (this.arbiPro) {
+          this.arbiPro.scheduleUpdate();
+        }
+      }, 500);
     }, 800);
   }
 
