@@ -1,19 +1,29 @@
 // assets/js/ui/shareui.js
-// Shark DEV — ShareUI (classe) com hotfix mínimo:
-// - mantém compatibilidade com `new ShareUI(...)`
-// - não interfere no botão de compartilhar
-// - fixa antes de setar stake, aplica comissão e reforça stake se alguma rotina externa zerar
+// Shark DEV — ShareUI UMD (compatível com new ShareUI())
+// Hotfix mínimo: fixa antes de setar stake, aplica comissão e reforça stake se algum listener externo zerar.
+// Não mexe em URL, não faz monkey-patch, não interfere no botão de compartilhar.
 
-(function () {
-  const NS = 'shareui.js';
-  const log  = (...a) => console.log(`${NS}:`, ...a);
-  const ok   = (m) => console.log(`${NS}: ✅ ${m}`);
-  const info = (m) => console.log(`${NS}: ⚙️ ${m}`);
-  const warn = (m) => console.warn(`${NS}: ⚠️ ${m}`);
-  const step = (m) => console.log(`${NS}: 📝 ${m}`);
-  const sub  = (m) => console.log(`${NS}:   ${m}`);
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD
+    define([], factory);
+  } else if (typeof module === 'object' && module.exports) {
+    // CommonJS (bundlers)
+    module.exports = factory();
+  } else {
+    // Browser global
+    root.ShareUI = factory();
+  }
+})(typeof globalThis !== 'undefined' ? globalThis : (typeof window !== 'undefined' ? window : this), function () {
+  const NS  = 'shareui.js';
+  const log = (...a) => console.log(`${NS}:`, ...a);
+  const ok  = (m)   => console.log(`${NS}: ✅ ${m}`);
+  const inf = (m)   => console.log(`${NS}: ⚙️ ${m}`);
+  const warn= (m)   => console.warn(`${NS}: ⚠️ ${m}`);
+  const step= (m)   => console.log(`${NS}: 📝 ${m}`);
+  const sub = (m)   => console.log(`${NS}:   ${m}`);
 
-  const q  = (sel, root=document) => root.querySelector(sel);
+  const q = (sel, root=document) => root.querySelector(sel);
 
   function setVal(el, value) {
     if (!el) return false;
@@ -23,6 +33,7 @@
     el.dispatchEvent(new Event('change', { bubbles: true }));
     return true;
   }
+
   function clickToggle(el, on) {
     if (!el) return;
     const isActive = el.classList?.contains('active')
@@ -36,20 +47,14 @@
     constructor(options = {}) {
       this.options = options;
       ok('Sistema de compartilhamento (ShareUI) inicializado');
-      // auto-start para ser compatível com `new ShareUI()`
-      // ainda assim, quem chamar `init()` explicitamente não quebra
-      this._started = false;
-      this.init();
+      // Não auto-inicia para combinar com apps que chamam init() explicitamente.
+      // Se preferir auto-start, descomente a linha abaixo:
+      // this.init();
     }
 
-    // Se o app chamar explicitamente, continua funcionando
     async init() {
-      if (this._started) return;
-      this._started = true;
       const shared = this._decodeShared();
       await this._loadArbiPro(shared);
-      // Não limpamos a URL e não tocamos em funções globais
-      // para não interferir no botão de compartilhar.
     }
 
     _decodeShared() {
@@ -57,7 +62,7 @@
         const sp = new URLSearchParams(location.search);
         const s  = sp.get('s');
         if (!s) return null;
-        const b64 = s.replace(/-/g, '+').replace(/_/g, '/');
+        const b64  = s.replace(/-/g, '+').replace(/_/g, '/');
         const json = atob(b64);
         return JSON.parse(json);
       } catch (e) {
@@ -69,7 +74,7 @@
     _applyCasa(index, casa) {
       log(`🏠 Carregando Casa ${index}:`, casa);
 
-      const rootSel = `[data-casa="${index}"]`;
+      const rootSel  = `[data-casa="${index}"]`;
       const oddSel   = `${rootSel} .odd-input, ${rootSel} [data-role="odd"]`;
       const stakeSel = `${rootSel} .stake-input, ${rootSel} [data-role="stake"]`;
       const fixSel   = `${rootSel} [data-action="fix-stake"]`;
@@ -129,7 +134,7 @@
     }
 
     async _loadArbiPro(shared) {
-      info('Carregando ArbiPro...');
+      inf('Carregando ArbiPro...');
       if (!shared) { warn('Sem estado compartilhado.'); return; }
       if ((shared.t || 'arbipro') !== 'arbipro') { warn(`Tipo não suportado: ${shared.t}`); return; }
 
@@ -153,6 +158,6 @@
     }
   }
 
-  // expõe globalmente para o main.js
-  window.ShareUI = ShareUI;
-})();
+  // Retorna a classe para UMD
+  return ShareUI;
+});
