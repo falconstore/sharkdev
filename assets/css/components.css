@@ -1983,3 +1983,328 @@
 .text-muted {
   color: var(--text-muted) !important;
 }
+
+/* === HOVER EFFECTS PREMIUM PARA CARDS === */
+
+/* Card Base - Transição suave */
+.card {
+  background: rgba(31, 41, 59, 0.8);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hover Effect: Elevação + Escala + Brilho */
+.card:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-color: rgba(34, 197, 94, 0.4);
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    0 0 20px rgba(34, 197, 94, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Brilho Neon Sutil no Topo do Card */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(34, 197, 94, 0.6), 
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+/* Efeito de Brilho Interno */
+.card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(34, 197, 94, 0.05) 0%,
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.card:hover::after {
+  opacity: 1;
+}
+
+/* === HOUSE CARDS (Calculadora ArbiPro) === */
+
+.house-card {
+  background: linear-gradient(135deg, rgba(31, 41, 59, 0.8), rgba(55, 65, 81, 0.6));
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.house-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  border-radius: 12px 12px 0 0;
+  transition: height 0.3s ease;
+}
+
+.house-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  border-color: rgba(34, 197, 94, 0.5);
+  box-shadow: 
+    0 12px 35px rgba(0, 0, 0, 0.4),
+    0 0 25px rgba(34, 197, 94, 0.2);
+}
+
+.house-card:hover::before {
+  height: 3px;
+}
+
+/* Brilho de fundo no hover */
+.house-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(34, 197, 94, 0.08) 0%,
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.house-card:hover::after {
+  opacity: 1;
+}
+
+/* === STAT CARDS === */
+
+.stat-card {
+  background: rgba(17, 24, 39, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: default;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px) scale(1.03);
+  border-color: rgba(34, 197, 94, 0.4);
+  background: rgba(17, 24, 39, 0.8);
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.3),
+    0 0 15px rgba(34, 197, 94, 0.1);
+}
+
+/* Pulsação no valor */
+.stat-card:hover .stat-value {
+  animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    text-shadow: 0 0 5px rgba(34, 197, 94, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+  }
+}
+
+/* === COVERAGE CARDS (FreePro) === */
+
+.coverage-card {
+  background: rgba(17, 24, 39, 0.6);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  border-left: 3px solid var(--primary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.coverage-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  border-left-width: 4px;
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    -4px 0 15px rgba(34, 197, 94, 0.2);
+}
+
+/* Diferentes cores por índice */
+.coverage-card:nth-child(1):hover { 
+  border-left-color: var(--success);
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    -4px 0 15px rgba(34, 197, 94, 0.2);
+}
+
+.coverage-card:nth-child(2):hover { 
+  border-left-color: var(--warning);
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    -4px 0 15px rgba(245, 158, 11, 0.2);
+}
+
+.coverage-card:nth-child(3):hover { 
+  border-left-color: var(--danger);
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    -4px 0 15px rgba(220, 38, 38, 0.2);
+}
+
+.coverage-card:nth-child(4):hover { 
+  border-left-color: var(--primary);
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    -4px 0 15px rgba(59, 130, 246, 0.2);
+}
+
+.coverage-card:nth-child(5):hover { 
+  border-left-color: var(--accent);
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.3),
+    -4px 0 15px rgba(139, 92, 246, 0.2);
+}
+
+/* === CARDS DE CONTATO/SOBRE === */
+
+.channel-card,
+.feature-card,
+.offering-card,
+.calculator-card,
+.requirement-card,
+.support-card {
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.channel-card:hover,
+.feature-card:hover,
+.offering-card:hover,
+.calculator-card:hover,
+.requirement-card:hover,
+.support-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 15px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(34, 197, 94, 0.15);
+}
+
+/* Brilho específico para cards de canal (Telegram, Instagram, etc) */
+.channel-card.telegram:hover {
+  box-shadow: 
+    0 15px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(0, 136, 204, 0.3);
+}
+
+.channel-card.instagram:hover {
+  box-shadow: 
+    0 15px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(228, 64, 95, 0.3);
+}
+
+.channel-card.youtube:hover {
+  box-shadow: 
+    0 15px 40px rgba(0, 0, 0, 0.4),
+    0 0 30px rgba(255, 0, 0, 0.3);
+}
+
+/* === TEMA CLARO === */
+
+[data-theme="light"] .card:hover,
+[data-theme="light"] .house-card:hover,
+[data-theme="light"] .stat-card:hover {
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.15),
+    0 0 20px rgba(34, 197, 94, 0.1);
+}
+
+[data-theme="light"] .coverage-card:hover {
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.15),
+    -4px 0 15px rgba(34, 197, 94, 0.15);
+}
+
+/* === PERFORMANCE === */
+
+/* Reduzir animações em dispositivos que preferem motion reduzido */
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .house-card,
+  .stat-card,
+  .coverage-card,
+  .channel-card,
+  .feature-card,
+  .offering-card,
+  .calculator-card,
+  .requirement-card,
+  .support-card {
+    transition: none !important;
+  }
+  
+  .card:hover,
+  .house-card:hover,
+  .stat-card:hover,
+  .coverage-card:hover {
+    transform: none !important;
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% { text-shadow: none; }
+  }
+}
+
+/* === HOVER COM TRACKING DE MOUSE (OPCIONAL) === */
+
+/* Para cards que seguem o mouse - adicione class "card-interactive" */
+.card-interactive {
+  cursor: pointer;
+}
+
+/* JavaScript necessário para tracking de mouse:
+document.querySelectorAll('.card-interactive').forEach(card => {
+  card.addEventListener('mousemove', (e) => {
+    const rect = card.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    card.style.setProperty('--mouse-x', `${x}%`);
+    card.style.setProperty('--mouse-y', `${y}%`);
+  });
+});
+*/
