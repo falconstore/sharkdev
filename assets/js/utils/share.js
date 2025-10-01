@@ -1,119 +1,201 @@
-// assets/js/utils/share.js - VERSÃO FINAL TESTADA
+// assets/js/utils/share.js - VERSÃO CORRIGIDA
 export class ShareSystem {
-  
-  constructor() {
-    this.baseUrl = window.location.origin + window.location.pathname;
-  }
-
-  // ========== ARBIPRO ==========
   generateArbiProLink(data) {
-    console.log('📤 Gerando link ArbiPro com dados:', data);
-    
-    const config = {
-      t: 'arbipro',
-      n: data.numHouses || 2,
-      r: data.rounding || 0.01,
-      h: (data.houses || []).slice(0, data.numHouses).map(h => ({
-        o: h.odd || '',
-        s: h.stake || '',
-        c: h.commission,
-        f: h.freebet ? 1 : 0,
-        i: h.increase,
-        l: h.lay ? 1 : 0,
-        x: h.fixedStake ? 1 : 0
-      }))
-    };
-    
-    const link = this._createLink(config);
-    console.log('✅ Link gerado:', link);
-    return link;
+    const numHouses = data?.numHouses ?? data?.n ?? 2;
+    const rounding  = data?.rounding  ?? data?.r ?? 0.01;
+
+    const housesIn = Array.isArray(data?.houses) ? data.houses
+                    : Array.isArray(data?.h)      ? data.h
+                    : [];
+
+    const houses = housesIn.slice(0, numHouses).map((h) => ({
+      o: h?.o ?? h?.odd ?? '',
+      s: h?.s ?? h?.stake ?? '',
+      c: _nullishToNumberOrNull(h?.c ?? h?.commission),
+      f: _toBool(h?.f ?? h?.freebet, false),
+      i: _nullishToNumberOrNull(h?.i ?? h?.increase),
+      l: _toBool(h?.l ?? h?.lay, false),
+      x: _toBool(h?.x ?? h?.fixedStake, false),
+    }));
+
+    const config = { t: 'arbipro', n: numHouses, r: rounding, h: houses };
+    return this.createShareableLink(config);
   }
 
-  // ========== FREEPRO ==========
   generateFreeProLink(data) {
-    console.log('📤 Gerando link FreePro com dados:', data);
-    
-    const config = {
-      t: 'freepro',
-      n: data.n || 3,
-      r: data.r || 1.0,
-      m: data.mode || 'freebet',
-      p: data.p || {},
-      cov: data.cov || []
+    const n = data?.n ?? data?.numEntradas ?? 3;
+    const r = data?.r ?? data?.roundStep   ?? 1.0;
+    const mode = data?.mode ?? 'freebet'; // 🔥 CORREÇÃO: inclui modo
+
+    const pIn = data?.p ?? {
+      o: data?.promoOdd ?? '',
+      c: data?.promoComm ?? '',
+      s: data?.promoStake ?? '',
+      f: data?.freebetValue ?? '',
+      e: data?.extractionRate ?? 70,
+      r: data?.cashbackRate ?? '',
     };
-    
-    const link = this._createLink(config);
-    console.log('✅ Link gerado:', link);
-    return link;
+
+    const p = {
+      o: pIn?.o ?? data?.promoOdd ?? '',
+      c: pIn?.c ?? data?.promoComm ?? '',
+      s: pIn?.s ?? data?.promoStake ?? '',
+      f: pIn?.f ?? data?.freebetValue ?? '',
+      e: pIn?.e ?? data?.extractionRate ?? 70,
+      r: pIn?.r ?? data?.cashbackRate ?? '',
+    };
+
+    const covIn = Array.isArray(data?.cov) ? data.cov
+                : Array.isArray(data?.coverages) ? data.coverages
+                : [];
+
+    const cov = covIn.map((c) => ({
+      odd:  c?.odd ?? c?.o ?? '',
+      comm: c?.comm ?? c?.c ?? '',
+      lay:  _toBool(c?.lay ?? c?.l, false),
+    }));
+
+    const config = { t: 'freepro', n, r, p, cov, mode }; // 🔥 CORREÇÃO: adiciona mode
+    return this.createShareableLink(config);
   }
 
-  // ========== CRIAR LINK ==========
-  _createLink(config) {
-    const encoded = this._encode(config);
-    return `${this.baseUrl}?s=${encoded}`;
-  }
-
-  // ========== ENCODE ==========
-  _encode(obj) {
+  createShareableLink(config) {
     try {
-      const json = JSON.stringify(obj);
-      console.log('📝 JSON:', json);
-      
-      const utf8 = unescape(encodeURIComponent(json));
-      const b64 = btoa(utf8)
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/, '');
-      
-      console.log('🔐 Base64:', b64);
-      return b64;
-    } catch (e) {
-      console.error('❌ Erro ao encodar:', e);
-      return '';
+      if (typeof window !== 'undefined' && typeof window.ShareCreateLink === 'function') {
+        return window.ShareCreateLink(config);
+      }
+      if (typeof this._externalCreateShareableLink === 'function') {
+        return this._externalCreateShareableLink(config);
+      }
+    } catch (_) {}
+
+    const url = new URL(typeof window !== 'undefined' ? window.location.href : 'https://example.com/');
+    const key = _detectShareKey(url.searchParams) ?? 'share';
+
+    const encoded = _encodePayload(config);
+    url.searchParams.set(key, encoded);
+
+    if (url.hash && /^#(s|share)=/i.test(url.hash.slice(1))) {
+      url.hash = '';
     }
+    return url.toString();
   }
 
-  // ========== DECODE ==========
-  _decode(str) {
-    try {
-      console.log('🔓 Decodificando:', str);
-      
-      const b64 = str.replace(/-/g, '+').replace(/_/g, '/');
-      const pad = '='.repeat((4 - b64.length % 4) % 4);
-      const full = b64 + pad;
-      
-      const decoded = atob(full);
-      const json = decodeURIComponent(escape(decoded));
-      const obj = JSON.parse(json);
-      
-      console.log('✅ Decodificado:', obj);
-      return obj;
-    } catch (e) {
-      console.error('❌ Erro ao decodar:', e);
-      return null;
-    }
-  }
+  static readFromUrl(currentHref) {
+    const url = new URL(currentHref || (typeof window !== 'undefined' ? window.location.href : 'https://example.com/'));
+    const sp  = url.searchParams;
+    const hash = (url.hash || '').replace(/^#/, '');
 
-  // ========== LER DA URL ==========
-  readFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const encoded = params.get('s') || params.get('share');
-    
-    if (!encoded) {
-      console.log('ℹ️ Nenhuma configuração para carregar');
-      return null;
+    let raw = sp.get('share') || sp.get('s') || null;
+    if (!raw && hash) {
+      const parts = hash.split('=');
+      if (parts.length === 2 && (parts[0] === 'share' || parts[0] === 's')) {
+        raw = parts[1];
+      }
     }
-    
-    console.log('📥 Configuração encontrada na URL');
-    return this._decode(encoded);
-  }
+    if (!raw) return null;
 
-  // ========== LIMPAR URL ==========
-  cleanUrl() {
-    const url = new URL(window.location);
-    url.searchParams.delete('s');
-    url.searchParams.delete('share');
-    window.history.replaceState({}, '', url.toString());
-    console.log('🧹 URL limpa');
+    return _decodePayload(raw);
   }
 }
+
+/* Helpers */
+function _detectShareKey(params) {
+  if (!params) return null;
+  if (params.has('s')) return 's';
+  if (params.has('share')) return 'share';
+  return null;
+}
+
+function _encodePayload(obj) {
+  try {
+    const json = JSON.stringify(obj);
+    const b64 = _toBase64Url(json);
+    return `b64:${b64}`;
+  } catch {
+    try {
+      return `j:${encodeURIComponent(JSON.stringify(obj))}`;
+    } catch {
+      return `j:${encodeURIComponent(String(obj))}`;
+    }
+  }
+}
+
+function _decodePayload(raw) {
+  let s = String(raw || '');
+
+  if (s.startsWith('b64:')) {
+    const body = s.slice(4);
+    try {
+      const json = _fromBase64Url(body);
+      return JSON.parse(json);
+    } catch {}
+  }
+  if (s.startsWith('j:')) {
+    const body = s.slice(2);
+    try {
+      const json = decodeURIComponent(body);
+      return JSON.parse(json);
+    } catch {}
+  }
+
+  if (/^[A-Za-z0-9_\-]+$/.test(s)) {
+    try {
+      const json = _fromBase64Url(s);
+      return JSON.parse(json);
+    } catch {}
+  }
+
+  try {
+    const json = decodeURIComponent(s);
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+}
+
+function _toBase64Url(str) {
+  if (typeof btoa === 'function') {
+    const utf8 = unescape(encodeURIComponent(str));
+    return btoa(utf8).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+  }
+  return Buffer.from(str, 'utf8').toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+
+function _fromBase64Url(b64url) {
+  const b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
+  const pad = b64.length % 4 === 2 ? '==' : b64.length % 4 === 3 ? '=' : '';
+  const full = b64 + pad;
+
+  if (typeof atob === 'function') {
+    const bin = atob(full);
+    try {
+      return decodeURIComponent(escape(bin));
+    } catch {
+      return bin;
+    }
+  }
+  return Buffer.from(full, 'base64').toString('utf8');
+}
+
+function _toBool(v, fallback = false) {
+  if (typeof v === 'boolean') return v;
+  if (v === 'true') return true;
+  if (v === 'false') return false;
+  if (v == null) return fallback;
+  if (v === 1 || v === '1') return true;
+  if (v === 0 || v === '0') return false;
+  return Boolean(v);
+}
+
+function _nullishToNumberOrNull(v) {
+  if (v === '' || v == null) return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : null;
+}
+
+export const ShareHelpers = {
+  encode: _encodePayload,
+  decode: _decodePayload,
+  base64url: { to: _toBase64Url, from: _fromBase64Url },
+};
