@@ -340,164 +340,130 @@ export class ShareUI {
   }
 
   fillArbiProHouses(config, app) {
-    let currentIndex = 0;
-    const houses = config.h || [];
+  let currentIndex = 0;
+  const houses = config.h || [];
 
-    const processNextHouse = () => {
-      if (currentIndex >= houses.length) {
-        setTimeout(() => {
-          app.scheduleUpdate();
-          console.log('✅ ArbiPro carregado com sucesso!');
-        }, 500);
-        return;
-      }
-
-      const house = houses[currentIndex];
-      const idx = currentIndex;
-      console.log(`🏠 Carregando Casa ${idx + 1}:`, house);
-
-      // FASE 1: CHECKBOXES/BOTÕES
-      if (house.f === true || house.f === 1) {
-        console.log(`  └─ Ativando freebet`);
-        const fbCheck = document.querySelector(`input[data-action="toggleFreebet"][data-idx="${idx}"]`);
-        if (fbCheck && !fbCheck.checked) {
-          fbCheck.checked = true;
-          fbCheck.dispatchEvent(new Event('change'));
-        }
-      }
-
-      if (house.l === true || house.l === 1) {
-        console.log(`  └─ Ativando LAY`);
-        const layBtn = document.querySelector(`button[data-action="toggleLay"][data-idx="${idx}"]`);
-        if (layBtn) {
-          const currentLay = app.houses[idx]?.lay;
-          if (!currentLay) {
-            layBtn.click();
-          }
-        }
-      }
-
-      if (house.c !== null && house.c !== undefined) {
-        console.log(`  └─ Ativando checkbox comissão`);
-        const commCheck = document.querySelector(`input[data-action="toggleCommission"][data-idx="${idx}"]`);
-        if (commCheck && !commCheck.checked) {
-          commCheck.checked = true;
-          commCheck.dispatchEvent(new Event('change'));
-        }
-      }
-
-      if (house.i !== null && house.i !== undefined) {
-        console.log(`  └─ Ativando checkbox aumento`);
-        const incCheck = document.querySelector(`input[data-action="toggleIncrease"][data-idx="${idx}"]`);
-        if (incCheck && !incCheck.checked) {
-          incCheck.checked = true;
-          incCheck.dispatchEvent(new Event('change'));
-        }
-      }
-
+  const processNextHouse = () => {
+    if (currentIndex >= houses.length) {
       setTimeout(() => {
-        console.log(`  ⏳ Aguardando re-render...`);
+        app.scheduleUpdate();
+        console.log('✅ ArbiPro carregado com sucesso!');
+      }, 1000);
+      return;
+    }
+
+    const house = houses[currentIndex];
+    const idx = currentIndex;
+    console.log(`🏠 Carregando Casa ${idx + 1}:`, house);
+
+    // ==========================================
+    // ETAPA 1: ATIVAR CHECKBOXES PRIMEIRO
+    // ==========================================
+    
+    if (house.f === true || house.f === 1) {
+      console.log(`  └─ Ativando freebet`);
+      const fbCheck = document.querySelector(`input[data-action="toggleFreebet"][data-idx="${idx}"]`);
+      if (fbCheck && !fbCheck.checked) {
+        fbCheck.checked = true;
+        fbCheck.dispatchEvent(new Event('change'));
+      }
+    }
+
+    if (house.l === true || house.l === 1) {
+      console.log(`  └─ Ativando LAY`);
+      const layBtn = document.querySelector(`button[data-action="toggleLay"][data-idx="${idx}"]`);
+      if (layBtn) {
+        const currentLay = app.houses[idx]?.lay;
+        if (!currentLay) {
+          layBtn.click();
+        }
+      }
+    }
+
+    if (house.c !== null && house.c !== undefined) {
+      console.log(`  └─ Ativando checkbox comissão`);
+      const commCheck = document.querySelector(`input[data-action="toggleCommission"][data-idx="${idx}"]`);
+      if (commCheck && !commCheck.checked) {
+        commCheck.checked = true;
+        commCheck.dispatchEvent(new Event('change'));
+      }
+    }
+
+    if (house.i !== null && house.i !== undefined) {
+      console.log(`  └─ Ativando checkbox aumento`);
+      const incCheck = document.querySelector(`input[data-action="toggleIncrease"][data-idx="${idx}"]`);
+      if (incCheck && !incCheck.checked) {
+        incCheck.checked = true;
+        incCheck.dispatchEvent(new Event('change'));
+      }
+    }
+
+    // ==========================================
+    // ETAPA 2: AGUARDAR E PREENCHER ODD
+    // ==========================================
+    
+    setTimeout(() => {
+      console.log(`  📝 Etapa 1: Preenchendo ODD...`);
+      
+      if (house.o) {
+        const oddInput = document.getElementById(`odd-${idx}`);
+        if (oddInput) {
+          oddInput.value = house.o;
+          oddInput.dispatchEvent(new Event('input'));
+          console.log(`    ✓ Odd: ${house.o}`);
+        }
+      }
+
+      // ==========================================
+      // ETAPA 3: AGUARDAR E PREENCHER STAKE (só se fixada)
+      // ==========================================
+      
+      setTimeout(() => {
+        console.log(`  📝 Etapa 2: Preenchendo STAKE (se necessário)...`);
         
-        setTimeout(() => {
-          console.log(`  📝 Preenchendo campos...`);
-
-          // FASE 2: PREENCHER CAMPOS
-          if (house.o) {
-            const oddInput = document.getElementById(`odd-${idx}`);
-            if (oddInput) {
-              oddInput.value = house.o;
-              oddInput.dispatchEvent(new Event('input'));
-              console.log(`    ✓ Odd: ${house.o}`);
-            }
-          }
-
-            // ✅ SÓ PREENCHE STAKE SE A CASA ESTIVER FIXADA
         if (house.s && (house.x === true || house.x === 1)) {
           const stakeInput = document.getElementById(`stake-${idx}`);
           if (stakeInput) {
             stakeInput.value = house.s;
             stakeInput.dispatchEvent(new Event('input'));
-            console.log(`    ✓ Stake: ${house.s} (casa fixada)`);
+            console.log(`    ✓ Stake: ${house.s}`);
           }
-        } else if (house.s) {
-          console.log(`    ⏭️ Stake ${house.s} ignorada (casa não fixada - será calculada automaticamente)`);
-        }
-
-          // ✅ COMISSÃO COM RETRY CORRIGIDO
-        if (house.c !== null && house.c !== undefined) {
-          let commissionAttempts = 0;
-          const maxCommissionAttempts = 5;
           
-          const tryFillCommission = () => {
-            const commInput = document.getElementById(`commission-${idx}`);
-            
-            if (commInput) {
-              commInput.value = house.c;
-              commInput.dispatchEvent(new Event('input'));
-              console.log(`    ✓ Comissão: ${house.c}% (tentativa ${commissionAttempts + 1})`);
-              return; // ✅ PARA AQUI SE ENCONTROU
-            }
-            
-            commissionAttempts++;
-            if (commissionAttempts < maxCommissionAttempts) {
-              console.log(`    ⏳ Campo commission-${idx} não encontrado, tentando novamente... (${commissionAttempts}/${maxCommissionAttempts})`);
-              setTimeout(tryFillCommission, 300);
-            } else {
-              console.error(`    ✗ Campo commission-${idx} não encontrado após ${maxCommissionAttempts} tentativas`);
-              console.error(`    📋 Debug - Campos disponíveis:`, 
-                Array.from(document.querySelectorAll(`[id*="commission"]`)).map(el => el.id)
-              );
-              return; // ✅ PARA AQUI APÓS ESGOTAR TENTATIVAS
-            }
-          };
+          // ==========================================
+          // ETAPA 4: MARCAR COMO FIXADA APÓS PREENCHER
+          // ==========================================
           
-          tryFillCommission();
-        }
-          // AUMENTO COM RETRY
-          if (house.i !== null && house.i !== undefined) {
-            let attempts = 0;
-            const maxAttempts = 10;
+          setTimeout(() => {
+            console.log(`  🔒 Etapa 3: Fixando stake...`);
             
-            const tryFillIncrease = () => {
-              const incInput = document.getElementById(`increase-${idx}`);
-              
-              if (incInput) {
-                incInput.value = house.i;
-                incInput.dispatchEvent(new Event('input'));
-                console.log(`    ✓ Aumento: ${house.i}%`);
-              } else {
-                attempts++;
-                if (attempts < maxAttempts) {
-                  setTimeout(tryFillIncrease, 300);
-                } else {
-                  console.error(`    ✗ Campo increase-${idx} não encontrado`);
-                }
+            const fixBtn = document.querySelector(`button[data-action="fixStake"][data-idx="${idx}"]`);
+            if (fixBtn) {
+              const currentFixed = app.houses[idx]?.fixedStake;
+              if (!currentFixed) {
+                fixBtn.click();
+                console.log(`    ✓ Stake fixada`);
               }
-            };
+            }
             
-            tryFillIncrease();
-          }
-
-          if (house.x === true || house.x === 1) {
+            // Continua para próxima casa
             setTimeout(() => {
-              const fixBtn = document.querySelector(`button[data-action="fixStake"][data-idx="${idx}"]`);
-              if (fixBtn) {
-                const currentFixed = app.houses[idx]?.fixedStake;
-                if (!currentFixed) {
-                  fixBtn.click();
-                  console.log(`    ✓ Stake fixada`);
-                }
-              }
-            }, 400);
-          }
-
+              currentIndex++;
+              processNextHouse();
+            }, 800);
+          }, 500);
+          
+        } else {
+          console.log(`    ⏭️ Stake não será preenchida (casa não fixada)`);
+          
+          // Continua para próxima casa
           setTimeout(() => {
             currentIndex++;
             processNextHouse();
-          }, 1500);
-        }, 600);
-      }, 1200);
-    };
+          }, 500);
+        }
+      }, 600);
+    }, 800);
+  };
 
     processNextHouse();
   }
